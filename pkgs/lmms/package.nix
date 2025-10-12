@@ -40,7 +40,7 @@ let
   wineSrc = fetchFromGitHub {
     owner = "tresf";
     repo = "wine";
-    rev = "92113c9f48b78928a838ba3d1d7ad2da3015d035";
+    rev = "1f8bb63e75baa5c9f901c8f50b4ea9dd69e0baa0";
     hash = "sha256-/6rW/b1y6MX0hXI6qspEchg1H7T/Vy7c3FuHDlONB9Y=";
   };
 in
@@ -103,6 +103,7 @@ stdenv.mkDerivation {
   ];
 
   patches = lib.optionals withOptionals [
+    ./0001-wine-path-patch.patch
     (substitute {
       src = ./0001-fix-add-unique-string-to-FindWine-for-replacement-in.patch;
       substitutions = [

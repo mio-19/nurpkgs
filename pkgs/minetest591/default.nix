@@ -82,57 +82,55 @@ stdenv.mkDerivation (finalAttrs: {
     ninja
   ];
 
-  buildInputs =
-    [
-      jsoncpp
-      gettext
-      freetype
-      sqlite
-      curl
-      bzip2
-      ncurses
-      gmp
-      libspatialindex
-    ]
-    ++ lib.optional (lib.meta.availableOn stdenv.hostPlatform luajit) luajit
-    ++ lib.optionals stdenv.hostPlatform.isDarwin [
-      libiconv
-      OpenGL
-      OpenAL
-      Carbon
-      Cocoa
-      Kernel
-    ]
-    ++ lib.optionals buildClient [
-      libpng
-      libjpeg
-      libGLU
-      openal
-      libogg
-      libvorbis
-    ]
-    ++ lib.optionals (buildClient && useSDL2) [
-      SDL2
-    ]
-    ++ lib.optionals (buildClient && !stdenv.hostPlatform.isDarwin && !useSDL2) [
-      xorg.libX11
-      xorg.libXi
-    ]
-    ++ lib.optionals buildServer [
-      leveldb
-      postgresql
-      hiredis
-      prometheus-cpp
-    ];
+  buildInputs = [
+    jsoncpp
+    gettext
+    freetype
+    sqlite
+    curl
+    bzip2
+    ncurses
+    gmp
+    libspatialindex
+  ]
+  ++ lib.optional (lib.meta.availableOn stdenv.hostPlatform luajit) luajit
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    libiconv
+    OpenGL
+    OpenAL
+    Carbon
+    Cocoa
+    Kernel
+  ]
+  ++ lib.optionals buildClient [
+    libpng
+    libjpeg
+    libGLU
+    openal
+    libogg
+    libvorbis
+  ]
+  ++ lib.optionals (buildClient && useSDL2) [
+    SDL2
+  ]
+  ++ lib.optionals (buildClient && !stdenv.hostPlatform.isDarwin && !useSDL2) [
+    xorg.libX11
+    xorg.libXi
+  ]
+  ++ lib.optionals buildServer [
+    leveldb
+    postgresql
+    hiredis
+    prometheus-cpp
+  ];
 
-  postPatch =
-    ''
-      substituteInPlace src/filesys.cpp \
-        --replace-fail "/bin/rm" "${coreutils}/bin/rm"
-    ''
-    + lib.optionalString stdenv.hostPlatform.isDarwin ''
-      sed -i '/pagezero_size/d;/fixup_bundle/d' src/CMakeLists.txt
-    '';
+  postPatch = ''
+    substituteInPlace src/filesys.cpp \
+      --replace-fail "/bin/rm" "${coreutils}/bin/rm"
+  ''
+  + lib.optionalString stdenv.hostPlatform.isDarwin ''
+    sed -i '/pagezero_size/d;/fixup_bundle/d' src/CMakeLists.txt
+  '';
 
   postInstall =
     lib.optionalString stdenv.hostPlatform.isLinux ''

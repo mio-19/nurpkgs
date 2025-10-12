@@ -10,7 +10,7 @@
   pkgs ? import <nixpkgs> { },
 }:
 
-{
+rec {
   # The `lib`, `modules`, and `overlays` names are special
   lib = import ./lib { inherit pkgs; }; # functions
   modules = import ./modules; # NixOS modules
@@ -18,7 +18,17 @@
 
   example-package = pkgs.callPackage ./pkgs/example-package { };
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; };
-  minetest591  = pkgs.callPackage ./pkgs/minetest591 { };
+  minetest591 = pkgs.callPackage ./pkgs/minetest591 {
+    inherit (pkgs.darwin.apple_sdk.frameworks)
+      OpenGL
+      OpenAL
+      Carbon
+      Cocoa
+      Kernel
+      ;
+  };
+  minetest591client = minetest591.override { buildServer = false; };
+  minetest591server = minetest591.override { buildClient = false; };
   musescore3 =
     if pkgs.stdenv.isDarwin then
       pkgs.callPackage ./pkgs/musescore3/darwin.nix { }

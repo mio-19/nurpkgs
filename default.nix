@@ -18,6 +18,7 @@
 
   example-package = pkgs.callPackage ./pkgs/example-package { };
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; };
+  musescore3 = pkgs.callPackage ./pkgs/musescore3 { };
   # some-qt5-package = pkgs.libsForQt5.callPackage ./pkgs/some-qt5-package { };
   # ...
 }

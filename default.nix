@@ -7,7 +7,11 @@
 #     nix-build -A mypackage
 
 {
-  pkgs ? import <nixpkgs> { },
+  pkgs ? import <nixpkgs> {
+    config.permittedInsecurePackages = [
+      "qtwebengine-5.15.19"
+    ];
+  },
 }:
 
 rec {

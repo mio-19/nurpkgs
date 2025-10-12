@@ -45,6 +45,7 @@ mkDerivation rec {
   cmakeFlags = [
     "-DMUSESCORE_BUILD_CONFIG=release"
     "-DUSE_SYSTEM_FREETYPE=ON"
+    "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
   ];
 
   qtWrapperArgs = [

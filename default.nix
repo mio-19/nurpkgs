@@ -19,26 +19,12 @@ rec {
   example-package = pkgs.callPackage ./pkgs/example-package { };
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; };
   minetest591 = pkgs.callPackage ./pkgs/minetest591 {
-    inherit (pkgs.darwin.apple_sdk.frameworks)
-      OpenGL
-      OpenAL
-      Carbon
-      Cocoa
-      Kernel
-      ;
   };
   minetest591client = minetest591.override { buildServer = false; };
   minetest591server = minetest591.override { buildClient = false; };
   irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
-    inherit (pkgs.darwin.apple_sdk.frameworks) Cocoa Kernel;
   };
   minetest580 = pkgs.callPackage ./pkgs/minetest580 {
-    inherit (pkgs.darwin.apple_sdk.frameworks)
-      OpenGL
-      OpenAL
-      Carbon
-      Cocoa
-      ;
     irrlichtmt = irrlichtmt;
   };
   minetest580client = minetest580.override { buildServer = false; };

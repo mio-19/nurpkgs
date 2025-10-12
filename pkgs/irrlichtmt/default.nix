@@ -10,8 +10,6 @@
   libX11,
   libXi,
   libXext,
-  Cocoa,
-  Kernel,
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "irrlichtmt";
@@ -37,8 +35,6 @@ stdenv.mkDerivation (finalAttrs: {
   ++ (
     if stdenv.hostPlatform.isDarwin then
       [
-        Cocoa
-        Kernel
       ]
     else
       [

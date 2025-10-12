@@ -36,10 +36,6 @@
   ninja,
   prometheus-cpp,
   mesa,
-  OpenGL,
-  OpenAL ? openal,
-  Carbon,
-  Cocoa,
   withTouchSupport ? false,
   buildClient ? true,
   buildServer ? true,
@@ -101,10 +97,6 @@ stdenv.mkDerivation (finalAttrs: {
   ++ lib.optionals stdenv.hostPlatform.isDarwin [
     mesa # for <KHR/khrplatform.h>
     libiconv
-    OpenGL
-    OpenAL
-    Carbon
-    Cocoa
   ]
   ++ lib.optionals buildClient [
     libpng

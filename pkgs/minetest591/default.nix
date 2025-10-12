@@ -30,11 +30,6 @@
   libiconv,
   ninja,
   prometheus-cpp,
-  OpenGL,
-  OpenAL ? openal,
-  Carbon,
-  Cocoa,
-  Kernel,
   buildClient ? true,
   buildServer ? true,
   SDL2,
@@ -96,11 +91,6 @@ stdenv.mkDerivation (finalAttrs: {
   ++ lib.optional (lib.meta.availableOn stdenv.hostPlatform luajit) luajit
   ++ lib.optionals stdenv.hostPlatform.isDarwin [
     libiconv
-    OpenGL
-    OpenAL
-    Carbon
-    Cocoa
-    Kernel
   ]
   ++ lib.optionals buildClient [
     libpng

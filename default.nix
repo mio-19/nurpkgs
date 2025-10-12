@@ -29,6 +29,20 @@ rec {
   };
   minetest591client = minetest591.override { buildServer = false; };
   minetest591server = minetest591.override { buildClient = false; };
+  minetest580 = pkgs.callPackage ./pkgs/minetest580 {
+    inherit (pkgs.darwin.apple_sdk.frameworks)
+      OpenGL
+      OpenAL
+      Carbon
+      Cocoa
+      ;
+  };
+  minetest580client = minetest580.override { buildServer = false; };
+  minetest580-touch = minetest580.override {
+    buildServer = false;
+    withTouchSupport = true;
+  };
+  minetest580server = minetest580.override { buildClient = false; };
   musescore3 =
     if pkgs.stdenv.isDarwin then
       pkgs.callPackage ./pkgs/musescore3/darwin.nix { }

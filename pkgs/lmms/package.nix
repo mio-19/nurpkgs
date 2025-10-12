@@ -39,13 +39,13 @@ let
 in
 stdenv.mkDerivation {
   pname = "lmms";
-  version = "0-unstable-2025-01-28";
+  version = "1.3.0-alpha.1-unstable-2025-10-12";
 
   src = fetchFromGitHub {
     owner = "LMMS";
     repo = "lmms";
-    rev = "2c674eca3accbc6dab6f5aacbf34f7bd85af767e";
-    sha256 = "sha256-jq3Wog5BHBWIq5iLEBrHWIvYSzmKsCdb63Nu7j9kJRY=";
+    rev = "807751dc4dce53583ecf4140b67a5dc343c789a7";
+    hash = "sha256-hXkH1e8C85JgZLoxDrHhwPBMzHtQt1IwTmb01S0cCAc=";
     fetchSubmodules = true;
   };
 
@@ -56,38 +56,37 @@ stdenv.mkDerivation {
     qt5.wrapQtAppsHook
   ];
 
-  buildInputs =
-    [
-      fftwFloat
-      libsForQt5.qt5.qtbase
-      libsForQt5.qt5.qtx11extras
-      libsamplerate
-      libsndfile
-    ]
-    ++ lib.optionals withOptionals [
-      SDL2
-      alsa-lib
-      carla
-      fltk
-      fluidsynth
-      glibc_multi
-      lame
-      libgig
-      libjack2
-      libogg
-      libpulseaudio
-      libsoundio
-      libvorbis
-      lilv
-      lv2
-      perl540
-      perl540Packages.ListMoreUtils
-      perl540Packages.XMLParser
-      portaudio
-      sndio
-      suil
-      winePackage
-    ];
+  buildInputs = [
+    fftwFloat
+    libsForQt5.qt5.qtbase
+    libsForQt5.qt5.qtx11extras
+    libsamplerate
+    libsndfile
+  ]
+  ++ lib.optionals withOptionals [
+    SDL2
+    alsa-lib
+    carla
+    fltk
+    fluidsynth
+    glibc_multi
+    lame
+    libgig
+    libjack2
+    libogg
+    libpulseaudio
+    libsoundio
+    libvorbis
+    lilv
+    lv2
+    perl540
+    perl540Packages.ListMoreUtils
+    perl540Packages.XMLParser
+    portaudio
+    sndio
+    suil
+    winePackage
+  ];
 
   patches = lib.optionals withOptionals [
     (substitute {

@@ -10,7 +10,11 @@
 # which this is possible.
 
 {
-  pkgs ? import <nixpkgs> { },
+  pkgs ? import <nixpkgs> {
+    config.permittedInsecurePackages = [
+      "qtwebengine-5.15.19"
+    ];
+  },
 }:
 
 with builtins;

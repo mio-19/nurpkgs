@@ -144,10 +144,6 @@ stdenv.mkDerivation (finalAttrs: {
     description = "Infinite-world block sandbox game";
     license = licenses.lgpl21Plus;
     platforms = platforms.linux ++ platforms.darwin;
-    maintainers = with maintainers; [
-      pyrolagus
-      fpletz
-      fgaz
-    ];
+    maintainers = with maintainers; [];
   };
 })

@@ -10,7 +10,12 @@
       legacyPackages = forAllSystems (
         system:
         import ./default.nix {
-          pkgs = import nixpkgs { inherit system; };
+          pkgs = import nixpkgs {
+            inherit system;
+            config.permittedInsecurePackages = [
+              "qtwebengine-5.15.19"
+            ];
+          };
         }
       );
       packages = forAllSystems (

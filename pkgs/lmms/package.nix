@@ -36,7 +36,7 @@
 
 let
   winePackage = if lib.isDerivation wineWowPackages then wineWowPackages else wineWowPackages.minimal;
-  
+
   wineSrc = fetchFromGitHub {
     owner = "tresf";
     repo = "wine";
@@ -55,14 +55,14 @@ stdenv.mkDerivation {
     hash = "sha256-hXkH1e8C85JgZLoxDrHhwPBMzHtQt1IwTmb01S0cCAc=";
     fetchSubmodules = true;
   };
-  
+
   # see https://github.com/LMMS/lmms/blob/807751dc4dce53583ecf4140b67a5dc343c789a7/plugins/VstBase/CMakeLists.txt#L55
   postUnpack = ''
     mkdir $sourceRoot/plugins/VstBase/wine
     cp -r ${wineSrc}/* $sourceRoot/plugins/VstBase/wine/
     chmod -R a+rw $sourceRoot/plugins/VstBase/wine
   '';
-  
+
   nativeBuildInputs = [
     cmake
     libsForQt5.qt5.qttools

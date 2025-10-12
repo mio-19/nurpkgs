@@ -124,6 +124,8 @@ stdenv.mkDerivation (finalAttrs: {
     prometheus-cpp
   ];
 
+  patches = [ ./0001-upper_bound-lower_bound-patch.patch ];
+
   postPatch = ''
     substituteInPlace src/filesys.cpp --replace "/bin/rm" "${coreutils}/bin/rm"
   ''

@@ -41,7 +41,7 @@ let
     owner = "tresf";
     repo = "wine";
     rev = "1f8bb63e75baa5c9f901c8f50b4ea9dd69e0baa0";
-    hash = "sha256-/6rW/b1y6MX0hXI6qspEchg1H7T/Vy7c3FuHDlONB9Y=";
+    hash = "sha256-x5+uYG6V0v/zHPO33YvT6Q47JQV7CQdnRbVEOa+tLBA=";
   };
 in
 stdenv.mkDerivation {

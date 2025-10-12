@@ -29,6 +29,9 @@ rec {
   };
   minetest591client = minetest591.override { buildServer = false; };
   minetest591server = minetest591.override { buildClient = false; };
+  irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
+    inherit (pkgs.darwin.apple_sdk.frameworks) Cocoa Kernel;
+  };
   minetest580 = pkgs.callPackage ./pkgs/minetest580 {
     inherit (pkgs.darwin.apple_sdk.frameworks)
       OpenGL
@@ -36,6 +39,7 @@ rec {
       Carbon
       Cocoa
       ;
+    irrlichtmt = irrlichtmt;
   };
   minetest580client = minetest580.override { buildServer = false; };
   minetest580-touch = minetest580.override {

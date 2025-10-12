@@ -1,7 +1,17 @@
-{ stdenv, lib, fetchurl, undmg }:
+{
+  stdenv,
+  lib,
+  fetchurl,
+  undmg,
+}:
 
 let
-  versionComponents = [ "3" "6" "2" "548020600" ];
+  versionComponents = [
+    "3"
+    "6"
+    "2"
+    "548020600"
+  ];
   appName = "MuseScore ${builtins.head versionComponents}";
 in
 
@@ -29,6 +39,6 @@ stdenv.mkDerivation rec {
     homepage = "https://musescore.org/";
     license = licenses.gpl3Only;
     platforms = platforms.darwin;
-    maintainers = [];
+    maintainers = [ ];
   };
 }

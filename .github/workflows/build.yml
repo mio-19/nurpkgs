@@ -45,6 +45,7 @@ jobs:
     runs-on: "${{ matrix.os }}"
     steps:
     - name: Maximize build space
+      if: runner.os == 'Linux'
       uses: mio-19/maximize-build-space@patch-1
       with:
         root-reserve-mb: 512

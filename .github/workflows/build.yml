@@ -15,6 +15,10 @@ jobs:
   tests:
     strategy:
       fail-fast: false
+      os:
+        - ubuntu-24.04
+        - macos-15
+        - macos-15-intel
       matrix:
         # Set this to notify the global nur package registry that changes are
         # available.
@@ -38,7 +42,7 @@ jobs:
         nixPath:
           - nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixpkgs-unstable.tar.gz
           - nixpkgs=https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-unstable.tar.gz
-    runs-on: ubuntu-latest
+    runs-on: "${{ matrix.os }}"
     steps:
     - name: Maximize build space
       uses: mio-19/maximize-build-space@patch-1

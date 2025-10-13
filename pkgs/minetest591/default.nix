@@ -143,7 +143,7 @@ stdenv.mkDerivation (finalAttrs: {
     description = "Infinite-world block sandbox game";
     license = licenses.lgpl21Plus;
     platforms = platforms.linux ++ platforms.darwin;
-    maintainers = with maintainers; [];
+    maintainers = with maintainers; [ ];
     mainProgram = if buildClient then "minetest" else "minetestserver";
   };
 })

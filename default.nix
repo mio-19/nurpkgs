@@ -65,6 +65,7 @@ rec {
       url = "https://github.com/helge17/tuxguitar/releases/download/${version}/tuxguitar-${version}-linux-swt-amd64.tar.gz";
       hash = "sha256-3Twh37HE1amaXPH13giKE2Qa+qcwwjcot8W457NKn2A=";
     };
+    broken = pkgs.stdenv.hostPlatform.isDarwin || pkgs.stdenv.targetPlatform.isAarch64;
   });
   aria2 = pkgs.aria2.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [

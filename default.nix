@@ -63,7 +63,7 @@ rec {
     version = "2.0.0beta4";
     src = pkgs.fetchurl {
       url = "https://github.com/helge17/tuxguitar/releases/download/${version}/tuxguitar-${version}-linux-swt-amd64.tar.gz";
-      hash = "sha256-3Twh37HE1amaXPH13giKE2Qa+qcwwjcot8W457NKn2A=";
+      hash = "sha256-QJ8SRY7UBtkICe312O6n8KgbF2MmLpdk2qBseaEUTIc=";
     };
     meta = old.meta // {
       broken = pkgs.stdenv.hostPlatform.isDarwin || pkgs.stdenv.targetPlatform.isAarch64;

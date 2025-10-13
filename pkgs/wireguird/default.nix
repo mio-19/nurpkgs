@@ -7,6 +7,11 @@
   libayatana-appindicator,
   gdk-pixbuf,
   glib,
+  xorg,
+  pkg-config,
+  makeWrapper,
+  wireguard-tools,
+  openresolv,
 }:
 buildGoModule {
   pname = "wireguird";

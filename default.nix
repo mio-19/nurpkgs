@@ -60,6 +60,7 @@ rec {
       pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
     else
       pkgs.libsForQt5.callPackage ./pkgs/musescore3 { };
+  zen-browser = pkgs.callPackage ./pkgs/zen-browser/package.nix { };
   # some-qt5-package = pkgs.libsForQt5.callPackage ./pkgs/some-qt5-package { };
   # ...
 }

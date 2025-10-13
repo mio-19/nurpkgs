@@ -20,6 +20,14 @@ rec {
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
 
+  # https://github.com/NixOS/nixpkgs/issues/445447
+  patch-cmake4 =
+    pkg:
+    (pkg.overrideAttrs (old: {
+      cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" ];
+    }));
+
+  rclone-browser = patch-cmake4 pkgs.rclone-browser;
   telegram-desktop = pkgs.telegram-desktop.overrideAttrs (old: {
     unwrapped = old.unwrapped.overrideAttrs (old2: {
       # see https://github.com/Layerex/telegram-desktop-patches

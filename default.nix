@@ -37,7 +37,9 @@ rec {
     });
   });
   example-package = pkgs.callPackage ./pkgs/example-package { };
-  lmms = pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; };
+  lmms = lib.mkIf pkgs.stdenv.isLinux (
+    pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; }
+  );
   minetest591 = pkgs.callPackage ./pkgs/minetest591 {
   };
   minetest591client = minetest591.override { buildServer = false; };

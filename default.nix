@@ -44,6 +44,7 @@ rec {
       ];
     });
   });
+  wireguird = pkgs.callPackage ./pkgs/wireguird { };
   example-package = pkgs.callPackage ./pkgs/example-package { };
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; };
   minetest591 = pkgs.callPackage ./pkgs/minetest591 {

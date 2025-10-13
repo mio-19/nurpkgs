@@ -20,7 +20,7 @@ buildGoModule {
   src = fetchFromGitHub {
     owner = "UnnoTed";
     repo = "wireguird";
-    rev = "master"; # consider pinning a commit for reproducibility
+    rev = "6dac3cd8784118f4fe7ea6d544a583c26d589572";
     sha256 = "sha256-iv0/HSu/6IOVmRZcyCazLdJyyBsu5PyTajLubk0speI=";
   };
   proxyVendor = true;

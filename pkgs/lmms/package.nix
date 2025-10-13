@@ -126,6 +126,7 @@ stdenv.mkDerivation {
     platforms = [
       "x86_64-linux"
     ];
+    broken = stdenv.hostPlatform.isDarwin || stdenv.targetPlatform.isAarch64;
     maintainers = with maintainers; [ wizardlink ];
   };
 }

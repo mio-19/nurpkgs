@@ -44,6 +44,14 @@ rec {
       ];
     });
   });
+  openssh = prev.openssh.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
+    #doCheck = false;
+  });
+  openssh_hpn = pkgs.openssh_hpn.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
+    #doCheck = false;
+  });
   wireguird = pkgs.callPackage ./pkgs/wireguird { };
   example-package = pkgs.callPackage ./pkgs/example-package { };
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; };

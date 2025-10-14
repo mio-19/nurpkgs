@@ -26,3 +26,7 @@
 ```zsh
 --option 'extra-substituters' 'https://mio.cachix.org/' --option extra-trusted-public-keys "mio.cachix.org-1:FlupyyLPURqwdRqtPT/LBWKsXY7JKsDkzZQo2K6LeMM="
 ```
+
+## broken
+
+we need to mark broken for unsupported platforms otherwise the github actions fail

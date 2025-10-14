@@ -49,8 +49,8 @@ jobs:
       if: runner.os == 'Linux'
       uses: mio-19/maximize-build-space@patch-1
       with:
-        root-reserve-mb: 512
-        swap-size-mb: 16384
+        root-reserve-mb: 1024
+        swap-size-mb: 30000
         overprovision-lvm: 'true'
         remove-dotnet: 'true'
         remove-android: 'true'

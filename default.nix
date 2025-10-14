@@ -44,7 +44,7 @@ rec {
       ];
     });
   });
-  openssh = prev.openssh.overrideAttrs (old: {
+  openssh = pkgs.openssh.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
     #doCheck = false;
   });

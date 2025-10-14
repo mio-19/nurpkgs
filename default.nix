@@ -27,7 +27,11 @@ rec {
       cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" ];
     }));
 
-  rclone-browser = pkgs.lib.mkIf pkgs.stdenv.hostPlatform.isLinux (patch-cmake4 pkgs.rclone-browser);
+  rclone-browser = (patch-cmake4 pkgs.rclone-browser).overrideAttrs (old: {
+    meta = old.meta // {
+      broken = pkgs.stdenv.hostPlatform.isDarwin || pkgs.stdenv.targetPlatform.isAarch64;
+    };
+  });
   telegram-desktop = pkgs.telegram-desktop.overrideAttrs (old: {
     unwrapped = old.unwrapped.overrideAttrs (old2: {
       # see https://github.com/Layerex/telegram-desktop-patches

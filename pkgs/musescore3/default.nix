@@ -38,8 +38,9 @@ mkDerivation rec {
   };
 
   patches = [
-    #./remove_qtwebengine_install_hack.patch # needed for musescore/MuseScore; not needed for Jojo-Schmitz's fork
-    #./dtl-gcc14-fix.patch # needed for musescore/MuseScore; not needed for Jojo-Schmitz's fork
+    #./remove_qtwebengine_install_hack.patch # for musescore/MuseScore
+    #./dtl-gcc14-fix.patch # for musescore/MuseScore
+    ./Jojo-Schmitz-remove_qtwebengine_install_hack.patch
   ];
 
   cmakeFlags = [

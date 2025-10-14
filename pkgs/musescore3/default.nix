@@ -28,18 +28,18 @@
 
 mkDerivation rec {
   pname = "musescore";
-  version = "3.6.2";
+  version = "3.7.0-unstable-2025-10-11"; # version = "3.6.2";
 
   src = fetchFromGitHub {
-    owner = "musescore";
+    owner = "Jojo-Schmitz"; # owner = "musescore";
     repo = "MuseScore";
-    rev = "v${version}";
-    sha256 = "sha256-GBGAD/qdOhoNfDzI+O0EiKgeb86GFJxpci35T6tZ+2s=";
+    rev = "1f2b0a281b6ad186341dc07ef53d9caf6c6e6df0"; # rev = "v${version}"; # 3.6.2
+    hash = "sha256-awXpPFLWzsA+Sj0p7329e94kopKTTtvc/2DddY4ZXdU="; # sha256 = "sha256-GBGAD/qdOhoNfDzI+O0EiKgeb86GFJxpci35T6tZ+2s=";
   };
 
   patches = [
-    ./remove_qtwebengine_install_hack.patch
-    ./dtl-gcc14-fix.patch
+    #./remove_qtwebengine_install_hack.patch # needed for musescore/MuseScore; not needed for Jojo-Schmitz's fork
+    #./dtl-gcc14-fix.patch # needed for musescore/MuseScore; not needed for Jojo-Schmitz's fork
   ];
 
   cmakeFlags = [

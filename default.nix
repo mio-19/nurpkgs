@@ -29,7 +29,7 @@ rec {
 
   rclone-browser = (patch-cmake4 pkgs.rclone-browser).overrideAttrs (old: {
     meta = old.meta // {
-      broken = pkgs.stdenv.hostPlatform.isDarwin || pkgs.stdenv.targetPlatform.isAarch64;
+      broken = pkgs.stdenv.hostPlatform.isDarwin;
     };
   });
   telegram-desktop = pkgs.telegram-desktop.overrideAttrs (old: {

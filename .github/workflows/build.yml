@@ -50,7 +50,7 @@ jobs:
       uses: mio-19/maximize-build-space@patch-1
       with:
         root-reserve-mb: 512
-        swap-size-mb: 50000
+        swap-size-mb: 40000
         overprovision-lvm: 'true'
         remove-dotnet: 'true'
         remove-android: 'true'
@@ -87,7 +87,7 @@ jobs:
           -I nixpkgs=$(nix-instantiate --find-file nixpkgs) \
           -I $PWD
     - name: Build nix packages
-      run: nix shell -f '<nixpkgs>' nix-build-uncached -c nix-build-uncached ci.nix -A cacheOutputs
+      run: nice -n 20 nix shell -f '<nixpkgs>' nix-build-uncached -c nix-build-uncached ci.nix -A cacheOutputs
     - name: Trigger NUR update
       # Don't replace <YOUR_REPO_NAME> here!
       if: ${{ matrix.nurRepo != '<YOUR_REPO_NAME>' }}

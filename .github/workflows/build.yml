@@ -57,12 +57,7 @@ jobs:
         remove-haskell: 'true'
         remove-codeql: 'true'
         remove-docker-images: 'true'
-    - name: bind mount /nix
-      if: runner.os == 'Linux'
-      run: |
-        sudo mkdir /nix $GITHUB_WORKSPACE/nix
-        echo $GITHUB_WORKSPACE/nix
-        sudo mount --bind $GITHUB_WORKSPACE/nix /nix
+        build-mount-path: /nix
     - name: Checkout repository
       uses: actions/checkout@v5
     - name: Install nix

@@ -94,6 +94,7 @@ rec {
       })
     ];
   });
+  audacity4 = pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { };
   # some-qt5-package = pkgs.libsForQt5.callPackage ./pkgs/some-qt5-package { };
   # ...
 }

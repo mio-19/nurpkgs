@@ -51,6 +51,13 @@ rec {
     patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
     #doCheck = false;
   });
+  grub2 = pkgs.grub2.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./patches/grub-os-prober-title.patch ];
+    #doCheck = false;
+    meta = old.meta // {
+      broken = pkgs.stdenv.hostPlatform.isDarwin;
+    };
+  });
   wireguird = pkgs.callPackage ./pkgs/wireguird { };
   example-package = pkgs.callPackage ./pkgs/example-package { };
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; };

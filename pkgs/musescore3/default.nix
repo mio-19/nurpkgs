@@ -24,6 +24,7 @@
   qtwebengine,
   qtxmlpatterns,
   nixosTests,
+  stdenv,
 }:
 
 mkDerivation rec {
@@ -96,5 +97,6 @@ mkDerivation rec {
       doronbehar
     ];
     platforms = platforms.linux;
+    broken = stdenv.targetPlatform.isAarch64; # disable building this package for aarch64 temporarily although not actually broken.
   };
 }

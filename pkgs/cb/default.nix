@@ -1,12 +1,10 @@
 {
   lib,
   pkgs,
-  config,
   ...
 }:
 
 let
-  cfg = config.programs.cb;
 
   isDarwin = pkgs.stdenv.isDarwin;
 

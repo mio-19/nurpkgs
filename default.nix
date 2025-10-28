@@ -20,44 +20,63 @@ rec {
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
 
-  # https://github.com/NixOS/nixpkgs/issues/445447
-  patch-cmake4 =
-    pkg:
-    (pkg.overrideAttrs (old: {
-      cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" ];
-    }));
+  v3Optimizations =
+    if pkgs.stdenv.hostPlatform.isx86_64 then
+      pkgs.stdenvAdapters.withCFlags [ "-march=x86-64-v3" ]
+    else
+      stdenv: stdenv;
 
   telegram-desktop = pkgs.telegram-desktop.overrideAttrs (old: {
-    unwrapped = old.unwrapped.overrideAttrs (old2: {
-      # see https://github.com/Layerex/telegram-desktop-patches
-      patches = (pkgs.telegram-desktop.unwrapped.patches or [ ]) ++ [
-        ./patches/0001-telegramPatches.patch
-      ];
-    });
+    unwrapped =
+      (old.unwrapped.overrideAttrs (old2: {
+        # see https://github.com/Layerex/telegram-desktop-patches
+        patches = (pkgs.telegram-desktop.unwrapped.patches or [ ]) ++ [
+          ./patches/0001-telegramPatches.patch
+        ];
+      })).override
+        (prev: {
+          stdenv = v3Optimizations prev.stdenv;
+        });
   });
   materialgram = pkgs.materialgram.overrideAttrs (old: {
-    unwrapped = old.unwrapped.overrideAttrs (old2: {
-      # see https://github.com/Layerex/telegram-desktop-patches
-      patches = (pkgs.materialgram.unwrapped.patches or [ ]) ++ [
-        ./patches/0001-materialgramPatches.patch
-      ];
-    });
+    unwrapped =
+      (old.unwrapped.overrideAttrs (old2: {
+        # see https://github.com/Layerex/telegram-desktop-patches
+        patches = (pkgs.materialgram.unwrapped.patches or [ ]) ++ [
+          ./patches/0001-materialgramPatches.patch
+        ];
+      })).override
+        (prev: {
+          stdenv = v3Optimizations prev.stdenv;
+        });
   });
-  openssh = pkgs.openssh.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
-    #doCheck = false;
-  });
-  openssh_hpn = pkgs.openssh_hpn.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
-    #doCheck = false;
-  });
-  grub2 = pkgs.grub2.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [ ./patches/grub-os-prober-title.patch ];
-    #doCheck = false;
-    meta = old.meta // {
-      broken = pkgs.stdenv.hostPlatform.isDarwin;
-    };
-  });
+  openssh =
+    (pkgs.openssh.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
+      #doCheck = false;
+    })).override
+      (prev: {
+        stdenv = v3Optimizations prev.stdenv;
+      });
+  openssh_hpn =
+    (pkgs.openssh_hpn.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
+      #doCheck = false;
+    })).override
+      (prev: {
+        stdenv = v3Optimizations prev.stdenv;
+      });
+  grub2 =
+    (pkgs.grub2.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ./patches/grub-os-prober-title.patch ];
+      #doCheck = false;
+      meta = old.meta // {
+        broken = pkgs.stdenv.hostPlatform.isDarwin;
+      };
+    })).override
+      (prev: {
+        stdenv = v3Optimizations prev.stdenv;
+      });
   wireguird = pkgs.callPackage ./pkgs/wireguird { };
   example-package = pkgs.callPackage ./pkgs/example-package { };
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; };

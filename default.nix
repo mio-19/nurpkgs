@@ -77,7 +77,11 @@ rec {
       (prev: {
         stdenv = v3Optimizations prev.stdenv;
       });
-  wireguird = pkgs.callPackage ./pkgs/wireguird { };
+  wireguird = (pkgs.callPackage ./pkgs/wireguird { }).overrideAttrs (
+    finalAttrs: previousAttrs: {
+      GOAMD64 = "v3";
+    }
+  );
   example-package = pkgs.callPackage ./pkgs/example-package { };
   lmms = (pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; }).override (prev: {
     stdenv = v3Optimizations prev.stdenv;
@@ -113,9 +117,7 @@ rec {
     if pkgs.stdenv.isDarwin then
       pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
     else
-      (pkgs.libsForQt5.callPackage ./pkgs/musescore3 { }).override (prev: {
-        stdenv = v3Optimizations prev.stdenv;
-      });
+      pkgs.libsForQt5.callPackage ./pkgs/musescore3 { };
   zen-browser = pkgs.callPackage ./pkgs/zen-browser/package.nix { };
   tuxguitar = pkgs.tuxguitar.overrideAttrs (old: rec {
     version = "2.0.0beta4";

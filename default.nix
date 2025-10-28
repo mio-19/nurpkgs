@@ -79,16 +79,30 @@ rec {
       });
   wireguird = pkgs.callPackage ./pkgs/wireguird { };
   example-package = pkgs.callPackage ./pkgs/example-package { };
-  lmms = pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; };
-  minetest591 = pkgs.callPackage ./pkgs/minetest591 {
-  };
+  lmms = (pkgs.callPackage ./pkgs/lmms/package.nix { withOptionals = true; }).override (prev: {
+    stdenv = v3Optimizations prev.stdenv;
+  });
+  minetest591 =
+    (pkgs.callPackage ./pkgs/minetest591 {
+    }).override
+      (prev: {
+        stdenv = v3Optimizations prev.stdenv;
+      });
   minetest591client = minetest591.override { buildServer = false; };
   minetest591server = minetest591.override { buildClient = false; };
-  irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
-  };
-  minetest580 = pkgs.callPackage ./pkgs/minetest580 {
-    irrlichtmt = irrlichtmt;
-  };
+  irrlichtmt =
+    (pkgs.callPackage ./pkgs/irrlichtmt {
+    }).override
+      (prev: {
+        stdenv = v3Optimizations prev.stdenv;
+      });
+  minetest580 =
+    (pkgs.callPackage ./pkgs/minetest580 {
+      irrlichtmt = irrlichtmt;
+    }).override
+      (prev: {
+        stdenv = v3Optimizations prev.stdenv;
+      });
   minetest580client = minetest580.override { buildServer = false; };
   minetest580-touch = minetest580.override {
     buildServer = false;
@@ -99,7 +113,9 @@ rec {
     if pkgs.stdenv.isDarwin then
       pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
     else
-      pkgs.libsForQt5.callPackage ./pkgs/musescore3 { };
+      (pkgs.libsForQt5.callPackage ./pkgs/musescore3 { }).override (prev: {
+        stdenv = v3Optimizations prev.stdenv;
+      });
   zen-browser = pkgs.callPackage ./pkgs/zen-browser/package.nix { };
   tuxguitar = pkgs.tuxguitar.overrideAttrs (old: rec {
     version = "2.0.0beta4";
@@ -111,15 +127,21 @@ rec {
       broken = pkgs.stdenv.hostPlatform.isDarwin || pkgs.stdenv.targetPlatform.isAarch64;
     };
   });
-  aria2 = pkgs.aria2.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [
-      (pkgs.fetchpatch {
-        name = "fix patch aria2 fast.patch";
-        url = "https://github.com/agalwood/aria2/commit/baf6f1d02f7f8b81cd45578585bdf1152d81f75f.patch";
-        sha256 = "sha256-bLGaVJoHuQk9vCbBg2BOG79swJhU/qHgdkmYJNr7rIQ=";
-      })
-    ];
+  aria2 =
+    (pkgs.aria2.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [
+        (pkgs.fetchpatch {
+          name = "fix patch aria2 fast.patch";
+          url = "https://github.com/agalwood/aria2/commit/baf6f1d02f7f8b81cd45578585bdf1152d81f75f.patch";
+          sha256 = "sha256-bLGaVJoHuQk9vCbBg2BOG79swJhU/qHgdkmYJNr7rIQ=";
+        })
+      ];
+    })).override
+      (prev: {
+        stdenv = v3Optimizations prev.stdenv;
+      });
+  audacity4 = (pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { }).override (prev: {
+    stdenv = v3Optimizations prev.stdenv;
   });
-  audacity4 = pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { };
   cb = pkgs.callPackage ./pkgs/cb { };
 }

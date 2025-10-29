@@ -57,6 +57,15 @@ mkDerivation rec {
     "--set-default QT_QPA_PLATFORM xcb"
   ];
 
+  postInstall = ''
+    # Rename binary from mscore to mscore3
+    mv $out/bin/mscore $out/bin/mscore3
+
+    # Update desktop file to use mscore3
+    substituteInPlace $out/share/applications/mscore.desktop \
+      --replace-fail "Exec=mscore" "Exec=mscore3"
+  '';
+
   nativeBuildInputs = [
     cmake
     pkg-config

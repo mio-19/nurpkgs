@@ -110,7 +110,7 @@ rec {
       pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
     else
       pkgs.libsForQt5.callPackage ./pkgs/musescore3 {
-        stdenv = v3Optimizations pkgs.stdenv;
+        mkDerivation = (v3Optimizations pkgs.stdenv).mkDerivation;
       };
   zen-browser = pkgs.callPackage ./pkgs/zen-browser/package.nix { };
   tuxguitar = pkgs.tuxguitar.overrideAttrs (old: rec {

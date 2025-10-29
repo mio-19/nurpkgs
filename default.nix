@@ -109,9 +109,7 @@ rec {
     if pkgs.stdenv.isDarwin then
       pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
     else
-      pkgs.libsForQt5.callPackage ./pkgs/musescore3 {
-        stdenv = v3Optimizations pkgs.stdenv;
-      };
+      pkgs.libsForQt5.callPackage ./pkgs/musescore3 { };
   zen-browser = pkgs.callPackage ./pkgs/zen-browser/package.nix { };
   tuxguitar = pkgs.tuxguitar.overrideAttrs (old: rec {
     version = "2.0.0beta4";

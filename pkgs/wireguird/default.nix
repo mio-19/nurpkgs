@@ -25,7 +25,7 @@ let
       sha256 = "sha256-/g4Im1R4VKVyl0qN3FYcvKTBHhiIKll4civs987Mo64=";
     };
     vendorHash = "sha256-56A+xFvgJLS8xWodcSzMuN0fB+vXb4Qm8OwbAig2KSM=";
-    
+
     # Tests fail in sandbox (try to access /dev/tty)
     doCheck = false;
   };

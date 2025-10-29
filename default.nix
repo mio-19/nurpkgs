@@ -13,13 +13,7 @@
     ];
   },
 }:
-
-rec {
-  # The `lib`, `modules`, and `overlays` names are special
-  lib = import ./lib { inherit pkgs; }; # functions
-  modules = import ./modules; # NixOS modules
-  overlays = import ./overlays; # nixpkgs overlays
-
+let
   v3Optimizations =
     if pkgs.stdenv.hostPlatform.isx86_64 then
       pkgs.stdenvAdapters.withCFlags [ "-march=x86-64-v3" ]
@@ -49,6 +43,12 @@ rec {
       })
     else
       x: x;
+in
+rec {
+  # The `lib`, `modules`, and `overlays` names are special
+  lib = import ./lib { inherit pkgs; }; # functions
+  modules = import ./modules; # NixOS modules
+  overlays = import ./overlays; # nixpkgs overlays
 
   telegram-desktop = pkgs.telegram-desktop.overrideAttrs (old: {
     unwrapped = v3override (

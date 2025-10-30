@@ -102,6 +102,7 @@ rec {
       };
     })
   );
+  # https://github.com/NixOS/nixpkgs/issues/456347
   sbcl = pkgs.sbcl.overrideAttrs (old: {
     doCheck = false;
   });

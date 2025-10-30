@@ -135,6 +135,8 @@ rec {
       pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
     else
       v3overrideAttrs (pkgs.libsForQt5.callPackage ./pkgs/musescore3 { });
+  # https://github.com/musescore/MuseScore/pull/21874
+  # https://github.com/adazem009/MuseScore/tree/piano_keyboard_playing_notes
   musescore = v3override (
     pkgs.musescore.overrideAttrs (old: {
       version = "4.4.0-piano_keyboard_playing_notes";

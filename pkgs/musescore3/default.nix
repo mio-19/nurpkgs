@@ -71,6 +71,11 @@ mkDerivation rec {
       fi
     done
 
+    # Rename man page from mscore to mscore3
+    mv $out/share/man/man1/mscore.1.gz $out/share/man/man1/mscore3.1.gz
+    rm $out/share/man/man1/musescore.1.gz
+    ln -s mscore3.1.gz $out/share/man/man1/musescore3.1.gz
+
     # Update desktop file to use mscore3
     substituteInPlace $out/share/applications/mscore.desktop \
       --replace-fail "Exec=mscore" "Exec=mscore3" \

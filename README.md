@@ -1,5 +1,7 @@
 # nurpkgs
 
+see all packages: <https://nur.nix-community.org/repos/mio/>
+
 + linux: x86_64-v3, aarch64
 + darwin: aarch64
 

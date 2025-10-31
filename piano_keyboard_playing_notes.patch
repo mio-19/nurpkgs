@@ -80,3 +80,32 @@ index aa3083c79..c1c113dd5 100644
    set(${PROJECT_NAME}_LIBRARY_QTID "-qt6")
  else()
    set(Qt_VERSION_MAJOR 5)
+diff --git a/src/importexport/bww/internal/bww/lexer.cpp b/src/importexport/bww/internal/bww/lexer.cpp
+index 84bc924b7..da7bff612 100644
+--- a/src/importexport/bww/internal/bww/lexer.cpp
++++ b/src/importexport/bww/internal/bww/lexer.cpp
+@@ -42,7 +42,7 @@ namespace Bww {
+ Lexer::Lexer(QIODevice* inDevice)
+     : in(inDevice),
+     lineNumber(-1),
+-    value(QChar(NONE))
++    value(QChar(static_cast<ushort>(NONE)))
+ {
+     LOGD() << "Lexer::Lexer() begin";
+ 
+diff --git a/src/importexport/midi/internal/midiimport/importmidi_tuplet.cpp b/src/importexport/midi/internal/midiimport/importmidi_tuplet.cpp
+index 729e928a0..c5645941b 100644
+--- a/src/importexport/midi/internal/midiimport/importmidi_tuplet.cpp
++++ b/src/importexport/midi/internal/midiimport/importmidi_tuplet.cpp
+@@ -895,9 +895,10 @@ void addTupletEvents(std::multimap<ReducedFraction, TupletData>& tupletEvents,
+                 message += QString::number(tiedTuplet.voice) + ", chord voice = ";
+                 message += QString::number(midiChord.voice) + ", bar number (from 1) = ";
+                 message += QString::number(midiChord.barIndex + 1);
+-#endif
++
+                 Q_ASSERT_X(tiedTuplet.voice == midiChord.voice,
+                            "MidiTuplet::addTupletEvents", message.toLatin1().data());
++#endif
+ 
+                 for (int j: tiedTuplet.tiedNoteIndexes) {
+                     midiChord.notes[j].tuplet = it;

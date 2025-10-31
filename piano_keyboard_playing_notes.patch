@@ -14,6 +14,20 @@ index a22ccb49d..8630056ab 100644
      Network
      NetworkAuth
      Qml
+diff --git a/buildscripts/cmake/SetupBuildEnvironment.cmake b/buildscripts/cmake/SetupBuildEnvironment.cmake
+index 2435d2926..53cd8f856 100644
+--- a/buildscripts/cmake/SetupBuildEnvironment.cmake
++++ b/buildscripts/cmake/SetupBuildEnvironment.cmake
+@@ -125,7 +125,7 @@ endif()
+ 
+ # APPLE specific
+ if (OS_IS_MAC)
+-    set(MACOSX_DEPLOYMENT_TARGET 10.14)
+-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
++    set(MACOSX_DEPLOYMENT_TARGET 10.15)
++    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
+ endif(OS_IS_MAC)
+ 
 diff --git a/src/appshell/CMakeLists.txt b/src/appshell/CMakeLists.txt
 index a3d7363e1..6da773af0 100644
 --- a/src/appshell/CMakeLists.txt

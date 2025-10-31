@@ -58,7 +58,7 @@ let
 in
 rec {
   # The `lib`, `modules`, and `overlays` names are special
-  lib = import ./lib { inherit pkgs; }; # functions
+  lib = pkgs.lib; # functions
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
   stdenv = pkgs.stdenv;

@@ -61,6 +61,7 @@ rec {
   lib = import ./lib { inherit pkgs; }; # functions
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
+  stdenv = pkgs.stdenv;
 
   telegram-desktop = pkgs.telegram-desktop.overrideAttrs (old: {
     unwrapped = v3overridegcc (
@@ -147,8 +148,14 @@ rec {
         hash = "sha256-1HvwkolmKa317ozprLEpo6v/aNX75sEdaXHlt5Cj6NA=";
       };
       patches = [ ./piano_keyboard_playing_notes.patch ];
+      # https://github.com/NixOS/nixpkgs/blob/d9376b2b549e33e71553901d7678461193f4d163/pkgs/by-name/wa/wamr/package.nix#L25
+      cmakeFlags =
+        old.cmakeFlags
+        ++ lib.optionals stdenv.hostPlatform.isDarwin [
+          "-DCMAKE_OSX_DEPLOYMENT_TARGET=${stdenv.hostPlatform.darwinSdkVersion}"
+        ];
       meta = old.meta // {
-        broken = pkgs.stdenv.hostPlatform.isDarwin; # TODO: fix build on darwin
+        broken = stdenv.hostPlatform.isDarwin; # TODO: fix build on darwin
       };
     })
   );

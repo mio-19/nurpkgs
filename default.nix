@@ -137,15 +137,18 @@ rec {
       v3overrideAttrs (pkgs.libsForQt5.callPackage ./pkgs/musescore3 { });
   # https://github.com/musescore/MuseScore/pull/21874
   # https://github.com/adazem009/MuseScore/tree/piano_keyboard_playing_notes
-  musescore = v3override (
+  # https://github.com/musescore/MuseScore/pull/28073
+  # https://github.com/githubwbp1988/MuseScore/tree/alex
+  musescore-alex = v3override (
     pkgs.musescore.overrideAttrs (old: {
-      version = "4.4.0-piano_keyboard_playing_notes";
+      version = "4.6.3-alex-unstable-20251031";
       src = pkgs.fetchFromGitHub {
-        owner = "adazem009";
+        owner = "githubwbp1988";
         repo = "MuseScore";
-        rev = "e3de9347f6078f170ddbfa6dcb922f72bb7fef88";
-        hash = "sha256-WLzt/Ox6GrfWD0/l8/Ksc2ptg5LZSOXXnlsSnenfZtI=";
+        rev = "487ee2105064f8571f95eb31f03cbf1687e96204";
+        hash = "sha256-r2HjHKnO6pD+urrW57z/SPcgm4vSkAMvW4ZJH+c7J4M=";
       };
+      patches = [ ];
     })
   );
   zen-browser = pkgs.callPackage ./pkgs/zen-browser/package.nix { };

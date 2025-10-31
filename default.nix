@@ -107,7 +107,6 @@ rec {
     doCheck = false;
   });
   wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
-  example-package = pkgs.callPackage ./pkgs/example-package { };
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix {
     withOptionals = true;
     stdenv = v3Optimizations pkgs.clangStdenv;
@@ -166,7 +165,6 @@ rec {
       patches = [ ];
     })
   );
-  zen-browser = pkgs.callPackage ./pkgs/zen-browser/package.nix { };
   tuxguitar = pkgs.tuxguitar.overrideAttrs (old: rec {
     version = "2.0.0beta4";
     src = pkgs.fetchurl {

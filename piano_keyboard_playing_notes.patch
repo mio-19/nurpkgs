@@ -14,6 +14,18 @@ index a22ccb49d..8630056ab 100644
      Network
      NetworkAuth
      Qml
+diff --git a/src/appshell/CMakeLists.txt b/src/appshell/CMakeLists.txt
+index a3d7363e1..6da773af0 100644
+--- a/src/appshell/CMakeLists.txt
++++ b/src/appshell/CMakeLists.txt
+@@ -144,6 +144,7 @@ if (NOT OS_IS_MAC)
+ 
+     # we use QKeyMapper to fix https://github.com/musescore/MuseScore/issues/10181
+     set(MODULE_INCLUDE ${Qt6Gui_PRIVATE_INCLUDE_DIRS} )
++    set(MODULE_LINK ${MODULE_LINK} Qt6::GuiPrivate)
+ endif(NOT OS_IS_MAC)
+ 
+ setup_module()
 diff --git a/src/framework/accessibility/CMakeLists.txt b/src/framework/accessibility/CMakeLists.txt
 index 98f4f4d9e..3b10b50d0 100644
 --- a/src/framework/accessibility/CMakeLists.txt

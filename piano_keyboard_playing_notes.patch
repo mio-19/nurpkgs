@@ -26,6 +26,36 @@ index a3d7363e1..6da773af0 100644
  endif(NOT OS_IS_MAC)
  
  setup_module()
+diff --git a/src/appshell/view/navigableappmenumodel.cpp b/src/appshell/view/navigableappmenumodel.cpp
+index 3a7b274cb..3d5cc9d95 100644
+--- a/src/appshell/view/navigableappmenumodel.cpp
++++ b/src/appshell/view/navigableappmenumodel.cpp
+@@ -39,7 +39,11 @@ QSet<int> possibleKeys(QKeyEvent* keyEvent)
+     //! NOTE: correct work only with alt modifier
+     correctedKeyEvent->setModifiers(Qt::AltModifier);
+ 
+-    QList<int> keys = QKeyMapper::possibleKeys(correctedKeyEvent);
++    QList<QKeyCombination> keyCombinations = QKeyMapper::possibleKeys(correctedKeyEvent);
++    QList<int> keys;
++    for (const QKeyCombination& combination : keyCombinations) {
++        keys.append(combination.toCombined());
++    }
+ 
+     return QSet<int>(keys.cbegin(), keys.cend());
+ }
+@@ -47,7 +51,11 @@ QSet<int> possibleKeys(QKeyEvent* keyEvent)
+ QSet<int> possibleKeys(const QChar& keySymbol)
+ {
+     QKeyEvent fakeKey(QKeyEvent::KeyRelease, Qt::Key_unknown, Qt::AltModifier, keySymbol);
+-    QList<int> keys = QKeyMapper::possibleKeys(&fakeKey);
++    QList<QKeyCombination> keyCombinations = QKeyMapper::possibleKeys(&fakeKey);
++    QList<int> keys;
++    for (const QKeyCombination& combination : keyCombinations) {
++        keys.append(combination.toCombined());
++    }
+ 
+     return QSet<int>(keys.cbegin(), keys.cend());
+ }
 diff --git a/src/framework/accessibility/CMakeLists.txt b/src/framework/accessibility/CMakeLists.txt
 index 98f4f4d9e..3b10b50d0 100644
 --- a/src/framework/accessibility/CMakeLists.txt

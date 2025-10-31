@@ -14,6 +14,7 @@
   },
 }:
 let
+  # TODO: consider -flto , linux only, breaks on darwin
   v3Optimizations =
     if pkgs.stdenv.hostPlatform.isx86_64 then
       pkgs.stdenvAdapters.withCFlags [ "-march=x86-64-v3" ]

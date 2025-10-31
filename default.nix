@@ -14,6 +14,8 @@
   },
 }:
 let
+  lib = pkgs.lib;
+  stdenv = pkgs.stdenv;
   # TODO: consider -flto , linux only, breaks on darwin
   v3Optimizations =
     if pkgs.stdenv.hostPlatform.isx86_64 then
@@ -56,12 +58,11 @@ let
     else
       x: x;
 in
-rec {
+{
   # The `lib`, `modules`, and `overlays` names are special
-  lib = pkgs.lib; # functions
+  lib = import ./lib { inherit pkgs; }; # functions
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
-  stdenv = pkgs.stdenv;
 
   telegram-desktop = pkgs.telegram-desktop.overrideAttrs (old: {
     unwrapped = v3overridegcc (

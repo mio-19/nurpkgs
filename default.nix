@@ -14,7 +14,6 @@
   },
 }:
 let
-  lib = pkgs.lib;
   stdenv = pkgs.stdenv;
   # TODO: consider -flto , linux only, breaks on darwin
   v3Optimizations =

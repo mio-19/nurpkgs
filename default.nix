@@ -147,7 +147,7 @@ rec {
         rev = "e3de9347f6078f170ddbfa6dcb922f72bb7fef88";
         hash = "sha256-1HvwkolmKa317ozprLEpo6v/aNX75sEdaXHlt5Cj6NA=";
       };
-      patches = [ ./piano_keyboard_playing_notes.patch ];
+      patches = [ ./patches/piano_keyboard_playing_notes.patch ];
       meta = old.meta // {
         broken = stdenv.hostPlatform.isDarwin; # TODO: fix build on darwin
       };

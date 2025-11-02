@@ -89,10 +89,10 @@ in
 
         echo Applying patch $patch.
         if [[ $patch == *-m-c.patch ]]; then
-          git apply -p1 -v < $patches/$patch
+          git apply -p1 -v --allow-empty < $patches/$patch
         else
           cd comm
-          git apply -p1 -v < $patches/$patch
+          git apply -p1 -v --allow-empty < $patches/$patch
           cd ..
         fi
       done < <(cat $patches/series $patches/series-M-C)

@@ -79,6 +79,23 @@ let
       // attrs
     );
 
+  #  from chaotic-nyx
+  gitOverride =
+    with pkgs;
+    import ./shared/git-override.nix {
+      inherit (final)
+        lib
+        callPackage
+        fetchFromGitHub
+        fetchFromGitLab
+        fetchFromGitea
+        ;
+      inherit (final.rustPlatform) fetchCargoVendor;
+      nyx = self;
+      fetchRevFromGitHub = final.callPackage ../shared/github-rev-fetcher.nix { };
+      fetchRevFromGitLab = final.callPackage ../shared/gitlab-rev-fetcher.nix { };
+      fetchRevFromGitea = final.callPackage ../shared/gitea-rev-fetcher.nix { };
+    };
 in
 rec {
   # The `lib`, `modules`, and `overlays` names are special

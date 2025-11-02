@@ -8,6 +8,7 @@
   libdbusmenu-gtk3,
   runtimeShell,
   thunderbirdPackages,
+  unzip,
 }:
 
 let
@@ -18,8 +19,10 @@ let
 
   betterbird-patches = fetchFromGitHub {
     owner = "Betterbird";
+    #owner = "mio-19";
     repo = "thunderbird-patches";
-    rev = "${version}-bb13-build2";
+    #rev = "${version}-bb13-build2";
+    rev = "072f3c8355b9e778f072f8f120865745cbaf467c";
     postFetch = ''
       echo "Retrieving external patches"
 
@@ -38,6 +41,7 @@ let
       rm external.sh
     '';
     hash = "sha256-QSC0euWW1lB+WxGxDBRLU2QvEvbJMiozmPyuRVRCXFs=";
+    #hash = "sha256-i9qpcV0k58cxKozqLJ73fOV80rtIV08Ux0FXT8vs6/E=";
   };
 in
 (
@@ -52,9 +56,38 @@ in
 
     src = fetchurl {
       # https://download.cdn.mozilla.net/pub/thunderbird/releases/
-      url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
-      hash = "sha256-sOuUbZ5tSyrb+tCJOlx5yqESA6OQawtfJvDMxMmyj/A=";
+      #url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
+      # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
+      url = "https://hg-edge.mozilla.org/releases/mozilla-esr140/archive/c4525dfe35a20458c7a6966c0c6d27f92f2deca7.zip";
+      hash = "sha256-Dx7RpwLLK/mF9wV7ltCe0XqnEW8S+s4VjzIdB64qBcw=";
     };
+
+    unpackPhase = ''
+      # Extract main mozilla-esr140 archive
+      unzip -q $src
+      mozillaDir=$(echo mozilla-esr140-*)
+
+      # Fetch and extract comm subdirectory
+      # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
+      unzip -q ${
+        fetchurl {
+          url = "https://hg-edge.mozilla.org/releases/comm-esr140/archive/efb07defaa2d56105675dc1d936af581ebfd8ffa.zip";
+          hash = "sha256-gVAarjhKynLOtzPHzLyN/dfL4VJ2ihSs3yB8NLaaE1A=";
+        }
+      }
+      commDir=$(echo comm-esr140-*)
+
+      # Move comm into mozilla directory
+      mv "$commDir" "$mozillaDir/comm"
+
+      # Flatten the mozilla directory
+      shopt -s dotglob
+      mv "$mozillaDir"/* .
+      rmdir "$mozillaDir"
+
+      # Verify
+      [ -d comm/mail ]
+    '';
 
     extraPostPatch = thunderbird-unwrapped.extraPostPatch or "" + /* bash */ ''
       PATH=$PATH:${lib.makeBinPath [ git ]}

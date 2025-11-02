@@ -26,6 +26,7 @@ let
       x:
       x.overrideAttrs (old: {
         env.NIX_CFLAGS_COMPILE = "-march=x86-64-v3";
+        env.RUSTFLAGS = "-C target_cpu=x86-64-v3";
       })
     else
       x: x;

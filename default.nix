@@ -189,7 +189,7 @@ rec {
   cb = pkgs.callPackage ./pkgs/cb { };
   jellyfin-media-player = v3override (pkgs.qt6Packages.callPackage ./pkgs/jellyfin-media-player { });
   firefox-unwrapped_nightly = pkgs.callPackage ./pkgs/firefox-nightly {
-    nss_git = pkgs.nss;
+    nss_git = pkgs.nss_latest;
     nyxUtils = nyxUtils;
   };
   firefox_nightly = pkgs.wrapFirefox firefox-unwrapped_nightly { };

@@ -18,11 +18,12 @@ let
   majVer = lib.versions.major version;
 
   betterbird-patches = fetchFromGitHub {
-    owner = "Betterbird";
-    #owner = "mio-19";
+    #owner = "Betterbird";
+    owner = "mio-19";
     repo = "thunderbird-patches";
     #rev = "${version}-bb13-build2";
-    rev = "072f3c8355b9e778f072f8f120865745cbaf467c";
+    #rev = "072f3c8355b9e778f072f8f120865745cbaf467c";
+    rev = "094f1e81838ad32f62d76ce895861710614775b4";
     postFetch = ''
       echo "Retrieving external patches"
 
@@ -40,8 +41,8 @@ let
       . ./external.sh
       rm external.sh
     '';
-    hash = "sha256-QSC0euWW1lB+WxGxDBRLU2QvEvbJMiozmPyuRVRCXFs=";
-    #hash = "sha256-i9qpcV0k58cxKozqLJ73fOV80rtIV08Ux0FXT8vs6/E=";
+    #hash = "sha256-QSC0euWW1lB+WxGxDBRLU2QvEvbJMiozmPyuRVRCXFs=";
+    hash = "sha256-i9qpcV0k58cxKozqLJ73fOV80rtIV08Ux0FXT8vs6/E=";
   };
 in
 (
@@ -117,6 +118,11 @@ in
         # requires vendored icu, fails to link with our icu
         # feature-506064 depends on those icu patches
         if [[ $patch == 14-feature-regexp-searchterm.patch || $patch == 14-feature-regexp-searchterm-m-c.patch || $patch == feature-506064-match-diacritics.patch || $patch == feature-506064-match-diacritics-m-c.patch ]]; then
+          continue
+        fi
+
+        # failed to apply. thunderbird-patches/140/bugs/*
+        if [[ $patch == 1976738-font-colour-plaintext.patch || $patch == 1976738-font-colour-plaintext-take2.patch ]]; then
           continue
         fi
 

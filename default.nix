@@ -140,17 +140,14 @@ rec {
   openssh_hpn = v3override (
     pkgs.openssh_hpn.overrideAttrs (old: {
       patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
-      #doCheck = false;
     })
   );
-  grub2 = v3overridegcc (
-    pkgs.grub2.overrideAttrs (old: {
-      patches = (old.patches or [ ]) ++ [ ./patches/grub-os-prober-title.patch ];
-      #doCheck = false;
-      meta = old.meta // {
-        broken = pkgs.stdenv.hostPlatform.isDarwin;
-      };
-    })
+  grub2 = nodarwin (
+    v3overridegcc (
+      pkgs.grub2.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ./patches/grub-os-prober-title.patch ];
+      })
+    )
   );
   # https://github.com/NixOS/nixpkgs/issues/456347
   sbcl = pkgs.sbcl.overrideAttrs (old: {

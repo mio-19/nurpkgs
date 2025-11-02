@@ -56,6 +56,29 @@ let
       })
     else
       x: x;
+  #  from chaotic-nyx
+  nyxUtils = import ./shared/utils.nix {
+    lib = pkgs.lib;
+    nyxOverlay = null;
+  };
+  #  from chaotic-nyx
+  callOverride =
+    path: attrs:
+    with pkgs;
+    import path (
+      {
+        inherit
+          final
+          flakes
+          nyxUtils
+          prev
+          gitOverride
+          rustPlatform_latest
+          ;
+      }
+      // attrs
+    );
+
 in
 rec {
   # The `lib`, `modules`, and `overlays` names are special
@@ -189,12 +212,9 @@ rec {
   cb = pkgs.callPackage ./pkgs/cb { };
   jellyfin-media-player = v3override (pkgs.qt6Packages.callPackage ./pkgs/jellyfin-media-player { });
   firefox-unwrapped_nightly = pkgs.callPackage ./pkgs/firefox-nightly {
-    nss_git = pkgs.nss_latest;
+    nss_git = nss_git;
     nyxUtils = nyxUtils;
   };
   firefox_nightly = pkgs.wrapFirefox firefox-unwrapped_nightly { };
-  nyxUtils = import ./shared/utils.nix {
-    lib = pkgs.lib;
-    nyxOverlay = null;
-  };
+  nss_git = callOverride ./pkgs/nss-git { };
 }

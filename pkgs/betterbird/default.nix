@@ -37,7 +37,7 @@ let
       . ./external.sh
       rm external.sh
     '';
-    hash = "sha256-dXfpu+ufBfAWl1OlpQ1i8CC7N8f0NbxfaMH6BdKr28c=";
+    hash = "sha256-QSC0euWW1lB+WxGxDBRLU2QvEvbJMiozmPyuRVRCXFs=";
   };
 in
 (
@@ -53,7 +53,7 @@ in
     src = fetchurl {
       # https://download.cdn.mozilla.net/pub/thunderbird/releases/
       url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
-      hash = "sha256-A3/D8D9e5PI9SUetKFUE0oDpJsThprIk1zUfZoxu1/A=";
+      hash = "sha256-sOuUbZ5tSyrb+tCJOlx5yqESA6OQawtfJvDMxMmyj/A=";
     };
 
     extraPostPatch = thunderbird-unwrapped.extraPostPatch or "" + /* bash */ ''

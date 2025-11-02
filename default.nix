@@ -188,4 +188,6 @@ rec {
   audacity4 = pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { };
   cb = pkgs.callPackage ./pkgs/cb { };
   jellyfin-media-player = v3override (pkgs.qt6Packages.callPackage ./pkgs/jellyfin-media-player { });
+  firefox-unwrapped_nightly = pkgs.callPackage ../pkgs/firefox-nightly { };
+  firefox_nightly = pkgs.wrapFirefox firefox-unwrapped_nightly { };
 }

@@ -240,19 +240,21 @@ rec {
   audacity4 = pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { };
   cb = pkgs.callPackage ./pkgs/cb { };
   jellyfin-media-player = v3override (pkgs.qt6Packages.callPackage ./pkgs/jellyfin-media-player { });
-  firefox-unwrapped_nightly = nodarwin (
-    v3override (
-      v3overrideAttrs (
-        pkgs.callPackage ./pkgs/firefox-nightly {
-          nss_git = nss_git;
-          nyxUtils = nyxUtils;
-        }
+  /*
+    firefox-unwrapped_nightly = nodarwin (
+      v3override (
+        v3overrideAttrs (
+          pkgs.callPackage ./pkgs/firefox-nightly {
+            nss_git = nss_git;
+            nyxUtils = nyxUtils;
+          }
+        )
       )
-    )
-  );
-  firefox_nightly = nodarwin (pkgs.wrapFirefox firefox-unwrapped_nightly { });
-  nss_git = callOverride ./pkgs/nss-git { };
+    );
+    firefox_nightly = nodarwin (pkgs.wrapFirefox firefox-unwrapped_nightly { });
+    nss_git = callOverride ./pkgs/nss-git { };
 
-  betterbird-unwrapped = wip (pkgs.callPackage ./pkgs/betterbird { });
-  betterbird = wip (pkgs.wrapThunderbird betterbird-unwrapped { });
+    betterbird-unwrapped = wip (pkgs.callPackage ./pkgs/betterbird { });
+    betterbird = wip (pkgs.wrapThunderbird betterbird-unwrapped { });
+  */
 }

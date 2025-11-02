@@ -11,15 +11,15 @@
 }:
 
 let
-  thunderbird-unwrapped = thunderbirdPackages.thunderbird-115;
+  thunderbird-unwrapped = thunderbirdPackages.thunderbird-140;
 
-  version = "115.14.0";
+  version = "140.4.0esr";
   majVer = lib.versions.major version;
 
   betterbird-patches = fetchFromGitHub {
     owner = "Betterbird";
     repo = "thunderbird-patches";
-    rev = "${version}-bb31";
+    rev = "${version}-bb13-build2";
     postFetch = ''
       echo "Retrieving external patches"
 
@@ -109,7 +109,6 @@ in
       maintainers = with maintainers; [ SuperSandro2000 ];
       inherit (thunderbird-unwrapped.meta)
         platforms
-        badPlatforms
         broken
         license
         ;

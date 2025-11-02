@@ -64,6 +64,13 @@ let
         broken = pkgs.stdenv.hostPlatform.isDarwin;
       };
     });
+  wip =
+    x:
+    x.overrideAttrs (old: {
+      meta = old.meta // {
+        broken = true;
+      };
+    });
   #  from chaotic-nyx
   nyxUtils = import ./shared/utils.nix {
     lib = pkgs.lib;
@@ -246,9 +253,6 @@ rec {
   firefox_nightly = nodarwin (pkgs.wrapFirefox firefox-unwrapped_nightly { });
   nss_git = callOverride ./pkgs/nss-git { };
 
-  betterbird-unwrapped = pkgs.callPackage ./pkgs/betterbird { };
-  betterbird = pkgs.wrapThunderbird betterbird-unwrapped {
-    desktopName = "Betterbird";
-    pname = "betterbird";
-  };
+  betterbird-unwrapped = wip (pkgs.callPackage ./pkgs/betterbird { });
+  betterbird = wip (pkgs.wrapThunderbird betterbird-unwrapped { });
 }

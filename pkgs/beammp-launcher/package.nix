@@ -11,6 +11,7 @@
   httplib,
   nlohmann_json,
   openssl,
+  cacert_3108,
 }:
 
 stdenv.mkDerivation (finalAttrs: {

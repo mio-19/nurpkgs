@@ -23,7 +23,7 @@ let
     repo = "thunderbird-patches";
     #rev = "${version}-bb13-build2";
     #rev = "072f3c8355b9e778f072f8f120865745cbaf467c";
-    rev = "094f1e81838ad32f62d76ce895861710614775b4";
+    rev = "0402d75202cf9a94ecffd92b6c78f59478dde9c0";
     postFetch = ''
       echo "Retrieving external patches"
 
@@ -42,7 +42,7 @@ let
       rm external.sh
     '';
     #hash = "sha256-QSC0euWW1lB+WxGxDBRLU2QvEvbJMiozmPyuRVRCXFs=";
-    hash = "sha256-i9qpcV0k58cxKozqLJ73fOV80rtIV08Ux0FXT8vs6/E=";
+    hash = "sha256-HVfdvR60a1wMgdW+JADUJ8Sz5XBEgGMqiWNFZ6Dkb1U=";
   };
 in
 (

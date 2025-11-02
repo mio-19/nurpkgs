@@ -57,6 +57,13 @@ let
       })
     else
       x: x;
+  nodarwin =
+    x:
+    x.overrideAttrs (old: {
+      meta = old.meta // {
+        broken = pkgs.stdenv.hostPlatform.isDarwin;
+      };
+    });
   #  from chaotic-nyx
   nyxUtils = import ./shared/utils.nix {
     lib = pkgs.lib;
@@ -229,12 +236,14 @@ rec {
   audacity4 = pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { };
   cb = pkgs.callPackage ./pkgs/cb { };
   jellyfin-media-player = v3override (pkgs.qt6Packages.callPackage ./pkgs/jellyfin-media-player { });
-  firefox-unwrapped_nightly = v3override (
-    v3overrideAttrs (
-      pkgs.callPackage ./pkgs/firefox-nightly {
-        nss_git = nss_git;
-        nyxUtils = nyxUtils;
-      }
+  firefox-unwrapped_nightly = nodarwin (
+    v3override (
+      v3overrideAttrs (
+        pkgs.callPackage ./pkgs/firefox-nightly {
+          nss_git = nss_git;
+          nyxUtils = nyxUtils;
+        }
+      )
     )
   );
   firefox_nightly = pkgs.wrapFirefox firefox-unwrapped_nightly { };

@@ -19,7 +19,7 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "beammp-launcher";
-  version = if stdenv.isDarwin then "2.7.0-darwin" else "2.7.0";
+  version = if stdenv.isDarwin then "2.4.0-unstable-20250211" else "2.7.0";
 
   src = fetchFromGitHub (
     if stdenv.isDarwin then

@@ -254,7 +254,8 @@ stdenv.mkDerivation rec {
     homepage = "https://github.com/helge17/tuxguitar";
     license = lib.licenses.lgpl2Plus;
     maintainers = with lib.maintainers; [ ardumont ];
-    platforms = lib.platforms.linux ++ lib.platforms.darwin;
+    platforms = lib.platforms.linux;
+    badPlatforms = lib.platforms.darwin;
     mainProgram = "tuxguitar";
   };
 }

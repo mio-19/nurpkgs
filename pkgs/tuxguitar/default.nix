@@ -19,7 +19,7 @@
   nixosTests,
 }:
 
-maven.buildMavenPackage rec {
+let
   pname = "tuxguitar";
   version = "2.0.0";
 
@@ -30,60 +30,105 @@ maven.buildMavenPackage rec {
     hash = "sha256-Kk6TQ2t4exVeRyxrCqpdddJE7BfZRlW+B/lUJ+SPPd8=";
   };
 
+  swtArtifactId =
+    if stdenv.hostPlatform.isDarwin then
+      "org.eclipse.swt.cocoa.macosx.x86_64"
+    else
+      "org.eclipse.swt.gtk.linux";
+
+  buildScript =
+    if stdenv.hostPlatform.isDarwin then
+      "desktop/build-scripts/tuxguitar-macosx-cocoa-64/pom.xml"
+    else
+      "desktop/build-scripts/tuxguitar-linux-swt/pom.xml";
+
+  # Fetch Maven dependencies in a fixed-output derivation
+  # We fetch dependencies WITHOUT the native-modules profile to keep it deterministic
+  mavenDeps = stdenv.mkDerivation {
+    name = "${pname}-${version}-maven-deps";
+    inherit src;
+
+    patches = [
+      ./fix-lv2-include.patch
+    ];
+
+    nativeBuildInputs = [
+      maven
+      jdk
+    ];
+
+    buildPhase = ''
+      runHook preBuild
+
+      # Use a temporary local repository
+      mkdir -p .m2/repository
+
+      # Copy SWT jar to a fixed location to avoid path dependencies
+      cp ${swt}/jars/swt.jar swt-4.36.jar
+
+      # Install SWT jar from fixed location
+      mvn install:install-file \
+        -Dfile=$(pwd)/swt-4.36.jar \
+        -DgroupId=org.eclipse.swt \
+        -DartifactId=${swtArtifactId} \
+        -Dpackaging=jar \
+        -Dversion=4.36 \
+        -Dmaven.repo.local=$(pwd)/.m2/repository
+
+      # Download dependencies WITH native-modules profile to get all deps
+      mvn dependency:go-offline -f ${buildScript} -P native-modules \
+        -Dmaven.repo.local=$(pwd)/.m2/repository
+
+      runHook postBuild
+    '';
+
+    installPhase = ''
+      runHook preInstall
+
+      # Copy to output, removing timestamps and non-deterministic files
+      mkdir -p $out
+      cp -r .m2/repository $out/
+
+      # Remove resolver status files that contain timestamps
+      find $out/repository -name "_remote.repositories" -delete
+      find $out/repository -name "*.lastUpdated" -delete
+      find $out/repository -name "resolver-status.properties" -delete
+      find $out/repository -type f -name "maven-metadata-*.xml" -delete
+
+      # Reset timestamps for determinism
+      find $out -exec touch -t 197001010000 {} +
+
+      runHook postInstall
+    '';
+
+    outputHashMode = "recursive";
+    outputHashAlgo = "sha256";
+    outputHash = "sha256-Pcxr3ab8kqTIs5bfcm4zGbva0evUYYiBr1vBwjWFMl4=";
+  };
+
+in
+stdenv.mkDerivation rec {
+  inherit pname version src;
+
   patches = [
     ./fix-lv2-include.patch
   ];
 
-  mvnHash = "sha256-+5gdz/BQZFNViwfqNysDqe5iMbFZHoGrs/TpODfVvyQ=";
-
-  # Use different build scripts based on platform
-  mvnParameters =
-    if stdenv.hostPlatform.isDarwin then
-      "-e -f desktop/build-scripts/tuxguitar-macosx-cocoa-64/pom.xml -P native-modules"
-    else
-      "-e -f desktop/build-scripts/tuxguitar-linux-swt/pom.xml -P native-modules";
-
-  mvnFetchExtraArgs = {
-    buildInputs =
-      lib.optionals stdenv.hostPlatform.isLinux [
-        alsa-lib.dev
-        jack2.dev
-        libpulseaudio.dev
-        suil
-        qt5.qtbase.dev
-      ]
-      ++ [
-        fluidsynth.dev
-        lilv.dev
-        pkg-config
-      ];
-    dontWrapQtApps = true;
-    preBuild =
-      let
-        swtArtifactId =
-          if stdenv.hostPlatform.isDarwin then
-            "org.eclipse.swt.cocoa.macosx.x86_64"
-          else
-            "org.eclipse.swt.gtk.linux";
-      in
-      ''
-        mvn install:install-file \
-          -Dfile=${swt}/jars/swt.jar \
-          -DgroupId=org.eclipse.swt \
-          -DartifactId=${swtArtifactId} \
-          -Dpackaging=jar \
-          -Dversion=4.36 \
-          -Dmaven.repo.local=$out/.m2
-      '';
-  };
-
   nativeBuildInputs = [
     makeWrapper
+    maven
     jdk
     pkg-config
+    fluidsynth.dev
+    lilv.dev
   ]
   ++ lib.optionals stdenv.hostPlatform.isLinux [
     wrapGAppsHook3
+    alsa-lib.dev
+    jack2.dev
+    libpulseaudio.dev
+    suil
+    qt5.qtbase.dev
   ];
 
   buildInputs = [
@@ -103,23 +148,16 @@ maven.buildMavenPackage rec {
 
   dontWrapGApps = stdenv.hostPlatform.isLinux;
 
-  afterDepsSetup =
-    let
-      swtArtifactId =
-        if stdenv.hostPlatform.isDarwin then
-          "org.eclipse.swt.cocoa.macosx.x86_64"
-        else
-          "org.eclipse.swt.gtk.linux";
-    in
-    ''
-      mvn install:install-file \
-        -Dfile=${swt}/jars/swt.jar \
-        -DgroupId=org.eclipse.swt \
-        -DartifactId=${swtArtifactId} \
-        -Dpackaging=jar \
-        -Dversion=4.36 \
-        -Dmaven.repo.local=$mvnDeps/.m2
-    '';
+  buildPhase = ''
+    runHook preBuild
+
+    # Build with offline mode using pre-fetched dependencies
+    mvn package -e -f ${buildScript} -P native-modules \
+      -o -Dmaven.test.skip=true \
+      -Dmaven.repo.local=${mavenDeps}/repository
+
+    runHook postBuild
+  '';
 
   installPhase =
     let

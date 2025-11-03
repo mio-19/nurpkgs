@@ -79,7 +79,10 @@ maven.buildMavenPackage rec {
     libpulseaudio
     lilv
     suil
+    qt5.qtbase
   ];
+
+  dontWrapQtApps = true;
 
   dontWrapGApps = true;
 
@@ -97,10 +100,10 @@ maven.buildMavenPackage rec {
   installPhase = ''
     runHook preInstall
 
-    # Find the built tuxguitar directory
-    cd target
+    # Find the built tuxguitar directory (it's in the subdirectory where we ran maven)
+    cd desktop/build-scripts/tuxguitar-linux-swt/target
     TUXGUITAR_DIR=$(ls -d tuxguitar-* | head -n 1)
-    
+
     mkdir -p $out/bin
     cp -r $TUXGUITAR_DIR/dist $out/
     cp -r $TUXGUITAR_DIR/lib $out/

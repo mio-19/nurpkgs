@@ -114,7 +114,8 @@ stdenv.mkDerivation (finalAttrs: {
     lib.optionalString stdenv.isDarwin ''
       mkdir -p $out/bin
       makeWrapper $out/Applications/BeamMP-Launcher.app/Contents/MacOS/BeamMP-Launcher $out/bin/BeamMP-Launcher \
-        --set SSL_CERT_FILE "${cacert_3108}/etc/ssl/certs/ca-bundle.crt"
+        --set SSL_CERT_FILE "${cacert_3108}/etc/ssl/certs/ca-bundle.crt" \
+        --prefix PATH : "${lib.makeBinPath [ curl ]}"
     ''
     + lib.optionalString (!stdenv.isDarwin) ''
       wrapProgram $out/bin/BeamMP-Launcher \

@@ -34,7 +34,7 @@ maven.buildMavenPackage rec {
     ./fix-lv2-include.patch
   ];
 
-  mvnHash = "sha256-hoTXp5bRdQ5sAjVuqDE3B/7hPUODeZJ/x9lWSHPZ6ZE=";
+  mvnHash = "sha256-+5gdz/BQZFNViwfqNysDqe5iMbFZHoGrs/TpODfVvyQ=";
 
   # Use different build scripts based on platform
   mvnParameters =

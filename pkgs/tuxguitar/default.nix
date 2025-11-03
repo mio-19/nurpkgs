@@ -36,12 +36,8 @@ maven.buildMavenPackage rec {
 
   mvnHash = "sha256-hoTXp5bRdQ5sAjVuqDE3B/7hPUODeZJ/x9lWSHPZ6ZE=";
 
-  # Maven needs to be run from the subdirectory but with access to parent POMs
   mvnParameters = "-e -f desktop/build-scripts/tuxguitar-linux-swt/pom.xml -P native-modules";
 
-  # Install SWT into Maven repository during dependency fetching
-  # Need to specify the local repository path so the dependency fetch can find it
-  # Also need to provide build inputs for compiling JNI modules
   mvnFetchExtraArgs = {
     buildInputs = [
       alsa-lib.dev

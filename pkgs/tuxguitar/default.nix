@@ -86,7 +86,6 @@ maven.buildMavenPackage rec {
 
   dontWrapGApps = true;
 
-  # Install SWT to local maven repository after deps are setup but before building
   afterDepsSetup = ''
     mvn install:install-file \
       -Dfile=${swt}/jars/swt.jar \

@@ -56,9 +56,11 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     jdk
     stripJavaArchivesHook
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isLinux [
     pkg-config
   ];
-  buildInputs = [
+  buildInputs = lib.optionals stdenv.hostPlatform.isLinux [
     gtk3
     libGLU
   ];
@@ -69,7 +71,7 @@ stdenv.mkDerivation (finalAttrs: {
   OUTPUT_DIR = "${placeholder "out"}/lib";
   # GTK4 is not supported yet. See:
   # https://github.com/eclipse-platform/eclipse.platform.swt/issues/652
-  makeFlags = "gtk3";
+  makeFlags = lib.optionals stdenv.hostPlatform.isLinux [ "gtk3" ];
   preBuild = ''
     cd library
     mkdir -p ${finalAttrs.OUTPUT_DIR}

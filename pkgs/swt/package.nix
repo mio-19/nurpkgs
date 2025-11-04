@@ -24,7 +24,7 @@ stdenv.mkDerivation (finalAttrs: {
     aarch64-linux.platform = "gtk-linux-aarch64";
     aarch64-linux.hash = "sha256-lKAB2aCI3dZdt3pE7uSvSfxc8vc3oMSTCx5R+71Aqdk=";
     aarch64-darwin.platform = "cocoa-macosx-aarch64";
-    aarch64-darwin.hash = "sha256-Uns3fMoetbZAIrL/N0eVd42/3uygXakDdxpaxf5SWDI=";
+    aarch64-darwin.hash = "sha256-G8DOuRuTdFneJSe8ZYdy6WUnFmuUiAyQexxdAOZkYRU=";
   };
   passthru.srcMetadata =
     finalAttrs.passthru.srcMetadataByPlatform.${stdenv.hostPlatform.system} or null;
@@ -40,7 +40,13 @@ stdenv.mkDerivation (finalAttrs: {
       url = "https://archive.eclipse.org/eclipse/downloads/drops4/R-${finalAttrs.fullVersion}/swt-${finalAttrs.version}-${srcMetadata.platform}.zip";
       inherit (srcMetadata) hash;
       stripRoot = false;
-      postFetch = ''
+      postFetch = if stdenv.hostPlatform.isDarwin then ''
+        # On Darwin, copy the prebuilt swt.jar before processing sources
+        # Save it with a different name so it doesn't get removed
+        cp "$out/swt.jar" "$out/swt-prebuilt.jar" || echo "Warning: swt.jar not found"
+        ls -la "$out/"
+      '' else ''
+        # On Linux, extract and use only the sources from src.zip
         mkdir "$unpackDir"
         cd "$unpackDir"
 
@@ -72,13 +78,13 @@ stdenv.mkDerivation (finalAttrs: {
   # GTK4 is not supported yet. See:
   # https://github.com/eclipse-platform/eclipse.platform.swt/issues/652
   makeFlags = lib.optionals stdenv.hostPlatform.isLinux [ "gtk3" ];
-  preBuild = ''
+  preBuild = lib.optionalString stdenv.hostPlatform.isLinux ''
     cd library
     mkdir -p ${finalAttrs.OUTPUT_DIR}
   '';
 
-  # Build the jar
-  postBuild = ''
+  # Build the jar (Linux only, Darwin uses prebuilt)
+  postBuild = lib.optionalString stdenv.hostPlatform.isLinux ''
     cd ../
     mkdir out
     find org/ -name '*.java' -type f -exec javac -encoding utf8 -d out/ {} +
@@ -92,9 +98,21 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preInstall
 
     install -d -- "$out/jars"
+    
+  '' + lib.optionalString stdenv.hostPlatform.isDarwin ''
+    # On Darwin, use the prebuilt swt.jar which includes native libraries
+    cp swt.jar "$out/jars/swt.jar"
+    
+  '' + lib.optionalString stdenv.hostPlatform.isLinux ''
+    # On Linux, build from source
     install -m 644 -t out -- version.txt
+    
+    # Copy native libraries into the jar
+    cp -v ${finalAttrs.OUTPUT_DIR}/*.so out/ || true
+    
     (cd out && jar -c *) > "$out/jars/swt.jar"
-
+    
+  '' + ''
     runHook postInstall
   '';
 

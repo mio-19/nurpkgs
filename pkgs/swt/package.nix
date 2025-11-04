@@ -40,23 +40,27 @@ stdenv.mkDerivation (finalAttrs: {
       url = "https://archive.eclipse.org/eclipse/downloads/drops4/R-${finalAttrs.fullVersion}/swt-${finalAttrs.version}-${srcMetadata.platform}.zip";
       inherit (srcMetadata) hash;
       stripRoot = false;
-      postFetch = if stdenv.hostPlatform.isDarwin then ''
-        # On Darwin, copy the prebuilt swt.jar before processing sources
-        # Save it with a different name so it doesn't get removed
-        cp "$out/swt.jar" "$out/swt-prebuilt.jar" || echo "Warning: swt.jar not found"
-        ls -la "$out/"
-      '' else ''
-        # On Linux, extract and use only the sources from src.zip
-        mkdir "$unpackDir"
-        cd "$unpackDir"
+      postFetch =
+        if stdenv.hostPlatform.isDarwin then
+          ''
+            # On Darwin, copy the prebuilt swt.jar before processing sources
+            # Save it with a different name so it doesn't get removed
+            cp "$out/swt.jar" "$out/swt-prebuilt.jar" || echo "Warning: swt.jar not found"
+            ls -la "$out/"
+          ''
+        else
+          ''
+            # On Linux, extract and use only the sources from src.zip
+            mkdir "$unpackDir"
+            cd "$unpackDir"
 
-        renamed="$TMPDIR/src.zip"
-        mv -- "$out/src.zip" "$renamed"
-        unpackFile "$renamed"
-        rm -r -- "$out"
+            renamed="$TMPDIR/src.zip"
+            mv -- "$out/src.zip" "$renamed"
+            unpackFile "$renamed"
+            rm -r -- "$out"
 
-        mv -- "$unpackDir" "$out"
-      '';
+            mv -- "$unpackDir" "$out"
+          '';
     };
 
   nativeBuildInputs = [
@@ -98,21 +102,31 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preInstall
 
     install -d -- "$out/jars"
-    
-  '' + lib.optionalString stdenv.hostPlatform.isDarwin ''
+
+  ''
+  + lib.optionalString stdenv.hostPlatform.isDarwin ''
     # On Darwin, use the prebuilt swt.jar which includes native libraries
-    cp swt.jar "$out/jars/swt.jar"
-    
-  '' + lib.optionalString stdenv.hostPlatform.isLinux ''
+    # Remove signature files to avoid validation errors after stripJavaArchivesHook modifies the jar
+    mkdir -p jar-temp
+    cd jar-temp
+    ${jdk}/bin/jar -xf ../swt.jar
+    rm -f META-INF/*.SF META-INF/*.RSA META-INF/*.DSA
+    ${jdk}/bin/jar -cf "$out/jars/swt.jar" *
+    cd ..
+    rm -rf jar-temp
+
+  ''
+  + lib.optionalString stdenv.hostPlatform.isLinux ''
     # On Linux, build from source
     install -m 644 -t out -- version.txt
-    
+
     # Copy native libraries into the jar
     cp -v ${finalAttrs.OUTPUT_DIR}/*.so out/ || true
-    
+
     (cd out && jar -c *) > "$out/jars/swt.jar"
-    
-  '' + ''
+
+  ''
+  + ''
     runHook postInstall
   '';
 

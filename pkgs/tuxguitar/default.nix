@@ -5,6 +5,7 @@
   maven,
   swt,
   jdk,
+  jre,
   makeWrapper,
   pkg-config,
   alsa-lib,
@@ -203,6 +204,10 @@ stdenv.mkDerivation rec {
       mkdir -p $out/Applications
       cp -r tuxguitar-*-macosx-swt-cocoa.app $out/Applications/TuxGuitar.app
 
+      # Fix the launch script to use the Nix JRE instead of bundled JRE
+      substituteInPlace $out/Applications/TuxGuitar.app/Contents/MacOS/tuxguitar.sh \
+        --replace-fail 'JAVA="./jre/bin/java"' 'JAVA="${jre}/bin/java"'
+
       # Ensure the main executable has execute permissions
       chmod +x $out/Applications/TuxGuitar.app/Contents/MacOS/tuxguitar.sh
 
@@ -211,7 +216,7 @@ stdenv.mkDerivation rec {
       makeWrapper $out/Applications/TuxGuitar.app/Contents/MacOS/tuxguitar.sh $out/bin/tuxguitar \
         --prefix PATH : ${
           lib.makeBinPath [
-            jdk
+            jre
             which
           ]
         }
@@ -240,7 +245,7 @@ stdenv.mkDerivation rec {
         "''${gappsWrapperArgs[@]}" \
         --prefix PATH : ${
           lib.makeBinPath [
-            jdk
+            jre
             which
           ]
         } \

@@ -217,7 +217,7 @@ rec {
     })
   );
   swt = (pkgs.callPackage ./pkgs/swt/package.nix { });
-  tuxguitar = (pkgs.callPackage ./pkgs/tuxguitar { swt = swt; });
+  tuxguitar = (pkgs.callPackage ./pkgs/tuxguitar/package.nix { swt = swt; });
   aria2 = v3override (
     pkgs.aria2.overrideAttrs (old: {
       patches = (old.patches or [ ]) ++ [

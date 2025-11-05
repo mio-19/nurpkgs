@@ -251,6 +251,7 @@ stdenv.mkDerivation (finalAttrs: {
       outputHashAlgo = "sha256";
       outputHash = (
         let
+          inherit (stdenv.hostPlatform) system;
           selectSystem = attrs: attrs.${system} or (throw "Unsupported system: ${system}");
         in
         (selectSystem {

@@ -82,7 +82,7 @@ stdenv.mkDerivation (finalAttrs: {
   # GTK4 is not supported yet. See:
   # https://github.com/eclipse-platform/eclipse.platform.swt/issues/652
   makeFlags = lib.optionals stdenv.hostPlatform.isLinux [ "gtk3" ];
-  
+
   # Disable -Werror to avoid build failures from deprecation warnings
   NIX_CFLAGS_COMPILE = lib.optionalString stdenv.hostPlatform.isLinux "-Wno-error";
   preBuild = lib.optionalString stdenv.hostPlatform.isLinux ''

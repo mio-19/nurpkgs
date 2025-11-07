@@ -28,6 +28,7 @@ let
     if pkgs.stdenv.hostPlatform.isx86_64 then
       x:
       x.overrideAttrs (old: {
+        # maybe see https://discourse.nixos.org/t/setting-nix-cflags-compile-and-nix-cflags-link-for-a-subset-of-packages/44078/3
         env.NIX_CFLAGS_COMPILE = (old.env.NIX_CFLAGS_COMPILE or "") + " -march=x86-64-v3 -mtune=raptorlake";
         env.RUSTFLAGS = (old.env.RUSTFLAGS or "") + " -C target_cpu=x86-64-v3";
       })

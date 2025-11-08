@@ -284,20 +284,19 @@ rec {
       ];
       hash = pluginsHash;
     };
-  /*
-    firefox-unwrapped_nightly = nodarwin (
-      v3override (
-        v3overrideAttrs (
-          pkgs.callPackage ./pkgs/firefox-nightly {
-            nss_git = nss_git;
-            nyxUtils = nyxUtils;
-          }
-        )
+  firefox-unwrapped_nightly = nodarwin (
+    v3override (
+      v3overrideAttrs (
+        pkgs.callPackage ./pkgs/firefox-nightly {
+          nss_git = nss_git;
+          nyxUtils = nyxUtils;
+        }
       )
-    );
-    firefox_nightly = nodarwin (pkgs.wrapFirefox firefox-unwrapped_nightly { });
-    nss_git = callOverride ./pkgs/nss-git { };
-
+    )
+  );
+  firefox_nightly = nodarwin (pkgs.wrapFirefox firefox-unwrapped_nightly { });
+  nss_git = callOverride ./pkgs/nss-git { };
+  /*
     betterbird-unwrapped = wip (pkgs.callPackage ./pkgs/betterbird { });
     betterbird = wip (pkgs.wrapThunderbird betterbird-unwrapped { });
   */

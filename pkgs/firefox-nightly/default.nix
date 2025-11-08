@@ -79,9 +79,11 @@ let
       pkg: if pkg.pname or "" == "rust-cbindgen" then rust-cbindgen_latest else pkg
     ) prevAttrs.nativeBuildInputs;
 
-    buildInputs = prevAttrs.buildInputs or [ ] ++ lib.optionals stdenv.hostPlatform.isDarwin [
-      apple-sdk_26
-    ];
+    buildInputs =
+      prevAttrs.buildInputs or [ ]
+      ++ lib.optionals stdenv.hostPlatform.isDarwin [
+        apple-sdk_26
+      ];
 
     passthru = prevAttrs.passthru // {
       rust-cbindgen = rust-cbindgen_latest;

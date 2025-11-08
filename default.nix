@@ -284,7 +284,7 @@ rec {
       ];
       hash = pluginsHash;
     };
-  firefox-unwrapped_nightly = nodarwin (
+  firefox-unwrapped_nightly = (
     v3override (
       v3overrideAttrs (
         pkgs.callPackage ./pkgs/firefox-nightly {

@@ -73,7 +73,7 @@ let
       ++ [
         ./env_var_for_system_dir-ff-unstable.patch
         ./no-buildconfig-ffx-unstable.patch
-        #./relax-apple-sdk.patch
+        ./relax-apple-sdk.patch
       ];
     nativeBuildInputs = builtins.map (
       pkg: if pkg.pname or "" == "rust-cbindgen" then rust-cbindgen_latest else pkg

@@ -294,7 +294,7 @@ rec {
       )
     )
   );
-  firefox_nightly = nodarwin (pkgs.wrapFirefox firefox-unwrapped_nightly { });
+  firefox_nightly = (pkgs.wrapFirefox firefox-unwrapped_nightly { });
   nss_git = callOverride ./pkgs/nss-git { };
   /*
     betterbird-unwrapped = wip (pkgs.callPackage ./pkgs/betterbird { });

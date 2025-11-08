@@ -386,7 +386,7 @@ stdenv.mkDerivation (finalAttrs: {
     "-Daudacity_use_ffmpeg=loaded"
     "-Daudacity_has_vst3=Off"
     "-Daudacity_has_crashreports=Off"
-    
+
     # Fix linker issues with circular dependencies between static libraries
     "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--start-group"
     "-DCMAKE_MODULE_LINKER_FLAGS=-Wl,--start-group"

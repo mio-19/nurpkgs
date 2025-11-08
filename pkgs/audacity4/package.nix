@@ -276,6 +276,12 @@ stdenv.mkDerivation (finalAttrs: {
         sed -i '/effects_lv2/d' src/app/CMakeLists.txt
         sed -i '/effects_vst/d' src/app/CMakeLists.txt
         
+        # Make sure effects_base is linked (it contains AbstractViewLauncher needed by effects_builtin)
+        # Add it to the target_link_libraries if not already there
+        if ! grep -q "effects_base" src/app/CMakeLists.txt; then
+            sed -i '/target_link_libraries.*audacity/a\    effects_base' src/app/CMakeLists.txt
+        fi
+        
         # Remove disabled libraries from au3wrap link lists
         sed -i '/set(AU3_LINK.*lv2sdk)/d' src/au3wrap/CMakeLists.txt
         sed -i '/set(AU3_LINK.*vst_sdk_3)/d' src/au3wrap/CMakeLists.txt
@@ -380,6 +386,10 @@ stdenv.mkDerivation (finalAttrs: {
     "-Daudacity_use_ffmpeg=loaded"
     "-Daudacity_has_vst3=Off"
     "-Daudacity_has_crashreports=Off"
+    
+    # Fix linker issues with circular dependencies between static libraries
+    "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--start-group"
+    "-DCMAKE_MODULE_LINKER_FLAGS=-Wl,--start-group"
 
     # Disable all tests since they depend on disabled libraries (portmixer, lv2sdk, vst3)
     "-DAU_BUILD_CONTEXT_TESTS=OFF"
@@ -439,7 +449,6 @@ stdenv.mkDerivation (finalAttrs: {
     '';
 
   meta = {
-    broken = true;
     description = "Sound editor with graphical UI";
     mainProgram = "audacity";
     homepage = "https://www.audacityteam.org";

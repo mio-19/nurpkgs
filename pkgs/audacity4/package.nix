@@ -280,6 +280,14 @@ stdenv.mkDerivation (finalAttrs: {
         sed -i '/set(AU3_LINK.*lv2sdk)/d' src/au3wrap/CMakeLists.txt
         sed -i '/set(AU3_LINK.*vst_sdk_3)/d' src/au3wrap/CMakeLists.txt
         sed -i '/portmixer/d' src/au3wrap/au3defs.cmake
+        
+        # Comment out LV2 and VST module initialization in main.cpp since we disabled them
+        sed -i 's/\(.*Lv2EffectsModule.*\)/\/\/ \1 \/\/ Disabled by Nix build/g' src/app/main.cpp
+        sed -i 's/\(.*VstEffectsModule.*\)/\/\/ \1 \/\/ Disabled by Nix build/g' src/app/main.cpp
+        
+        # Also comment out includes for these modules
+        sed -i 's/\(#include.*lv2.*effectsmodule.*\)/\/\/ \1 \/\/ Disabled by Nix build/gi' src/app/main.cpp
+        sed -i 's/\(#include.*vst.*effectsmodule.*\)/\/\/ \1 \/\/ Disabled by Nix build/gi' src/app/main.cpp
   ''
   + lib.optionalString stdenv.hostPlatform.isLinux ''
     substituteInPlace au3/libraries/lib-files/FileNames.cpp \
@@ -400,7 +408,9 @@ stdenv.mkDerivation (finalAttrs: {
 
   preConfigure = ''
     # Add Qt6 private headers to include path
-    export NIX_CFLAGS_COMPILE="$NIX_CFLAGS_COMPILE -I${qt6.qtbase}/include/QtCore/${qt6.qtbase.version}/QtCore -I${qt6.qtbase}/include/QtGui/${qt6.qtbase.version}/QtGui"
+    # Private headers are in QtCore/6.x.x/QtCore/private/, and they include each other as QtCore/private/...
+    # So we need both QtCore/6.x.x/ (for QtCore/private/...) and QtCore/6.x.x/QtCore (for private/...)
+    export NIX_CFLAGS_COMPILE="$NIX_CFLAGS_COMPILE -I${qt6.qtbase}/include/QtCore/${qt6.qtbase.version} -I${qt6.qtbase}/include/QtCore/${qt6.qtbase.version}/QtCore -I${qt6.qtbase}/include/QtGui/${qt6.qtbase.version} -I${qt6.qtbase}/include/QtGui/${qt6.qtbase.version}/QtGui"
   '';
 
   # [ 57%] Generating LightThemeAsCeeCode.h...

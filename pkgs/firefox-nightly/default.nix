@@ -54,7 +54,6 @@ let
       homepage = "http://www.mozilla.com/en-US/firefox/";
       maintainers = with lib.maintainers; [ pedrohlc ];
       platforms = lib.platforms.unix;
-      badPlatforms = lib.platforms.darwin;
       broken = stdenv.buildPlatform.is32bit;
       maxSilent = 14400;
       license = lib.licenses.mpl20;

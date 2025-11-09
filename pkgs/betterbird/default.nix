@@ -41,7 +41,7 @@ let
           if [[ -n "''${patch// }" ]] && [[ -n "''${url// }" ]]; then
             url=$(echo "$url" | sed 's/\/rev\//\/raw-rev\//')
             echo "Downloading $patch from $url"
-            curl -L -f "$url" -o external/$patch || true
+            curl -L -f "$url" -o external/$patch
           fi
         done
       fi
@@ -55,7 +55,7 @@ let
           if [[ -n "''${patch// }" ]] && [[ -n "''${url// }" ]]; then
             url=$(echo "$url" | sed 's/\/rev\//\/raw-rev\//')
             echo "Downloading $patch from $url"
-            curl -L -f "$url" -o external/$patch || true
+            curl -L -f "$url" -o external/$patch
           fi
         done
       fi
@@ -91,19 +91,19 @@ in
     };
 
     unpackPhase = ''
-      unzip -q $src
-      mozillaDir=$(echo mozilla-esr${majVer}-*)
+      tmpdir=$(mktemp -d)
 
-      unzip -q ${comm-source}
-      commDir=$(echo comm-esr${majVer}-*)
+      unzip -q $src -d "$tmpdir"
+      mozillaDir="$tmpdir/$(cd "$tmpdir" && echo mozilla-esr${majVer}-*)"
+
+      unzip -q ${comm-source} -d "$tmpdir"
+      commDir="$tmpdir/$(cd "$tmpdir" && echo comm-esr${majVer}-*)"
 
       # Move comm into mozilla directory
       mv "$commDir" "$mozillaDir/comm"
 
-      # Flatten the mozilla directory
-      shopt -s dotglob
+      # Move contents to current directory
       mv "$mozillaDir"/* .
-      rmdir "$mozillaDir"
 
       # Verify
       [ -d comm/mail ]
@@ -114,12 +114,12 @@ in
       patches=$(mktemp -d)
       for dir in branding bugs features misc; do
         if [ -d ${betterbird-patches}/${majVer}/$dir ]; then
-          cp -r ${betterbird-patches}/${majVer}/$dir/*.patch $patches/ || true
+          cp -r ${betterbird-patches}/${majVer}/$dir/*.patch $patches/
         fi
       done
       # Copy external patches if they exist
       if [ -d ${betterbird-patches}/${majVer}/external ]; then
-        cp -r ${betterbird-patches}/${majVer}/external/*.patch $patches/ || true
+        cp -r ${betterbird-patches}/${majVer}/external/*.patch $patches/
       fi
       cp ${betterbird-patches}/${majVer}/series* $patches/
       chmod -R +w $patches

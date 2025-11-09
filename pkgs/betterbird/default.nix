@@ -15,13 +15,13 @@
 let
   thunderbird-unwrapped = thunderbirdPackages.thunderbird-140;
 
-  version = "140.4.0esr";
+  version = "140.5.0esr";
   majVer = lib.versions.major version;
 
   betterbird-patches = fetchFromGitHub {
     owner = "Betterbird";
     repo = "thunderbird-patches";
-    rev = "${version}-bb13-build2";
+    rev = "${version}-bb14";
     postFetch = ''
       export PATH=${lib.makeBinPath [ curl ]}:$PATH
       export SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt
@@ -60,7 +60,13 @@ let
         done
       fi
     '';
-    hash = "sha256-jYNomFJaHDdCqTu43DldczU4u73unQvuoojMAmVp5+k=";
+    hash = "sha256-jAZGcR8ri1jXaRjgVN5q3zxOrVR7OB+tnJNGwjfctWc=";
+  };
+  # Fetch and extract comm subdirectory
+  # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
+  comm-source = fetchurl {
+    url = "https://hg-edge.mozilla.org/releases/comm-esr140/archive/6a3011b7161c6f3a36d5116f2608d51b19fb4d58.zip";
+    hash = "sha256-K7BBwMmePC4MoD6xllklbh58I1a65fajO846qRDacEk=";
   };
 in
 (
@@ -80,8 +86,8 @@ in
       # https://download.cdn.mozilla.net/pub/thunderbird/releases/
       #url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
       # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
-      url = "https://hg-edge.mozilla.org/releases/mozilla-esr140/archive/c4525dfe35a20458c7a6966c0c6d27f92f2deca7.zip";
-      hash = "sha256-Dx7RpwLLK/mF9wV7ltCe0XqnEW8S+s4VjzIdB64qBcw=";
+      url = "https://hg-edge.mozilla.org/releases/mozilla-esr140/archive/558705980ca9db16de0564b5a6031b5d6e0a7efe.zip";
+      hash = "sha256-K7BBwMmePC4MoD6xllklbh58I1a65fajO846qRDacEk=";
     };
 
     unpackPhase = ''
@@ -89,14 +95,7 @@ in
       unzip -q $src
       mozillaDir=$(echo mozilla-esr140-*)
 
-      # Fetch and extract comm subdirectory
-      # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
-      unzip -q ${
-        fetchurl {
-          url = "https://hg-edge.mozilla.org/releases/comm-esr140/archive/efb07defaa2d56105675dc1d936af581ebfd8ffa.zip";
-          hash = "sha256-gVAarjhKynLOtzPHzLyN/dfL4VJ2ihSs3yB8NLaaE1A=";
-        }
-      }
+      unzip -q ${comm-source}
       commDir=$(echo comm-esr140-*)
 
       # Move comm into mozilla directory

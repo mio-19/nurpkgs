@@ -2,6 +2,7 @@
   lib,
   buildMozillaMach,
   cacert,
+  curl,
   fetchFromGitHub,
   fetchurl,
   git,
@@ -18,31 +19,48 @@ let
   majVer = lib.versions.major version;
 
   betterbird-patches = fetchFromGitHub {
-    #owner = "Betterbird";
-    owner = "mio-19";
+    owner = "Betterbird";
     repo = "thunderbird-patches";
-    #rev = "${version}-bb13-build2";
-    #rev = "072f3c8355b9e778f072f8f120865745cbaf467c";
-    rev = "861419b4cf2cfef7a63e73bd8a826123ebfb31a9";
+    rev = "${version}-bb13-build2";
     postFetch = ''
+      export PATH=${lib.makeBinPath [ curl ]}:$PATH
+      export SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt
+
       echo "Retrieving external patches"
+      cd $out/${majVer}
 
-      echo "#!${runtimeShell}" > external.sh
-      # if no external patches need to be downloaded, don't fail
-      { grep " # " $out/${majVer}/series-M-C || true ; } >> external.sh
-      { grep " # " $out/${majVer}/series || true ; } >> external.sh
-      sed -i -e '/^#/d' external.sh
-      sed -i -e 's/\/rev\//\/raw-rev\//' external.sh
-      sed -i -e 's|\(.*\) # \(.*\)|curl \2 -o $out/${majVer}/external/\1|' external.sh
-      chmod 700 external.sh
+      # Create directories for external patches
+      mkdir -p external
 
-      mkdir $out/${majVer}/external
-      SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt
-      . ./external.sh
-      rm external.sh
+      # Download external patches for Mozilla repo (series-M-C)
+      if [ -f series-M-C ]; then
+        echo "Processing series-M-C for Mozilla external patches"
+        grep " # " series-M-C | grep -v "^#" | while read line || [[ -n $line ]]; do
+          patch=$(echo "$line" | cut -f1 -d'#' | sed 's/ *$//')
+          url=$(echo "$line" | cut -f2 -d'#' | sed 's/^ *//')
+          if [[ -n "''${patch// }" ]] && [[ -n "''${url// }" ]]; then
+            url=$(echo "$url" | sed 's/\/rev\//\/raw-rev\//')
+            echo "Downloading $patch from $url"
+            curl -L -f "$url" -o external/$patch || true
+          fi
+        done
+      fi
+
+      # Download external patches for comm repo (series)
+      if [ -f series ]; then
+        echo "Processing series for comm external patches"
+        grep " # " series | grep -v "^#" | while read line || [[ -n $line ]]; do
+          patch=$(echo "$line" | cut -f1 -d'#' | sed 's/ *$//')
+          url=$(echo "$line" | cut -f2 -d'#' | sed 's/^ *//')
+          if [[ -n "''${patch// }" ]] && [[ -n "''${url// }" ]]; then
+            url=$(echo "$url" | sed 's/\/rev\//\/raw-rev\//')
+            echo "Downloading $patch from $url"
+            curl -L -f "$url" -o external/$patch || true
+          fi
+        done
+      fi
     '';
-    #hash = "sha256-QSC0euWW1lB+WxGxDBRLU2QvEvbJMiozmPyuRVRCXFs=";
-    hash = "sha256-8hn+p2LCWYJTjqQc3yDAklCs4XxEcx007Cv0B7hb88A=";
+    hash = "sha256-jYNomFJaHDdCqTu43DldczU4u73unQvuoojMAmVp5+k=";
   };
 in
 (
@@ -50,10 +68,13 @@ in
     pname = "betterbird";
     inherit version;
 
+    # Keep binaryName as "thunderbird" so --with-app-name=thunderbird is passed
+    # The betterbird patches change the BINARY variable to "betterbird" while keeping MOZ_APP_NAME=thunderbird
     applicationName = "Betterbird";
-    binaryName = "betterbird";
+    binaryName = "thunderbird";
+    application = "comm/mail";
     branding = "comm/mail/branding/betterbird";
-    inherit (thunderbird-unwrapped) application extraPatches;
+    inherit (thunderbird-unwrapped) extraPatches;
 
     src = fetchurl {
       # https://download.cdn.mozilla.net/pub/thunderbird/releases/
@@ -93,9 +114,15 @@ in
     extraPostPatch = thunderbird-unwrapped.extraPostPatch or "" + /* bash */ ''
       PATH=$PATH:${lib.makeBinPath [ git ]}
       patches=$(mktemp -d)
-      for dir in branding bugs external features misc; do
-        cp -r ${betterbird-patches}/${majVer}/$dir/*.patch $patches/
+      for dir in branding bugs features misc; do
+        if [ -d ${betterbird-patches}/${majVer}/$dir ]; then
+          cp -r ${betterbird-patches}/${majVer}/$dir/*.patch $patches/ || true
+        fi
       done
+      # Copy external patches if they exist
+      if [ -d ${betterbird-patches}/${majVer}/external ]; then
+        cp -r ${betterbird-patches}/${majVer}/external/*.patch $patches/ || true
+      fi
       cp ${betterbird-patches}/${majVer}/series* $patches/
       chmod -R +w $patches
 

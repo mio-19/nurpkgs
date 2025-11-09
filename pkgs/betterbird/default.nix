@@ -91,22 +91,27 @@ in
     };
 
     unpackPhase = ''
-      tmpdir=$(mktemp -d)
+      runHook preUnpack
 
-      unzip -q $src -d "$tmpdir"
-      mozillaDir="$tmpdir/$(cd "$tmpdir" && echo mozilla-esr${majVer}-*)"
+      # Extract mozilla source
+      unzip -q $src
+      mozillaDir=$(echo mozilla-esr${majVer}-*)
 
-      unzip -q ${comm-source} -d "$tmpdir"
-      commDir="$tmpdir/$(cd "$tmpdir" && echo comm-esr${majVer}-*)"
+      # Extract comm source
+      unzip -q ${comm-source}
+      commDir=$(echo comm-esr${majVer}-*)
 
       # Move comm into mozilla directory
       mv "$commDir" "$mozillaDir/comm"
 
-      # Move contents to current directory
-      mv "$mozillaDir"/* .
+      # Change into the source directory
+      cd "$mozillaDir"
+      chmod -R +w .
 
-      # Verify
-      [ -d comm/mail ]
+      # Set sourceRoot for the build
+      sourceRoot="$PWD"
+
+      runHook postUnpack
     '';
 
     extraPostPatch = thunderbird-unwrapped.extraPostPatch or "" + /* bash */ ''

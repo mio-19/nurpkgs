@@ -6,10 +6,11 @@
   fetchFromGitHub,
   fetchurl,
   git,
-  libdbusmenu-gtk3,
+  libdbusmenu-gtk3 ? null,
   runtimeShell,
   thunderbirdPackages,
   unzip,
+  stdenv,
 }:
 
 let
@@ -130,10 +131,12 @@ in
       chmod -R +w $patches
 
       cd $patches
-      # fix FHS paths to libdbusmenu
-      substituteInPlace 12-feature-linux-systray.patch \
-        --replace-fail "/usr/include/libdbusmenu-glib-0.4/" "${lib.getDev libdbusmenu-gtk3}/include/libdbusmenu-glib-0.4/" \
-        --replace-fail "/usr/include/libdbusmenu-gtk3-0.4/" "${lib.getDev libdbusmenu-gtk3}/include/libdbusmenu-gtk3-0.4/"
+      # fix FHS paths to libdbusmenu (only on non-Darwin when libdbusmenu-gtk3 is available)
+      ${lib.optionalString (!stdenv.hostPlatform.isDarwin && libdbusmenu-gtk3 != null) ''
+        substituteInPlace 12-feature-linux-systray.patch \
+          --replace-fail "/usr/include/libdbusmenu-glib-0.4/" "${lib.getDev libdbusmenu-gtk3}/include/libdbusmenu-glib-0.4/" \
+          --replace-fail "/usr/include/libdbusmenu-gtk3-0.4/" "${lib.getDev libdbusmenu-gtk3}/include/libdbusmenu-gtk3-0.4/"
+      ''}
       cd -
 
       chmod -R +w dom/base/test/gtest/
@@ -167,7 +170,7 @@ in
       done < <(cat $patches/series $patches/series-M-C)
     '';
 
-    extraBuildInputs = [
+    extraBuildInputs = lib.optionals (!stdenv.hostPlatform.isDarwin && libdbusmenu-gtk3 != null) [
       libdbusmenu-gtk3
     ];
 

@@ -65,7 +65,7 @@ let
   # Fetch and extract comm subdirectory
   # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
   comm-source = fetchurl {
-    url = "https://hg-edge.mozilla.org/releases/comm-esr140/archive/6a3011b7161c6f3a36d5116f2608d51b19fb4d58.zip";
+    url = "https://hg-edge.mozilla.org/releases/comm-esr${majVer}/archive/6a3011b7161c6f3a36d5116f2608d51b19fb4d58.zip";
     hash = "sha256-K7BBwMmePC4MoD6xllklbh58I1a65fajO846qRDacEk=";
   };
 in
@@ -86,17 +86,16 @@ in
       # https://download.cdn.mozilla.net/pub/thunderbird/releases/
       #url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
       # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
-      url = "https://hg-edge.mozilla.org/releases/mozilla-esr140/archive/558705980ca9db16de0564b5a6031b5d6e0a7efe.zip";
-      hash = "sha256-K7BBwMmePC4MoD6xllklbh58I1a65fajO846qRDacEk=";
+      url = "https://hg-edge.mozilla.org/releases/mozilla-esr${majVer}/archive/558705980ca9db16de0564b5a6031b5d6e0a7efe.zip";
+      hash = "sha256-f2qBCXFW7EGrWUORB3+YYEzYYpnlrJ71Gn0EKO2+K00=";
     };
 
     unpackPhase = ''
-      # Extract main mozilla-esr140 archive
       unzip -q $src
-      mozillaDir=$(echo mozilla-esr140-*)
+      mozillaDir=$(echo mozilla-esr${majVer}-*)
 
       unzip -q ${comm-source}
-      commDir=$(echo comm-esr140-*)
+      commDir=$(echo comm-esr${majVer}-*)
 
       # Move comm into mozilla directory
       mv "$commDir" "$mozillaDir/comm"

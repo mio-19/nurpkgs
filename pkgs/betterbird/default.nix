@@ -11,6 +11,8 @@
   thunderbirdPackages,
   unzip,
   stdenv,
+  linkFarmFromDrvs,
+  fetchhg,
 }:
 
 let
@@ -19,55 +21,79 @@ let
   version = "140.5.0esr";
   majVer = lib.versions.major version;
 
-  betterbird-patches = fetchFromGitHub {
+  betterbird-patches-plain = fetchFromGitHub {
     owner = "Betterbird";
     repo = "thunderbird-patches";
     rev = "${version}-bb14";
-    postFetch = ''
-      export PATH=${lib.makeBinPath [ curl ]}:$PATH
-      export SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt
-
-      echo "Retrieving external patches"
-      cd $out/${majVer}
-
-      # Create directories for external patches
-      mkdir -p external
-
-      # Download external patches for Mozilla repo (series-moz)
-      if [ -f series-moz ]; then
-        echo "Processing series-moz for Mozilla external patches"
-        grep " # " series-moz | grep -v "^#" | while read line || [[ -n $line ]]; do
-          patch=$(echo "$line" | cut -f1 -d'#' | sed 's/ *$//')
-          url=$(echo "$line" | cut -f2 -d'#' | sed 's/^ *//')
-          if [[ -n "''${patch// }" ]] && [[ -n "''${url// }" ]]; then
-            url=$(echo "$url" | sed 's/\/rev\//\/raw-rev\//')
-            echo "Downloading $patch from $url"
-            curl -L -f "$url" -o external/$patch
-          fi
-        done
-      fi
-
-      # Download external patches for comm repo (series)
-      if [ -f series ]; then
-        echo "Processing series for comm external patches"
-        grep " # " series | grep -v "^#" | while read line || [[ -n $line ]]; do
-          patch=$(echo "$line" | cut -f1 -d'#' | sed 's/ *$//')
-          url=$(echo "$line" | cut -f2 -d'#' | sed 's/^ *//')
-          if [[ -n "''${patch// }" ]] && [[ -n "''${url// }" ]]; then
-            url=$(echo "$url" | sed 's/\/rev\//\/raw-rev\//')
-            echo "Downloading $patch from $url"
-            curl -L -f "$url" -o external/$patch
-          fi
-        done
-      fi
-    '';
-    hash = "sha256-b7N+r7ZUk2WdUC3KWyCnLQy9Jg9p4740WpizbvlWVeM=";
+    hash = "sha256-Hzdm8xpoEqV9BsqW235JrLalq5sUNcvp/QMjU3aSuxI=";
   };
+
+  remote-patch-data = lib.importJSON ./patchdata.json;
+
+  remote-patches = map ({name, url, hash}:
+    fetchurl {
+      inherit name url hash;
+    }
+  ) remote-patch-data;
+
+  remote-patches-folder = linkFarmFromDrvs "betterbird-remote-patches" remote-patches;
+
+  betterbird-patches = betterbird-patches-plain;
+  # betterbird-patches = fetchFromGitHub {
+  #   owner = "Betterbird";
+  #   repo = "thunderbird-patches";
+  #   rev = "${version}-bb14";
+  #   postFetch = ''
+  #     export PATH=${lib.makeBinPath [ curl ]}:$PATH
+  #     export SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt
+  #
+  #     echo "Retrieving external patches"
+  #     cd $out/${majVer}
+  #
+  #     # Create directories for external patches
+  #     mkdir -p external
+  #
+  #     # Download external patches for Mozilla repo (series-moz)
+  #     if [ -f series-moz ]; then
+  #       echo "Processing series-moz for Mozilla external patches"
+  #       grep " # " series-moz | grep -v "^#" | while read line || [[ -n $line ]]; do
+  #         patch=$(echo "$line" | cut -f1 -d'#' | sed 's/ *$//')
+  #         url=$(echo "$line" | cut -f2 -d'#' | sed 's/^ *//')
+  #         if [[ -n "''${patch// }" ]] && [[ -n "''${url// }" ]]; then
+  #           url=$(echo "$url" | sed 's/\/rev\//\/raw-rev\//')
+  #           echo "Downloading $patch from $url"
+  #           curl -L -f "$url" -o external/$patch
+  #         fi
+  #       done
+  #     fi
+  #
+  #     # Download external patches for comm repo (series)
+  #     if [ -f series ]; then
+  #       echo "Processing series for comm external patches"
+  #       grep " # " series | grep -v "^#" | while read line || [[ -n $line ]]; do
+  #         patch=$(echo "$line" | cut -f1 -d'#' | sed 's/ *$//')
+  #         url=$(echo "$line" | cut -f2 -d'#' | sed 's/^ *//')
+  #         if [[ -n "''${patch// }" ]] && [[ -n "''${url// }" ]]; then
+  #           url=$(echo "$url" | sed 's/\/rev\//\/raw-rev\//')
+  #           echo "Downloading $patch from $url"
+  #           curl -L -f "$url" -o external/$patch
+  #         fi
+  #       done
+  #     fi
+  #   '';
+  #   hash = "sha256-b7N+r7ZUk2WdUC3KWyCnLQy9Jg9p4740WpizbvlWVeM=";
+  # };
   # Fetch and extract comm subdirectory
   # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
-  comm-source = fetchurl {
-    url = "https://hg-edge.mozilla.org/releases/comm-esr${majVer}/archive/6a3011b7161c6f3a36d5116f2608d51b19fb4d58.zip";
-    hash = "sha256-K7BBwMmePC4MoD6xllklbh58I1a65fajO846qRDacEk=";
+  # comm-source = fetchurl {
+  #   url = "https://hg-edge.mozilla.org/releases/comm-esr${majVer}/archive/6a3011b7161c6f3a36d5116f2608d51b19fb4d58.zip";
+  #   hash = "sha256-K7BBwMmePC4MoD6xllklbh58I1a65fajO846qRDacEk=";
+  # };
+  comm-source = fetchhg {
+    name = "comm-source";
+    url = "https://hg.mozilla.org/releases/comm-esr140";
+    rev = "6a3011b7161c6f3a36d5116f2608d51b19fb4d58";
+    hash = "sha256-w8KLdxw3r/E3dFM9ejRajMPTsAQ3VRFzF0HBve33JFk=";
   };
 in
 (
@@ -83,27 +109,28 @@ in
     branding = "comm/mail/branding/betterbird";
     inherit (thunderbird-unwrapped) extraPatches;
 
-    src = fetchurl {
-      # https://download.cdn.mozilla.net/pub/thunderbird/releases/
-      #url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
-      # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
-      url = "https://hg-edge.mozilla.org/releases/mozilla-esr${majVer}/archive/558705980ca9db16de0564b5a6031b5d6e0a7efe.zip";
-      hash = "sha256-f2qBCXFW7EGrWUORB3+YYEzYYpnlrJ71Gn0EKO2+K00=";
+    # src = fetchurl {
+    #   # https://download.cdn.mozilla.net/pub/thunderbird/releases/
+    #   #url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
+    #   # https://github.com/Betterbird/thunderbird-patches/blob/main/140/140.sh
+    #   url = "https://hg-edge.mozilla.org/releases/mozilla-esr${majVer}/archive/558705980ca9db16de0564b5a6031b5d6e0a7efe.zip";
+    #   hash = "sha256-f2qBCXFW7EGrWUORB3+YYEzYYpnlrJ71Gn0EKO2+K00=";
+    # };
+    src = fetchhg {
+      name = "mozilla-source";
+      url = "https://hg.mozilla.org/releases/mozilla-esr140";
+      rev = "558705980ca9db16de0564b5a6031b5d6e0a7efe";
+      hash = "sha256-IS/rn7qvnmEqMh8IRsCFNH5Y0C/7KXGDAuPPcjCqcFc=";
     };
 
     unpackPhase = ''
       runHook preUnpack
 
-      # Extract mozilla source
-      unzip -q $src
-      mozillaDir=$(echo mozilla-esr${majVer}-*)
+      mozillaDir="$PWD/mozillaDir"
+      mkdir "$mozillaDir"
+      cp -r "$src" "$mozillaDir"
 
-      # Extract comm source
-      unzip -q ${comm-source}
-      commDir=$(echo comm-esr${majVer}-*)
-
-      # Move comm into mozilla directory
-      mv "$commDir" "$mozillaDir/comm"
+      cp -r ${comm-source} "$mozillaDir/comm"
 
       # Change into the source directory
       cd "$mozillaDir"
@@ -123,10 +150,9 @@ in
           cp -r ${betterbird-patches}/${majVer}/$dir/*.patch $patches/
         fi
       done
-      # Copy external patches if they exist
-      if [ -d ${betterbird-patches}/${majVer}/external ]; then
-        cp -r ${betterbird-patches}/${majVer}/external/*.patch $patches/
-      fi
+      # Copy external patches
+      cp ${remote-patches-folder}/*.patch $patches/
+
       cp ${betterbird-patches}/${majVer}/series* $patches/
       chmod -R +w $patches
 
@@ -141,28 +167,42 @@ in
 
       chmod -R +w dom/base/test/gtest/
 
-      while read patch; do
-        patch="''${patch%%#*}"
-        patch="''${patch% }"
-        if [[ $patch == "" ]]; then
-          continue
-        fi
+      function trim() {
+          local var="$1"
+          # remove leading whitespace characters
+          var="''${var#"''${var%%[![:space:]]*}"}"
+          # remove trailing whitespace characters
+          var="''${var%"''${var##*[![:space:]]}"}"
+          printf '%s' "$var"
+      }
 
-        # requires vendored icu, fails to link with our icu
-        # feature-506064 depends on those icu patches
-        if [[ $patch == 14-feature-regexp-searchterm.patch || $patch == 14-feature-regexp-searchterm-moz.patch || $patch == feature-506064-match-diacritics.patch || $patch == feature-506064-match-diacritics-moz.patch ]]; then
-          continue
-        fi
+      function applyPatches() {
+        declare seriesFile="$1" srcRoot="$2"
+        declare -a patchLines=()
+        mapfile -t patchLines <"$seriesFile"
+        declare patch=""
+        for patch in "''${patch[@]}"; do
+          patch="''${patch%%#*}"
+          patch="$(trim patch)"
+          if [[ $patch == "" ]]; then
+            continue
+          fi
 
-        echo Applying patch $patch.
-        if [[ $patch == *-moz.patch ]]; then
-          git apply -p1 -v --allow-empty < $patches/$patch
-        else
-          cd comm
-          git apply -p1 -v --allow-empty < $patches/$patch
-          cd ..
-        fi
-      done < <(cat $patches/series $patches/series-moz)
+          # requires vendored icu, fails to link with our icu
+          # feature-506064 depends on those icu patches
+          if [[ $patch == 14-feature-regexp-searchterm.patch || $patch == 14-feature-regexp-searchterm-moz.patch || $patch == feature-506064-match-diacritics.patch || $patch == feature-506064-match-diacritics-moz.patch ]]; then
+            continue
+          fi
+          (
+            cd -- "$srcRoot"
+            echo "Applying patch $patch in $PWD"
+            git apply -p1 -v --allow-empty < $patches/$patch
+          )
+        done
+      }
+
+      applyPatches series-moz .
+      applyPatches series comm
     '';
 
     extraBuildInputs = lib.optionals (!stdenv.hostPlatform.isDarwin && libdbusmenu-gtk3 != null) [
@@ -209,6 +249,8 @@ in
       flag: !lib.hasPrefix "--with-wasi-sysroot=" flag
     ) oldAttrs.configureFlags;
 
+    patches = [];
+
     # Environment variables from official build
     preConfigure = (oldAttrs.preConfigure or "") + ''
       export MOZ_APP_REMOTINGNAME=eu.betterbird.Betterbird
@@ -237,6 +279,6 @@ in
     doInstallCheck = false;
 
     passthru = oldAttrs.passthru // {
-      inherit betterbird-patches;
+      inherit betterbird-patches betterbird-patches-plain remote-patches-folder comm-source;
     };
   })

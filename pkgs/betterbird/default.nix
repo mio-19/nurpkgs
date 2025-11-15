@@ -185,8 +185,6 @@ in
   }
 ).overrideAttrs
   (oldAttrs: {
-    NIX_DEBUG = "6";
-
     # Remove wasi-sysroot flag - not available in Betterbird/Thunderbird 140 configuration
     configureFlags = lib.filter (
       flag: !lib.hasPrefix "--with-wasi-sysroot=" flag

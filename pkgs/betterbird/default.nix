@@ -12,7 +12,15 @@
 }:
 
 let
-  thunderbird-unwrapped = thunderbirdPackages.thunderbird-140;
+  thunderbird-unwrapped = (thunderbirdPackages.thunderbird-140.override {
+    crashreporterSupport = false;
+  }).overrideAttrs rec {
+    version = "140.5.0esr";
+    src = fetchurl {
+      url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
+      hash = "sha256-y40QaTu8BMS/xTnEVgd5+0NrQDJr9w30wII6wSW4FeU=";
+    };
+  };
 
   version = "140.5.0esr";
   majVer = lib.versions.major version;
@@ -82,7 +90,6 @@ in
     '';
 
     extraPostPatch = thunderbird-unwrapped.extraPostPatch or "" + /* bash */ ''
-      PATH=$PATH:${lib.makeBinPath [ git ]}
       patches=$(mktemp -d)
       for dir in branding bugs features misc; do
         if [ -d ${betterbird-patches}/${majVer}/$dir ]; then
@@ -135,7 +142,7 @@ in
           (
             cd -- "$srcRoot"
             echo "Applying patch $patch in $PWD"
-            git apply -p1 -v --allow-empty < $patches/$patch
+            ${lib.getExe git} apply -p1 -v --allow-empty < $patches/$patch
           )
         done
       }
@@ -160,11 +167,10 @@ in
       "--without-wasm-sandboxed-libraries"
     ];
 
-    meta = with lib; {
+    meta = {
       description = "Betterbird is a fine-tuned version of Mozilla Thunderbird, Thunderbird on steroids, if you will";
       homepage = "https://www.betterbird.eu/";
       mainProgram = "betterbird";
-      maintainers = with maintainers; [ SuperSandro2000 ];
       inherit (thunderbird-unwrapped.meta)
         platforms
         broken
@@ -177,11 +183,9 @@ in
     geolocationSupport = false;
     webrtcSupport = false;
 
-    enableDebugSymbols = false; # speeds up things for dev
-
     pgoSupport = false; # console.warn: feeds: "downloadFee d: network connection unavailable"
 
-    inherit (thunderbird-unwrapped.passthru) icu73;
+    inherit (thunderbird-unwrapped.passthru) icu73 icu77;
   }
 ).overrideAttrs
   (oldAttrs: {
@@ -222,6 +226,6 @@ in
     doInstallCheck = false;
 
     passthru = oldAttrs.passthru // {
-      inherit betterbird-patches remote-patches-folder comm-source;
+      inherit betterbird-patches remote-patches-folder comm-source thunderbird-unwrapped;
     };
   })

@@ -298,15 +298,12 @@ rec {
       firefox_nightly = (pkgs.wrapFirefox firefox-unwrapped_nightly { });
       nss_git = callOverride ./pkgs/nss-git { };
   */
-  betterbird-unwrapped = wip (nodarwin (v3overrideAttrs (pkgs.callPackage ./pkgs/betterbird { })));
-  betterbird = wip (
-    nodarwin (
+  betterbird-unwrapped = pkgs.callPackage ./pkgs/betterbird { };
+  betterbird =
       pkgs.wrapThunderbird betterbird-unwrapped {
         applicationName = "betterbird";
         libName = "betterbird";
       }
-    )
-  );
-
+    ;
   shell-gpt = pkgs.callPackage ./pkgs/shell-gpt/package.nix { };
 }

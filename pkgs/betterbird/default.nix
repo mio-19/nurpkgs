@@ -194,8 +194,6 @@ in
       sourceRoot="$mozillaDir"
     '';
 
-    # patches = [];
-
     # Environment variables from official build
     preConfigure = (oldAttrs.preConfigure or "") + ''
       export MOZ_APP_REMOTINGNAME=eu.betterbird.Betterbird

@@ -8,7 +8,7 @@ cd -- "$script_dir"
 td="$(mktemp -d)"
 trap 'exit_code=$?; rm -rf -- "$td" || true; exit $?' EXIT
 
-nix build .#betterbird-unwrapped.betterbird-patches-plain --out-link "$td/betterbird-patches"
+nix build .#betterbird-unwrapped.betterbird-patches --out-link "$td/betterbird-patches"
 
 full_series_text="$(cat "$td/betterbird-patches/140/"{series,series-moz})"
 declare -a series_lines=()

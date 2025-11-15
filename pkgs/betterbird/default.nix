@@ -9,6 +9,7 @@
   stdenv,
   linkFarmFromDrvs,
   fetchhg,
+  wrapThunderbird,
 }:
 
 let
@@ -227,5 +228,6 @@ in
 
     passthru = oldAttrs.passthru // {
       inherit betterbird-patches remote-patches-folder comm-source thunderbird-unwrapped;
+      thunderbird = wrapThunderbird thunderbird-unwrapped { };
     };
   })

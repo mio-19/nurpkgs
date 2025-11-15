@@ -13,15 +13,17 @@
 }:
 
 let
-  thunderbird-unwrapped = (thunderbirdPackages.thunderbird-140.override {
-    crashreporterSupport = false;
-  }).overrideAttrs rec {
-    version = "140.5.0esr";
-    src = fetchurl {
-      url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
-      hash = "sha256-y40QaTu8BMS/xTnEVgd5+0NrQDJr9w30wII6wSW4FeU=";
-    };
-  };
+  thunderbird-unwrapped =
+    (thunderbirdPackages.thunderbird-140.override {
+      crashreporterSupport = false;
+    }).overrideAttrs
+      rec {
+        version = "140.5.0esr";
+        src = fetchurl {
+          url = "mirror://mozilla/thunderbird/releases/${version}/source/thunderbird-${version}.source.tar.xz";
+          hash = "sha256-y40QaTu8BMS/xTnEVgd5+0NrQDJr9w30wII6wSW4FeU=";
+        };
+      };
 
   version = "140.5.0esr";
   majVer = lib.versions.major version;
@@ -35,7 +37,12 @@ let
 
   remote-patch-data = lib.importJSON ./patchdata.json;
 
-  remote-patches = map ({name, url, hash}:
+  remote-patches = map (
+    {
+      name,
+      url,
+      hash,
+    }:
     fetchurl {
       inherit name url hash;
     }
@@ -227,7 +234,12 @@ in
     doInstallCheck = false;
 
     passthru = oldAttrs.passthru // {
-      inherit betterbird-patches remote-patches-folder comm-source thunderbird-unwrapped;
+      inherit
+        betterbird-patches
+        remote-patches-folder
+        comm-source
+        thunderbird-unwrapped
+        ;
       thunderbird = wrapThunderbird thunderbird-unwrapped { };
     };
   })

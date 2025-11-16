@@ -307,6 +307,6 @@ rec {
     libName = "betterbird";
   };
   shell-gpt = pkgs.callPackage ./pkgs/shell-gpt/package.nix { };
-  eamodio-gitlens = pkgs.callPackage ./pkgs/eamodio.gitlens {
+  vscode-extensions.eamodio.gitlens = pkgs.callPackage ./pkgs/eamodio.gitlens {
   };
 }

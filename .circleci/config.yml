@@ -10,8 +10,8 @@ orbs:
   nix: eld/nix@1.1.1
 jobs:
   build:
-    machine:
-      - image: ubuntu-2204:current
+    docker:
+      - image: cimg/base:current
         environment:
           CACHIX_NAME: mio
     steps:

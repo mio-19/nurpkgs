@@ -315,7 +315,7 @@ rec {
   # https://github.com/NixOS/nixpkgs/pull/461412
   shell-gpt = pkgs.callPackage ./pkgs/shell-gpt/package.nix { };
 
-  mygui-next =  (
+  mygui-next = (
     fixcmake (
       pkgs.callPackage ./pkgs/mygui-next/package.nix {
       }

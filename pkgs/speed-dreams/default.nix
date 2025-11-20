@@ -32,12 +32,12 @@
   libvorbis,
   runtimeShell,
   curl,
-  copyDesktopItems,
-  makeDesktopItem,
   fetchgit,
   cjson,
   minizip,
   rhash,
+  copyDesktopItems,
+  makeDesktopItem,
 }:
 
 let
@@ -67,24 +67,9 @@ stdenv.mkDerivation rec {
     ln -s "$out/share/games/speed-dreams-2/data/icons/icon.png" "$out/share/pixmaps/speed-dreams-2.png"
   '';
 
-  desktopItems = [
-    (makeDesktopItem {
-      name = "Speed Dreams 2";
-      exec = "speed-dreams-2";
-      icon = "speed-dreams-2.png";
-      desktopName = "speed-dreams-2";
-      comment = "The Open Racing Car Simulator Fork";
-      categories = [
-        "Application"
-        "Game"
-      ];
-    })
-  ];
-
   # RPATH of binary /nix/store/.../lib64/games/speed-dreams-2/drivers/shadow_sc/shadow_sc.so contains a forbidden reference to /build/
   cmakeFlags = [
     "-DCMAKE_SKIP_BUILD_RPATH=ON"
-    "-DCMAKE_INCLUDE_PATH=${src}/src/libs/tgf;${src}/src/libs/tgfdata"
   ];
 
   nativeBuildInputs = [

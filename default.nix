@@ -331,5 +331,5 @@ rec {
     }
   );
 
-  speed_dreams = (pkgs.callPackage ./pkgs/speed-dreams { });
+  speed_dreams = nodarwin (pkgs.callPackage ./pkgs/speed-dreams { });
 }

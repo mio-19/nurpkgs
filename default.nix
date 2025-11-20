@@ -313,4 +313,20 @@ rec {
   };
   # https://github.com/NixOS/nixpkgs/pull/461779
   fish = pkgs.callPackage ./pkgs/fish/package.nix { };
+  /*
+    mygui = v3overrideAttrs (
+      pkgs.mygui.overrideAttrs (old: {
+        cmakeFlags = (old.cmakeFlags or [ ]) ++ [
+          "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+        ];
+      })
+    );
+  */
+  ogre-next_3 = v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-next/default.nix { }).ogre-next_3;
+  stuntrally3 = wip (
+    pkgs.callPackage ./pkgs/stuntrally3 {
+      ogre-next_3 = ogre-next_3;
+      #mygui = mygui;
+    }
+  );
 }

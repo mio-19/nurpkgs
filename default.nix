@@ -308,11 +308,6 @@ rec {
   };
   # https://github.com/NixOS/nixpkgs/pull/461412
   shell-gpt = pkgs.callPackage ./pkgs/shell-gpt/package.nix { };
-  # https://github.com/NixOS/nixpkgs/issues/462082
-  vscode-extensions.eamodio.gitlens = pkgs.callPackage ./pkgs/eamodio.gitlens {
-  };
-  # https://github.com/NixOS/nixpkgs/pull/461779
-  fish = pkgs.callPackage ./pkgs/fish/package.nix { };
   /*
     mygui = v3overrideAttrs (
       pkgs.mygui.overrideAttrs (old: {

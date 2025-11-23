@@ -333,4 +333,5 @@ rec {
     );
   */
   speed_dreams = nodarwin (pkgs.callPackage ./pkgs/speed-dreams { });
+  netdata = (v3override (goV3OverrideAttrs pkgs.netdata)).override { withCloudUi = true; };
 }

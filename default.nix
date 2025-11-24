@@ -204,7 +204,8 @@ rec {
       v3overrideAttrs (pkgs.libsForQt5.callPackage ./pkgs/musescore3 { });
   # https://github.com/musescore/MuseScore/pull/21874
   # https://github.com/adazem009/MuseScore/tree/piano_keyboard_playing_notes
-  # broken on nixpkgs between 5538b43ec73bc2d2c68fcb33ae79a41eac9bf4f8 and d321a04f4576d5cb0456cefe9b370ca17a829d76
+  # broken on nixpkgs between a98f368960a921d4fdc048e3a2401d12739bc1f9 and 7fd9583d8c174ecc7ac0094bed29bde80135c876
+  # https://github.com/NixOS/nixpkgs/compare/a98f368960a921d4fdc048e3a2401d12739bc1f9%E2%80%A67fd9583d8c174ecc7ac0094bed29bde80135c876
   musescore-adazem009 = v3override (
     pkgs.musescore.overrideAttrs (old: {
       version = "4.4.0-piano_keyboard_playing_notes";

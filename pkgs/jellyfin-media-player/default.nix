@@ -27,13 +27,13 @@
 
 stdenv.mkDerivation rec {
   pname = "jellyfin-media-player";
-  version = "1.12.0-unstable-2025-10-29";
+  version = "1.12.0-unstable-2025-11-25";
 
   src = fetchFromGitHub {
     owner = "jellyfin";
     repo = "jellyfin-media-player";
-    rev = "67d1298b4c2e4d302bb9f818dd48f1794b4a3aac";
-    hash = "sha256-SO4Iyao6Ivdj6QWrUlTVQYPed5/8F30zZlPzX9jPqRE=";
+    rev = "5a12a0842b8fa739e4e7cb8a6df95656c795ac74";
+    hash = "sha256-QtbNFQmVe0P/QkgNB1MC+D9o2j/FjM6H1TXUU4AEPdQ=";
   };
 
   patches = [

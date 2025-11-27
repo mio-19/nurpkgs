@@ -266,6 +266,15 @@ rec {
           meta = old.meta // {
             platforms = pkgs.lib.platforms.unix;
           };
+
+          propagatedBuildInputs = map (
+            pkg:
+            pkg.overrideAttrs (oldPkg: {
+              meta = (oldPkg.meta or { }) // {
+                platforms = pkgs.lib.platforms.unix;
+              };
+            })
+          ) old.propagatedBuildInputs;
         });
       };
     }

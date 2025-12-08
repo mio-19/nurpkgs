@@ -324,17 +324,16 @@ rec {
       ];
       hash = pluginsHash;
     };
-  firefox-unwrapped_nightly = (
-    v3override (
+  firefox_nightly = (
+    pkgs.wrapFirefox (v3override (
       v3overrideAttrs (
         pkgs.callPackage ./pkgs/firefox-nightly {
           nss_git = nss_git;
           nyxUtils = nyxUtils;
         }
       )
-    )
+    )) { }
   );
-  firefox_nightly = (pkgs.wrapFirefox firefox-unwrapped_nightly { });
   nss_git = callOverride ./pkgs/nss-git { };
   betterbird-unwrapped = v3overrideAttrs (pkgs.callPackage ./pkgs/betterbird { });
   betterbird = pkgs.wrapThunderbird betterbird-unwrapped {

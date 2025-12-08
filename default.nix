@@ -183,12 +183,11 @@ rec {
     stdenv = v3Optimizations pkgs.clangStdenv;
   };
   minetest591client = minetest591.override { buildServer = false; };
-  minetest591server = minetest591.override { buildClient = false; };
-  irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
-    stdenv = v3Optimizations pkgs.clangStdenv;
-  };
+  #minetest591server = minetest591.override { buildClient = false; };
   minetest580 = pkgs.callPackage ./pkgs/minetest580 {
-    irrlichtmt = irrlichtmt;
+    irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
+      stdenv = v3Optimizations pkgs.clangStdenv;
+    };
     stdenv = v3Optimizations pkgs.clangStdenv;
   };
   minetest580client = minetest580.override { buildServer = false; };
@@ -196,7 +195,7 @@ rec {
     buildServer = false;
     withTouchSupport = true;
   };
-  minetest580server = minetest580.override { buildClient = false; };
+  #minetest580server = minetest580.override { buildClient = false; };
   musescore3 =
     if pkgs.stdenv.isDarwin then
       pkgs.callPackage ./pkgs/musescore3/darwin.nix { }

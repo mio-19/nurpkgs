@@ -36,11 +36,11 @@ let
     let
       # versionNyxPath can be either a string relative to nyx or a path.
       versionLocalPath =
-        if lib.path.isPath versionNyxPath then versionNyxPath else "${nyx}/${versionNyxPath}";
+        if builtins.isPath versionNyxPath then versionNyxPath else "${nyx}/${versionNyxPath}";
 
       # The update script wants a path relative to the repository root.
       versionPathForScript =
-        if lib.path.isPath versionNyxPath then
+        if builtins.isPath versionNyxPath then
           lib.strings.removePrefix "${toString nyx}/" (toString versionNyxPath)
         else
           versionNyxPath;

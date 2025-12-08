@@ -123,7 +123,7 @@ let
         fetchFromGitea
         ;
       inherit (pkgs.rustPlatform) fetchCargoVendor;
-      nyx = ./pkgs/..;
+      nyx = ./.;
       fetchRevFromGitHub = pkgs.callPackage ./shared/github-rev-fetcher.nix { };
       fetchRevFromGitLab = pkgs.callPackage ./shared/gitlab-rev-fetcher.nix { };
       fetchRevFromGitea = pkgs.callPackage ./shared/gitea-rev-fetcher.nix { };

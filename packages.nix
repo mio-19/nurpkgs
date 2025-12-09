@@ -14,168 +14,8 @@
     config.allowUnfree = true;
   },
 }:
-let
-  stdenv = pkgs.stdenv;
-  fixcmake =
-    x:
-    x.overrideAttrs (old: {
-      cmakeFlags = (old.cmakeFlags or [ ]) ++ [
-        "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
-      ];
-    });
-  v3Optimizations =
-    if pkgs.stdenv.hostPlatform.isx86_64 then
-      pkgs.stdenvAdapters.withCFlags [
-        "-march=x86-64-v3"
-        "-mtune=raptorlake"
-      ]
-    else
-      stdenv: stdenv;
-  v3overrideAttrs =
-    if pkgs.stdenv.hostPlatform.isx86_64 then
-      x:
-      x.overrideAttrs (old: {
-        env.NIX_CFLAGS_COMPILE = "-march=x86-64-v3 -mtune=raptorlake";
-        env.RUSTFLAGS = "-C target_cpu=x86-64-v3";
-      })
-    else
-      x: x;
-  goV3OverrideAttrs =
-    if pkgs.stdenv.hostPlatform.isx86_64 then
-      x:
-      x.overrideAttrs (old: {
-        GOAMD64 = "v3";
-      })
-    else
-      x: x;
-  v3override =
-    if pkgs.stdenv.hostPlatform.isx86_64 then
-      x:
-      x.override (prev: {
-        stdenv = v3Optimizations pkgs.clangStdenv;
-      })
-    else
-      x:
-      x.override (prev: {
-        stdenv = pkgs.clangStdenv;
-      });
-  v3overridegcc =
-    if pkgs.stdenv.hostPlatform.isx86_64 then
-      x:
-      x.override (prev: {
-        stdenv = v3Optimizations prev.stdenv;
-      })
-    else
-      x: x;
-  nodarwin =
-    x:
-    x.overrideAttrs (old: {
-      meta = old.meta // {
-        broken = pkgs.stdenv.hostPlatform.isDarwin;
-      };
-    });
-  x8664linux =
-    x:
-    x.overrideAttrs (old: {
-      meta = old.meta // {
-        broken = !pkgs.stdenv.hostPlatform.isLinux || !pkgs.stdenv.hostPlatform.isx86_64;
-      };
-    });
-  wip =
-    x:
-    x.overrideAttrs (old: {
-      meta = old.meta // {
-        broken = true;
-      };
-    });
-  #  from chaotic-nyx
-  nyxUtils = import ./shared/utils.nix {
-    lib = pkgs.lib;
-    nyxOverlay = null;
-  };
-  inherit (nyxUtils) multiOverride overrideDescription drvDropUpdateScript;
-  #  from chaotic-nyx
-  callOverride =
-    path: attrs:
-    with pkgs;
-    import path (
-      {
-        final = pkgs;
-        prev = pkgs;
-        flakes = {
-          self.overlays = import ./overlays;
-          nixpkgs = pkgs.path;
-        };
-        inherit
-          nyxUtils
-          gitOverride
-          rustPlatform_latest
-          ;
-      }
-      // attrs
-    );
-
-  #  from chaotic-nyx
-  gitOverride =
-    with pkgs;
-    import ./shared/git-override.nix {
-      inherit (pkgs)
-        lib
-        callPackage
-        fetchFromGitHub
-        fetchFromGitLab
-        fetchFromGitea
-        ;
-      inherit (pkgs.rustPlatform) fetchCargoVendor;
-      nyx = ./.;
-      fetchRevFromGitHub = pkgs.callPackage ./shared/github-rev-fetcher.nix { };
-      fetchRevFromGitLab = pkgs.callPackage ./shared/gitlab-rev-fetcher.nix { };
-      fetchRevFromGitea = pkgs.callPackage ./shared/gitea-rev-fetcher.nix { };
-    };
-
-  icu = pkgs.callPackage ./pkgs/icu { };
-  cachyosPackages = callOverride ./pkgs/linux-cachyos { nyxUtils = nyxUtils; };
-in
+with (import ./private.nix { inherit pkgs; });
 rec {
-  telegram-desktop = pkgs.telegram-desktop.overrideAttrs (old: {
-    unwrapped = v3overridegcc (
-      old.unwrapped.overrideAttrs (old2: {
-        # see https://github.com/Layerex/telegram-desktop-patches
-        patches = (pkgs.telegram-desktop.unwrapped.patches or [ ]) ++ [
-          ./patches/0001-telegramPatches.patch
-        ];
-      })
-    );
-  });
-  materialgram = pkgs.materialgram.overrideAttrs (old: {
-    unwrapped = v3overridegcc (
-      old.unwrapped.overrideAttrs (old2: {
-        # see https://github.com/Layerex/telegram-desktop-patches
-        patches = (pkgs.materialgram.unwrapped.patches or [ ]) ++ [
-          ./patches/0001-materialgramPatches.patch
-        ];
-      })
-    );
-  });
-  openssh = v3override (
-    (pkgs.openssh_10_2 or pkgs.openssh).overrideAttrs (old: {
-      patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
-      #doCheck = false;
-    })
-  );
-  openssh_hpn = v3override (
-    pkgs.openssh_hpn.overrideAttrs (old: {
-      patches = (old.patches or [ ]) ++ [ ./patches/openssh.patch ];
-    })
-  );
-  grub2 = nodarwin (
-    v3overridegcc (
-      pkgs.grub2.overrideAttrs (old: {
-        patches = (old.patches or [ ]) ++ [ ./patches/grub-os-prober-title.patch ];
-      })
-    )
-  );
-  bees = nodarwin (v3overridegcc pkgs.bees);
   wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix {
     withOptionals = true;
@@ -241,21 +81,7 @@ rec {
       swt = v3overrideAttrs (pkgs.callPackage ./pkgs/swt/package.nix { });
     }
   );
-  aria2 = v3override (
-    pkgs.aria2.overrideAttrs (old: {
-      patches = (old.patches or [ ]) ++ [
-        (pkgs.fetchpatch {
-          name = "fix patch aria2 fast.patch";
-          url = "https://github.com/agalwood/aria2/commit/baf6f1d02f7f8b81cd45578585bdf1152d81f75f.patch";
-          sha256 = "sha256-bLGaVJoHuQk9vCbBg2BOG79swJhU/qHgdkmYJNr7rIQ=";
-        })
-      ];
-    })
-  );
   nss_git = callOverride ./pkgs/nss-git { };
-  aria2-wrapped = pkgs.writeShellScriptBin "aria2" ''
-    ${aria2}/bin/aria2c -s65536 -j65536 -x256 -k1k "$@"
-  '';
   #aria2-wrapped = pkgs.writeShellScriptBin "aria2" ''
   #  ${pkgs.aria2}/bin/aria2c -s65536 -j65536 -x16 -k1M "$@"
   #'';
@@ -289,43 +115,6 @@ rec {
   beammp-launcher = pkgs.callPackage ./pkgs/beammp-launcher/package.nix {
     cacert_3108 = pkgs.callPackage ./pkgs/cacert_3108 { };
   };
-  caddy =
-    let
-      # Table mapping caddy source hash + Go version to plugins hash
-      # Key format: "<srcHash>:<goVersion>"
-      # To check current key: nix eval --impure --expr 'let pkgs = import <nixpkgs> {}; in "${pkgs.caddy.src.outputHash}:${pkgs.caddy.passthru.go.version}"' --raw
-      # From local nixpkgs repo: nix eval --impure --expr 'let pkgs = import ./. {}; in "${pkgs.caddy.src.outputHash}:${pkgs.caddy.passthru.go.version}"' --raw
-      caddyPluginsHashTable = {
-        # nixpkgs-unstable 2025-11-04
-        "sha256-KvikafRYPFZ0xCXqDdji1rxlkThEDEOHycK8GP5e8vk=:1.25.2" =
-          "sha256-+3itNp/as78n584eDu9byUvH5LQmEsFrX3ELrVjWmEw=";
-        # staging-next 20251107
-        "sha256-KvikafRYPFZ0xCXqDdji1rxlkThEDEOHycK8GP5e8vk=:1.25.3" =
-          "sha256-hfIP97+TKcQkGg6s19VQcz9bS1wqzSBtqVTbtDc4HSQ=";
-        # release-25.05 20251107
-        "sha256-hzDd2BNTZzjwqhc/STbSAHnNlP7g1cFuMehqU1LumQE=:1.24.9" =
-          "sha256-lraVVvjqWpQJmlHhpfWZwC9S0Gvx7nQR6Nzmt0oEOLw=";
-        # staging-next 20251116
-        "sha256-KvikafRYPFZ0xCXqDdji1rxlkThEDEOHycK8GP5e8vk=:1.25.4" =
-          "sha256-cZLVVKeEoSO4im0wGJfwzpAknPs2WFFJpTtDMcaGwhk=";
-      };
-      srcHash = pkgs.caddy.src.outputHash;
-      goVersion = pkgs.caddy.passthru.go.version;
-      lookupKey = "${srcHash}:${goVersion}";
-      pluginsHash =
-        caddyPluginsHashTable.${lookupKey}
-          or (throw "Unknown caddy source hash + Go version: ${lookupKey}. Please update caddyPluginsHashTable in default.nix");
-    in
-    (goV3OverrideAttrs pkgs.caddy).withPlugins {
-      # https://github.com/crowdsecurity/example-docker-compose/blob/main/caddy/Dockerfile
-      # https://github.com/NixOS/nixpkgs/pull/358586
-      plugins = [
-        "github.com/caddy-dns/cloudflare@v0.2.2"
-        "github.com/porech/caddy-maxmind-geolocation@v1.0.1"
-        # "github.com/hslatman/caddy-crowdsec-bouncer/http@main"
-      ];
-      hash = pluginsHash;
-    };
   firefox_nightly-unwrapped = v3override (
     v3overrideAttrs (
       pkgs.callPackage ./pkgs/firefox-nightly {
@@ -361,7 +150,6 @@ rec {
     );
   */
   speed_dreams = nodarwin (pkgs.callPackage ./pkgs/speed-dreams { });
-  netdata = (v3override (goV3OverrideAttrs pkgs.netdata)).override { withCloudUi = true; };
 
   howdy = nodarwin (pkgs.callPackage ./pkgs/howdy/package.nix { });
   linux-enable-ir-emitter = nodarwin (

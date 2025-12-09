@@ -26,10 +26,6 @@ see all packages: <https://nur.nix-community.org/repos/mio/>
 
 a binary cache may be available on Garnix. See <https://garnix.io/docs/caching/>
 
-## broken
-
-we need to mark broken for unsupported platforms otherwise the github actions fail
-
 ## sources - where files were copied from
 
 + lmms - <https://github.com/NixOS/nixpkgs/pull/377643>

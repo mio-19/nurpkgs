@@ -30,7 +30,7 @@ a binary cache may be available on Garnix. See <https://garnix.io/docs/caching/>
 
 we need to mark broken for unsupported platforms otherwise the github actions fail
 
-## sources
+## sources - where files were copied from
 
 + lmms - <https://github.com/NixOS/nixpkgs/pull/377643>
 + musescore3 - <https://aur.archlinux.org/cgit/aur.git/tree/dtl-gcc14-fix.patch?h=musescore3-git> <https://github.com/NixOS/nixpkgs/blob/31968e86eddf260716458ee9ede65691f6e1987f/pkgs/applications/audio/musescore/default.nix>

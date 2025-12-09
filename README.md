@@ -24,7 +24,7 @@ see all packages: <https://nur.nix-community.org/repos/mio/> How to use (NUR gui
 --option 'extra-substituters' 'https://mio.cachix.org/' --option extra-trusted-public-keys "mio.cachix.org-1:FlupyyLPURqwdRqtPT/LBWKsXY7JKsDkzZQo2K6LeMM="
 ```
 
-a binary cache may be available on Garnix. See <https://garnix.io/docs/caching/>
+a binary cache may or may not be available on Garnix. See <https://garnix.io/docs/caching/>
 
 ## sources - where files were copied from
 

@@ -7,6 +7,8 @@ see all packages: <https://nur.nix-community.org/repos/mio/> How to use (NUR gui
 
 ## cache
 
+binary cache is provided as best effort. binary cache is frequently *NOT* up to date and you will frequently have to build packages from source code because github actions is often not sufficient to compile packages. Solutions to provide up to date binary cache do require money every month
+
 ```nix
   nix = {
     settings = {

@@ -252,6 +252,7 @@ rec {
       ];
     })
   );
+  nss_git = callOverride ./pkgs/nss-git { };
   aria2-wrapped = pkgs.writeShellScriptBin "aria2" ''
     ${aria2}/bin/aria2c -s65536 -j65536 -x256 -k1k "$@"
   '';
@@ -328,7 +329,7 @@ rec {
   firefox_nightly-unwrapped = v3override (
     v3overrideAttrs (
       pkgs.callPackage ./pkgs/firefox-nightly {
-        nss_git = callOverride ./pkgs/nss-git { };
+        nss_git = nss_git;
         nyxUtils = nyxUtils;
         icu78 = icu.icu78;
       }

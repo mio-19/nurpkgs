@@ -76,6 +76,7 @@ let
 
   kernel = callPackage ./kernel.nix {
     inherit cachyConfig stdenv kconfigToNix;
+    inherit nyxUtils;
     kernelPatches = [ ];
     configfile = preparedConfigfile;
     config = linuxConfigTransfomed;

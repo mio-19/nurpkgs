@@ -85,7 +85,7 @@ let
     kernelPackages = packagesWithRightPlatforms;
   };
 
-  commonMakeFlags = import "${inputs.flakes.nixpkgs}/pkgs/os-specific/linux/kernel/common-flags.nix" {
+  commonMakeFlags = import ../os-specific/linux/kernel/common-flags.nix {
     inherit
       lib
       stdenv
@@ -98,7 +98,7 @@ let
   addOurs = finalAttrs: prevAttrs: {
     kernel_configfile = prevAttrs.kernel.configfile;
     zfs_cachyos =
-      (finalAttrs.callPackage "${inputs.flakes.nixpkgs}/pkgs/os-specific/linux/zfs/generic.nix"
+      (finalAttrs.callPackage ../os-specific/linux/zfs/generic.nix
         zfsOverride
         {
           kernelModuleAttribute = "zfs_cachyos";

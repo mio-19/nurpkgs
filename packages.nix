@@ -325,17 +325,17 @@ rec {
       ];
       hash = pluginsHash;
     };
-  firefox_nightly = (
-    pkgs.wrapFirefox (v3override (
-      v3overrideAttrs (
-        pkgs.callPackage ./pkgs/firefox-nightly {
-          nss_git = callOverride ./pkgs/nss-git { };
-          nyxUtils = nyxUtils;
-          icu78 = icu.icu78;
-        }
-      )
-    )) { }
+  firefox_nightly-unwrapped = v3override (
+    v3overrideAttrs (
+      pkgs.callPackage ./pkgs/firefox-nightly {
+        nss_git = callOverride ./pkgs/nss-git { };
+        nyxUtils = nyxUtils;
+        icu78 = icu.icu78;
+      }
+    )
   );
+
+  firefox_nightly = pkgs.wrapFirefox firefox_nightly-unwrapped { };
   betterbird-unwrapped = v3overrideAttrs (pkgs.callPackage ./pkgs/betterbird { });
   betterbird = pkgs.wrapThunderbird betterbird-unwrapped {
     applicationName = "betterbird";

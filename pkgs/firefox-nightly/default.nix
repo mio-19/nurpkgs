@@ -69,7 +69,7 @@ let
       nyxUtils.removeByBaseNames [
         "136-no-buildconfig.patch"
         "133-env-var-for-system-dir.patch"
-        "142-relax-apple-sdk.patch"
+        #"142-relax-apple-sdk.patch"
       ] prevAttrs.patches
       ++ [
         ./env_var_for_system_dir-ff-unstable.patch

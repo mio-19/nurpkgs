@@ -23,7 +23,8 @@ let
       lib = import ./lib { inherit pkgs; }; # functions
       modules = import ./modules; # NixOS modules
       overlays = import ./overlays; # nixpkgs overlays
-
+    }
+    // rec {
       aria2 = v3override (
         pkgs.aria2.overrideAttrs (old: {
           patches = (old.patches or [ ]) ++ [

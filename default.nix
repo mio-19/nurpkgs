@@ -17,7 +17,7 @@
 with (import ./private.nix { inherit pkgs; });
 let
   self = (
-    rec {
+    {
       # note: some packages might be commented out to reduce package numbers. garnix has hardcoded limit of 100.
       # The `lib`, `modules`, and `overlays` names are special
       lib = import ./lib { inherit pkgs; }; # functions

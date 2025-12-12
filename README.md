@@ -1,7 +1,5 @@
 # nurpkgs
 
-for personal use.
-
 see all packages: <https://nur.nix-community.org/repos/mio/> How to use (NUR guide) <https://nur.nix-community.org/documentation/> You will want to use `nur.repos.mio.*`
 
 + linux: x86_64-v3, aarch64

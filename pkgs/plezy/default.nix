@@ -21,7 +21,7 @@
 let
   libwebrtc = fetchzip {
     url = "https://github.com/flutter-webrtc/flutter-webrtc/releases/download/v1.2.1/libwebrtc.zip";
-    hash = "sha256-i4LRG44f//SDIOl072yZavkYoTZdiydPZndeOm6/fBM=";
+    hash = "sha256-eLOMO9FyBfD1PeQ65Ca4dt1IDtGEBLwZVO7SNw4xLAE=";
   };
   libwebrtcRpath = lib.makeLibraryPath [
     libgbm
@@ -120,4 +120,6 @@ flutter.buildFlutterApplication rec {
     maintainers = [ ];
     platforms = lib.platforms.linux;
   };
+
+  passthru.updateScript = ./update.sh;
 }

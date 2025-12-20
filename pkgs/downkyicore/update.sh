@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -i bash -p nix-prefetch-url git gnused coreutils jq dotnet-sdk_8 nuget-to-json
+#!nix-shell -i bash -p nix-prefetch-scripts nix git gnused coreutils jq dotnet-sdk_8 nuget-to-json
 
 set -euo pipefail
 

@@ -120,7 +120,7 @@ buildDotnetModule (finalAttrs: {
     homepage = "https://github.com/yaobiao131/downkyicore";
     license = lib.licenses.gpl3Only;
     maintainers = with lib.maintainers; [ ];
-    platforms = [ "x86_64-linux" ];
+    platforms = lib.platforms.linux;
     mainProgram = "DownKyi";
   };
 })

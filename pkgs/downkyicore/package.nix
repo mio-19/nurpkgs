@@ -73,7 +73,7 @@ buildDotnetModule (finalAttrs: {
 
   makeWrapperArgs = [
     "--chdir"
-    "$out/lib/downkyicore"
+    "${builtins.placeholder "out"}/lib/downkyicore"
   ];
 
   passthru.updateScript = ./update.sh;

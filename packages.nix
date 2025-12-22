@@ -217,4 +217,6 @@ rec {
   };
 
   ego = v3overrideAttrs (pkgs.callPackage ./pkgs/ego/package.nix { });
+
+  systemd257 = v3overrideAttrs (pkgs.callPackage ./pkgs/systemd257 { });
 }

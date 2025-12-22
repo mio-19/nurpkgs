@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -i bash -p nix-prefetch-scripts nix git gnused coreutils jq dotnet-sdk_8 nuget-to-json
+#!nix-shell -i bash -p nix-prefetch-scripts nix git gnused coreutils jq python3 dotnet-sdk_8 nuget-to-json
 
 set -euo pipefail
 
@@ -22,6 +22,11 @@ if [[ -z "$version" ]]; then
   exit 1
 fi
 
+if [[ -n "$current_version" && "$version" == "$current_version" ]]; then
+  echo "Already up to date at ${version}"
+  exit 0
+fi
+
 tarball="$repo_url/archive/refs/tags/v${version}.tar.gz"
 base32_hash=$(nix-prefetch-url --unpack "$tarball")
 sri_hash=$(nix hash to-sri --type sha256 "$base32_hash")
@@ -42,12 +47,51 @@ git clone --depth 1 --branch "v${version}" "$repo_url" "$tmpdir/src"
 
 sed -i "s/version = \\\".*\\\";/version = \\\"${version}\\\";/" pkgs/downkyicore/package.nix
 sed -i "s|hash = \\\"sha256-.*\\\";|hash = \\\"${sri_hash}\\\";|" pkgs/downkyicore/package.nix
-cp "$tmpdir/deps.json" pkgs/downkyicore/deps.json
+cp "$tmpdir/deps.json" tmp.deps.json
+python - <<'PY'
+import json
+
+def version_key(value: str):
+    parts = value.replace("-", ".").split(".")
+    out = []
+    for part in parts:
+        try:
+            out.append(int(part))
+        except ValueError:
+            out.append(part)
+    return out
+
+runtime_packs = {
+    "Microsoft.NETCore.App.Runtime.linux-x64",
+    "Microsoft.AspNetCore.App.Runtime.linux-x64",
+}
+
+with open("tmp.deps.json") as fh:
+    data = json.load(fh)
+
+filtered = {}
+for entry in data:
+    name = entry["pname"]
+    if name in runtime_packs:
+        continue
+    current = filtered.get(name)
+    if current is None or version_key(entry["version"]) > version_key(current["version"]):
+        filtered[name] = entry
+
+deduped = sorted(filtered.values(), key=lambda item: item["pname"].lower())
+with open("pkgs/downkyicore/deps.json", "w") as fh:
+    json.dump(deduped, fh, indent=2, ensure_ascii=False)
+PY
+rm -f tmp.deps.json
 
 echo "Updated to ${version}"
 
 # Commit changes if inside a git repo
 if command -v git >/dev/null 2>&1 && [ -d .git ]; then
-  git add pkgs/downkyicore/package.nix pkgs/downkyicore/deps.json
-  git commit -m "downkyicore: ${current_version:-unknown} -> ${version}" || true
+  if ! git diff --quiet -- pkgs/downkyicore/package.nix pkgs/downkyicore/deps.json; then
+    git add pkgs/downkyicore/package.nix pkgs/downkyicore/deps.json
+    git commit -m "downkyicore: ${current_version:-unknown} -> ${version}" || true
+  else
+    echo "No changes to commit"
+  fi
 fi

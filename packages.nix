@@ -216,4 +216,5 @@ rec {
     repo = "proton-ge-custom";
   };
 
+  ego = v3overrideAttrs (pkgs.callPackage ./pkgs/ego/package.nix { });
 }

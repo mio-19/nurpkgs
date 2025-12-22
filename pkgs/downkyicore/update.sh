@@ -22,11 +22,6 @@ if [[ -z "$version" ]]; then
   exit 1
 fi
 
-if [[ -n "$current_version" && "$version" == "$current_version" ]]; then
-  echo "Already up to date at ${version}"
-  exit 0
-fi
-
 tarball="$repo_url/archive/refs/tags/v${version}.tar.gz"
 base32_hash=$(nix-prefetch-url --unpack "$tarball")
 sri_hash=$(nix hash to-sri --type sha256 "$base32_hash")
@@ -38,6 +33,7 @@ git clone --depth 1 --branch "v${version}" "$repo_url" "$tmpdir/src"
 
 (
   cd "$tmpdir/src"
+  sed -i 's/net6.0/net8.0/g' DownKyi/DownKyi.csproj DownKyi.Core/DownKyi.Core.csproj
   export HOME=$PWD/.home
   export NUGET_PACKAGES=$PWD/.nuget/packages
   export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1

@@ -39,13 +39,17 @@ buildDotnetModule (finalAttrs: {
   executables = [ "DownKyi" ];
 
   nativeBuildInputs = [
-    autoPatchelfHook
     copyDesktopItems
+  ]
+  ++ lib.optionals stdenv.isLinux [
+    autoPatchelfHook
   ];
 
   buildInputs = [
     aria2
     ffmpeg
+  ]
+  ++ lib.optionals stdenv.isLinux [
     fontconfig
     freetype
     icu
@@ -56,15 +60,18 @@ buildDotnetModule (finalAttrs: {
     (lib.getLib stdenv.cc.cc)
   ];
 
-  runtimeDeps = with xorg; [
-    libX11
-    libXcursor
-    libXext
-    libXi
-    libXrandr
-    libICE
-    libSM
-  ];
+  runtimeDeps = lib.optionals stdenv.isLinux (
+    with xorg;
+    [
+      libX11
+      libXcursor
+      libXext
+      libXi
+      libXrandr
+      libICE
+      libSM
+    ]
+  );
 
   postPatch = ''
     substituteInPlace DownKyi/DownKyi.csproj DownKyi.Core/DownKyi.Core.csproj \
@@ -98,10 +105,12 @@ buildDotnetModule (finalAttrs: {
       printf 'See https://ffmpeg.org/legal.html for FFmpeg licensing information.\n' > $out/lib/downkyicore/FFmpeg_LICENSE.txt
     fi
 
+  ''
+  + lib.optionalString stdenv.isLinux ''
     install -Dm644 DownKyi/Resources/favicon.ico $out/share/icons/hicolor/256x256/apps/downkyicore.ico
   '';
 
-  desktopItems = [
+  desktopItems = lib.optionals stdenv.isLinux [
     (makeDesktopItem {
       name = "downkyicore";
       desktopName = "DownKyi";
@@ -120,7 +129,7 @@ buildDotnetModule (finalAttrs: {
     homepage = "https://github.com/yaobiao131/downkyicore";
     license = lib.licenses.gpl3Only;
     maintainers = with lib.maintainers; [ ];
-    platforms = lib.platforms.linux;
+    platforms = lib.platforms.linux ++ lib.platforms.darwin;
     mainProgram = "DownKyi";
   };
 })

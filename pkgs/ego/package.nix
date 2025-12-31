@@ -15,8 +15,8 @@ rustPlatform.buildRustPackage rec {
   src = fetchFromGitHub {
     owner = "mio-19";
     repo = "ego";
-    rev = "b08502d7a19e26edbfab75774f69cf02cc3883ea"; # version;
-    hash = "sha256-cKZwZouEA92y9HsHAkQVhJjBiZIBJODZRqFGsQEMbaM=";
+    rev = "308de189ae0a8ae2402460c2ca5615e2ea436820"; # version;
+    hash = "sha256-F33DOStxcN/RJ6g+ZVmaRijutL7+jpgyczeu9pAGN2Q=";
   };
 
   buildInputs = [

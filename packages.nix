@@ -116,7 +116,7 @@ rec {
       pkgs.callPackage ./pkgs/firefox-nightly {
         nss_git = nss_git;
         nyxUtils = nyxUtils;
-        icu78 = icu.icu78;
+        icu78 = pkgs.icu78 or icu.icu78;
       }
     )
   );

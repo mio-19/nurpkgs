@@ -9,6 +9,9 @@
   },
 }:
 with (import ./private.nix { inherit pkgs; });
+let
+  callPackage = pkgs.callPackage;
+in
 rec {
   wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix {
@@ -240,12 +243,14 @@ rec {
     studioVariant = true;
   };
 
-  mkWindowsApp = pkgs.callPackage ./pkgs/mkwindowsapp {
+  mkWindowsApp = callPackage ./pkgs/mkwindowsapp {
     makeBinPath = pkgs.lib.makeBinPath;
   };
 
-  mkWindowsAppNoCC = pkgs.callPackage ./pkgs/mkwindowsapp {
+  mkWindowsAppNoCC = callPackage ./pkgs/mkwindowsapp {
     stdenv = pkgs.stdenvNoCC;
     makeBinPath = pkgs.lib.makeBinPath;
   };
+  mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
+
 }

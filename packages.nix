@@ -11,6 +11,7 @@
 with (import ./private.nix { inherit pkgs; });
 let
   callPackage = pkgs.callPackage;
+  lib' = import ./lib { inherit pkgs; };
 in
 rec {
   wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
@@ -243,14 +244,11 @@ rec {
     studioVariant = true;
   };
 
-  mkWindowsApp = callPackage ./pkgs/mkwindowsapp {
-    makeBinPath = pkgs.lib.makeBinPath;
-  };
-
-  mkWindowsAppNoCC = callPackage ./pkgs/mkwindowsapp {
-    stdenv = pkgs.stdenvNoCC;
-    makeBinPath = pkgs.lib.makeBinPath;
-  };
   mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
+
+  line = callPackage ./pkgs/line.nix {
+    inherit (lib') mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
+    wine = pkgs.wineWowPackages.base;
+  };
 
 }

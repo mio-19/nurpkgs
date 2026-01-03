@@ -240,4 +240,12 @@ rec {
     studioVariant = true;
   };
 
+  mkWindowsApp = pkgs.callPackage ./pkgs/mkwindowsapp {
+    makeBinPath = pkgs.lib.makeBinPath;
+  };
+
+  mkWindowsAppNoCC = pkgs.callPackage ./pkgs/mkwindowsapp {
+    stdenv = pkgs.stdenvNoCC;
+    makeBinPath = pkgs.lib.makeBinPath;
+  };
 }

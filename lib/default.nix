@@ -2,7 +2,7 @@
 
 with pkgs.lib;
 let
-  lib = pkgs.lib;
+  lib = pkgs.lib // import ./default.nix { inherit pkgs; };
   callPackage = pkgs.callPackage;
 in
 {

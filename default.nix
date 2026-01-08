@@ -128,6 +128,15 @@ let
       );
 
       cached = {
+        pkgscache = (
+          pkgs.symlinkJoin {
+            name = "pkgscache";
+            paths = [
+              self.materialgram
+              self.telegram-desktop
+            ];
+          }
+        );
         inherit (self)
           aria2-wrapped
           openssh_hpn

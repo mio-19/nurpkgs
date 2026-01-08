@@ -281,26 +281,4 @@ rec {
         ))
       ];
     });
-  telegram-desktop' = pkgs.telegram-desktop.overrideAttrs (old: {
-    pname = "telegram-desktop-custom";
-    unwrapped = v3overridegcc (
-      old.unwrapped.overrideAttrs (old2: {
-        # see https://github.com/Layerex/telegram-desktop-patches
-        patches = (pkgs.telegram-desktop.unwrapped.patches or [ ]) ++ [
-          ./patches/0001-telegramPatches.patch
-        ];
-      })
-    );
-  });
-  materialgram' = pkgs.materialgram.overrideAttrs (old: {
-    pname = "materialgram-custom";
-    unwrapped = v3overridegcc (
-      old.unwrapped.overrideAttrs (old2: {
-        # see https://github.com/Layerex/telegram-desktop-patches
-        patches = (pkgs.materialgram.unwrapped.patches or [ ]) ++ [
-          ./patches/0001-materialgramPatches.patch
-        ];
-      })
-    );
-  });
 }

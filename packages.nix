@@ -246,13 +246,14 @@ rec {
     studioVariant = true;
   };
 
-  mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
+  /*
+    mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
 
-  line = callPackage ./pkgs/line.nix {
-    inherit (lib) mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
-    wine = pkgs.wineWowPackages.base;
-  };
-
+    line = callPackage ./pkgs/line.nix {
+      inherit (lib) mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
+      wine = pkgs.wineWowPackages.base;
+    };
+  */
   prismlauncher-diegiwg =
     let
       # https://github.com/NixOS/nixpkgs/blob/fb6a5b23f9416753d343d914fe7c14044e59aaed/pkgs/by-name/pr/prismlauncher/package.nix#L41

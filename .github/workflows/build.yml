@@ -118,5 +118,5 @@ jobs:
     - name: Build nix packages
       run: |
         nice -n 20 nix run nixpkgs#nix-fast-build -- --max-jobs 1 --option cores 1 --option max-jobs 1 \
-          --no-nom --skip-cached \
+          --no-nom \
           -f .#cached.${{ env.SYSTEM }} ${{ matrix.nixpkgs-override }}

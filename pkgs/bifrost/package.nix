@@ -166,14 +166,29 @@ stdenv.mkDerivation {
       exit 1
     fi
 
-    export PATH="${lib.makeBinPath [ glib dconf dpkg rpm ]}:$PATH"
+    export PATH="${
+      lib.makeBinPath [
+        glib
+        dconf
+        dpkg
+        rpm
+      ]
+    }:$PATH"
     export GSETTINGS_SCHEMA_DIR="${glib.getSchemaPath gsettings-desktop-schemas}"
-    export XDG_DATA_DIRS="${lib.makeSearchPath "share" [
-      gsettings-desktop-schemas
-      hicolor-icon-theme
-      adwaita-icon-theme
-    ]}:''${XDG_DATA_DIRS:-}"
-    export LD_LIBRARY_PATH="${lib.makeLibraryPath [ stdenv.cc.cc.lib udev libglvnd ]}:''${LD_LIBRARY_PATH:-}"
+    export XDG_DATA_DIRS="${
+      lib.makeSearchPath "share" [
+        gsettings-desktop-schemas
+        hicolor-icon-theme
+        adwaita-icon-theme
+      ]
+    }:''${XDG_DATA_DIRS:-}"
+    export LD_LIBRARY_PATH="${
+      lib.makeLibraryPath [
+        stdenv.cc.cc.lib
+        udev
+        libglvnd
+      ]
+    }:''${LD_LIBRARY_PATH:-}"
     export JAVA_HOME="${jdk21}"
 
     exec "${jdk21}/bin/java" \

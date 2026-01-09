@@ -10,19 +10,13 @@
   file,
   gtk3,
   glib,
-  dconf,
-  gsettings-desktop-schemas,
-  hicolor-icon-theme,
-  adwaita-icon-theme,
   cups,
   lcms2,
   alsa-lib,
   libglvnd,
-  udev,
   makeDesktopItem,
   copyDesktopItems,
   autoPatchelfHook,
-  makeWrapper,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
@@ -64,7 +58,6 @@ stdenv.mkDerivation (finalAttrs: {
     jdk21
     copyDesktopItems
     autoPatchelfHook
-    makeWrapper
   ];
 
   buildInputs = [
@@ -74,15 +67,10 @@ stdenv.mkDerivation (finalAttrs: {
     file
     gtk3
     glib
-    dconf
-    gsettings-desktop-schemas
-    hicolor-icon-theme
-    adwaita-icon-theme
     cups
     lcms2
     alsa-lib
     libglvnd
-    udev
   ];
 
   doCheck = false;
@@ -106,23 +94,6 @@ stdenv.mkDerivation (finalAttrs: {
       $out/share/icons/hicolor/512x512/apps/bifrost.png
 
     runHook postInstall
-  '';
-
-  postFixup = ''
-    wrapProgram $out/bin/Bifrost \
-      --prefix PATH : ${
-        lib.makeBinPath [
-          glib
-          dconf
-        ]
-      } \
-      --prefix XDG_DATA_DIRS : ${
-        lib.makeSearchPath "share" [
-          gsettings-desktop-schemas
-          hicolor-icon-theme
-          adwaita-icon-theme
-        ]
-      }
   '';
 
   meta = {

@@ -208,7 +208,12 @@ py.buildPythonApplication rec {
     makeWrapper ${py.python.interpreter} $out/bin/ultimate-vocal-remover \
       --add-flags $out/share/ultimate-vocal-remover/UVR.py \
       --set PYTHONPATH "${pythonPath}:$out/share/ultimate-vocal-remover" \
-      --prefix PATH : ${lib.makeBinPath [ ffmpeg rubberband ]}
+      --prefix PATH : ${
+        lib.makeBinPath [
+          ffmpeg
+          rubberband
+        ]
+      }
 
     runHook postInstall
   '';

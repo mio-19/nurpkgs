@@ -10,13 +10,13 @@
 
 rustPlatform.buildRustPackage rec {
   pname = "ego";
-  version = "1.1.7-unstable-20251222";
+  version = "1.1.7-unstable-20260107";
 
   src = fetchFromGitHub {
-    owner = "mio-19";
+    owner = "intgr";
     repo = "ego";
-    rev = "7ebeebfe0e8aa0f578978f08839d8afb8c2ddcd0"; # version;
-    hash = "sha256-G1Le+Kd894cZ4qS64FBE4S3aa6yroS2T2JaSrEvLyqs=";
+    rev = "33798378f719c376ed215c6725223c44d3c9dce9"; # version;
+    hash = "sha256-GJSCNQ+KxQEdkbfkKD/fniB/Ta2d6zqvU56oe7DK4j8=";
   };
 
   buildInputs = [

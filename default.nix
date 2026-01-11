@@ -16,6 +16,16 @@
 }:
 with (import ./private.nix { inherit pkgs; });
 let
+  stdenv = pkgs.stdenv;
+  llvmPackages_19 = pkgs.llvmPackages_19;
+  minipkgs = rec {
+    materialgram = (pkgs.callPackage ./pkgs/materialgram/package.nix { inherit telegram-desktop; });
+    telegram-desktop = (
+      pkgs.kdePackages.callPackage ./pkgs/telegram-desktop {
+        stdenv = if stdenv.hostPlatform.isDarwin then llvmPackages_19.stdenv else stdenv;
+      }
+    );
+  };
   self = (
     {
       # note: some packages might be commented out to reduce package numbers. garnix has hardcoded limit of 100.
@@ -79,7 +89,7 @@ let
           ];
           hash = pluginsHash;
         };
-      telegram-desktop = pkgs.telegram-desktop.overrideAttrs (old: {
+      telegram-desktop = minipkgs.telegram-desktop.overrideAttrs (old: {
         unwrapped = v3overridegcc (
           old.unwrapped.overrideAttrs (old2: {
             # see https://github.com/Layerex/telegram-desktop-patches
@@ -89,7 +99,7 @@ let
           })
         );
       });
-      materialgram = pkgs.materialgram.overrideAttrs (old: {
+      materialgram = minipkgs.materialgram.overrideAttrs (old: {
         unwrapped = v3overridegcc (
           old.unwrapped.overrideAttrs (old2: {
             # see https://github.com/Layerex/telegram-desktop-patches
@@ -120,8 +130,23 @@ let
       bees = nodarwin (v3overridegcc pkgs.bees);
       netdata = (v3override (goV3OverrideAttrs pkgs.netdata)).override { withCloudUi = true; };
       lix = v3override pkgs.lixPackageSets.latest.lix;
+      # https://gist.github.com/nstarke/baa031e0cab64a608c9bd77d73c50fc6
+      ghidra = v3override (
+        pkgs.ghidra.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [ ./patches/ghidra-ui-scale.patch ];
+        })
+      );
 
       cached = {
+        pkgscache = (
+          pkgs.symlinkJoin {
+            name = "pkgscache";
+            paths = [
+              self.materialgram
+              self.telegram-desktop
+            ];
+          }
+        );
         inherit (self)
           aria2-wrapped
           openssh_hpn
@@ -143,8 +168,11 @@ let
           plezy
           downkyicore
           ego
-          davinci-resolve-studio2001
+          #davinci-resolve-studio2001
           lix
+          ghidra
+          prismlauncher-diegiwg
+          android-translation-layer
           ;
       };
     }

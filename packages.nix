@@ -9,11 +9,19 @@
   },
 }:
 with (import ./private.nix { inherit pkgs; });
+let
+  callPackage = pkgs.callPackage;
+  lib = pkgs.lib // import ./lib { inherit pkgs; };
+  stdenv = pkgs.stdenv;
+  fetchFromGitHub = pkgs.fetchFromGitHub;
+in
 rec {
   wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix {
     withOptionals = true;
     stdenv = v3Optimizations pkgs.clangStdenv;
+    perl540 = pkgs.perl540 or pkgs.perl5;
+    perl540Packages = pkgs.perl540Packages or pkgs.perl5Packages;
   };
   minetest591 = pkgs.callPackage ./pkgs/minetest591 {
     stdenv = v3Optimizations pkgs.clangStdenv;
@@ -73,14 +81,21 @@ rec {
   );
   tuxguitar = v3overrideAttrs (
     pkgs.callPackage ./pkgs/tuxguitar/package.nix {
-      swt = v3overrideAttrs (pkgs.callPackage ./pkgs/swt/package.nix { });
+      swt = (pkgs.callPackage ./pkgs/swt/package.nix { });
     }
   );
-  mioplays = v3overrideAttrs (
-    pkgs.callPackage ./pkgs/mioplays/package.nix {
-      swt = v3overrideAttrs (pkgs.callPackage ./pkgs/swt/package.nix { });
-    }
-  );
+  mioplays = tuxguitar.overrideAttrs (old: {
+    src = pkgs.fetchFromGitHub {
+      owner = "mio-19";
+      repo = "tuxguitar";
+      rev = "0212c160ad3176d3bc96b3003fe03fc7738cebf8";
+      hash = "sha256-Vl15Ydj5sFNtaAhRxuiZwVcuVavD6TVRtZbpthra3tU=";
+    };
+
+    patches = [
+      ./pkgs/tuxguitar/fix-include.patch
+    ];
+  });
   nss_git = callOverride ./pkgs/nss-git { };
   #aria2-wrapped = pkgs.writeShellScriptBin "aria2" ''
   #  ${pkgs.aria2}/bin/aria2c -s65536 -j65536 -x16 -k1M "$@"
@@ -106,6 +121,14 @@ rec {
     }
   );
   mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });
+  bionic-translation = pkgs.callPackage ./pkgs/bionic-translation/package.nix { };
+  art-standalone = pkgs.callPackage ./pkgs/art-standalone/package.nix {
+    bionic-translation = bionic-translation;
+  };
+  android-translation-layer = pkgs.callPackage ./pkgs/android-translation-layer/package.nix {
+    art-standalone = art-standalone;
+    bionic-translation = bionic-translation;
+  };
   beammp-launcher = pkgs.callPackage ./pkgs/beammp-launcher/package.nix {
     cacert_3108 = pkgs.callPackage ./pkgs/cacert_3108 { };
   };
@@ -115,7 +138,7 @@ rec {
       pkgs.callPackage ./pkgs/firefox-nightly {
         nss_git = nss_git;
         nyxUtils = nyxUtils;
-        icu78 = icu.icu78;
+        icu78 = pkgs.icu78 or icu.icu78;
       }
     )
   );
@@ -149,6 +172,8 @@ rec {
   plezy = nodarwin (pkgs.callPackage ./pkgs/plezy { });
 
   downkyicore = pkgs.callPackage ./pkgs/downkyicore/package.nix { };
+  bifrost = pkgs.callPackage ./pkgs/bifrost/package.nix { };
+  bifrost-unwrapped = bifrost.unwrapped;
 
   eden = nodarwin (v3overrideAttrs (pkgs.callPackage ./pkgs/eden/package.nix { }));
 
@@ -156,6 +181,8 @@ rec {
   linux-enable-ir-emitter = nodarwin (
     pkgs.callPackage ./pkgs/linux-enable-ir-emitter/package.nix { }
   );
+  layan-sddm = nodarwin (pkgs.callPackage ./pkgs/layan-sddm { });
+  ultimate-vocal-remover = pkgs.callPackage ./pkgs/ultimate-vocal-remover { };
 
   proton-cachyos = pkgs.callPackage ./pkgs/proton-bin {
     toolTitle = "Proton-CachyOS";
@@ -231,4 +258,44 @@ rec {
     studioVariant = true;
   };
 
+  /*
+    mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
+
+    line = callPackage ./pkgs/line.nix {
+      inherit (lib) mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
+      wine = pkgs.wineWowPackages.base;
+    };
+  */
+  prismlauncher-diegiwg =
+    let
+      # https://github.com/NixOS/nixpkgs/blob/fb6a5b23f9416753d343d914fe7c14044e59aaed/pkgs/by-name/pr/prismlauncher/package.nix#L41
+      msaClientID = null;
+      gamemodeSupport = stdenv.hostPlatform.isLinux;
+      prismlauncher = pkgs.callPackage ./pkgs/prismlauncher/package.nix {
+        prismlauncher-unwrapped = prismlauncher-unwrapped;
+      };
+      prismlauncher-unwrapped = pkgs.callPackage ./pkgs/prismlauncher-unwrapped/package.nix {
+      };
+    in
+    prismlauncher.overrideAttrs (old: {
+      paths = [
+        # https://github.com/NixOS/nixpkgs/blob/fb6a5b23f9416753d343d914fe7c14044e59aaed/pkgs/by-name/pr/prismlauncher/package.nix#L61
+        (v3overrideAttrs (
+          (prismlauncher-unwrapped.override { inherit msaClientID gamemodeSupport; }).overrideAttrs (old': {
+            patches = (old.patches or [ ]) ++ [
+              (pkgs.fetchpatch {
+                name = "12a.patch";
+                url = "https://github.com/PrismLauncher/PrismLauncher/commit/12acabdb57ba6f12fcf9047c28ec8afa7a4fb970.patch";
+                sha256 = "sha256-t+sanKiSEuqmshy6Y+Y9tfpDf+7L3A8d0CBcA+oqLUs=";
+              })
+              (pkgs.fetchpatch {
+                name = "911.patch";
+                url = "https://github.com/PrismLauncher/PrismLauncher/commit/911c0f3593dd6b825f6d91900e48bdf3b59ad3a9.patch";
+                sha256 = "sha256-mCkZ613f7kvMQTW+UOi2dcnvzHg/c2vhPcPGCvdz+0k=";
+              })
+            ];
+          })
+        ))
+      ];
+    });
 }

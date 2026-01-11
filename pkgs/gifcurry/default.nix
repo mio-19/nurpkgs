@@ -113,7 +113,7 @@ haskell.lib.doJailbreak (
       homepage = "https://github.com/lettier/gifcurry";
       license = licenses.bsd3;
       mainProgram = "gifcurry_gui";
-      platforms = platforms.linux;
+      platforms = platforms.linux ++ platforms.darwin;
     };
   })
 )

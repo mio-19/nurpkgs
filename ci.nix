@@ -9,13 +9,22 @@
 # then your CI will be able to build and cache only those packages for
 # which this is possible.
 
+let
+  pinned = (builtins.fromJSON (builtins.readFile ./pinned.json)).pins;
+  nixpkgs = fetchTarball {
+    inherit (pinned.nixpkgs) url;
+    sha256 = pinned.nixpkgs.hash;
+  };
+in
 {
-  pkgs ? import <nixpkgs> {
-    #config.permittedInsecurePackages = [
-    #  "qtwebengine-5.15.19"
-    #];
-    config.allowUnfree = true;
-  },
+  pkgs ?
+    import nixpkgs # <nixpkgs>
+      {
+        #config.permittedInsecurePackages = [
+        #  "qtwebengine-5.15.19"
+        #];
+        config.allowUnfree = true;
+      },
 }:
 
 with builtins;

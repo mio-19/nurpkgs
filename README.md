@@ -64,3 +64,4 @@ files are copied from following locations. some are modified in this repo and so
 + android-translation-layer nixpkgs commit d9f0b9cb3d82342268db374b40bf062ea9a5f044
 + bionic-translation nixpkgs commit d9f0b9cb3d82342268db374b40bf062ea9a5f044
 + art-standalone nixpkgs commit d9f0b9cb3d82342268db374b40bf062ea9a5f044
++ https://github.com/NixOS/nixpkgs/raw/refs/heads/master/ci/pinned.json

@@ -5,14 +5,22 @@
 # Having pkgs default to <nixpkgs> is fine though, and it lets you use short
 # commands such as:
 #     nix-build -A mypackage
-
+let
+  pinned = (builtins.fromJSON (builtins.readFile ./pinned.json)).pins;
+  nixpkgs = fetchTarball {
+    inherit (pinned.nixpkgs) url;
+    sha256 = pinned.nixpkgs.hash;
+  };
+in
 {
-  pkgs ? import <nixpkgs> {
-    #config.permittedInsecurePackages = [
-    #  "qtwebengine-5.15.19"
-    #];
-    config.allowUnfree = true;
-  },
+  pkgs ?
+    import nixpkgs # <nixpkgs>
+      {
+        #config.permittedInsecurePackages = [
+        #  "qtwebengine-5.15.19"
+        #];
+        config.allowUnfree = true;
+      },
 }:
 with (import ./private.nix { inherit pkgs; });
 let

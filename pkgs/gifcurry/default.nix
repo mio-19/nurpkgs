@@ -5,6 +5,7 @@
   fetchurl,
   haskell,
   haskellPackages,
+  makeWrapper,
   wrapGAppsHook3,
   gsettings-desktop-schemas,
   gtk3,
@@ -35,21 +36,29 @@ let
     ];
   };
 
+  gstPluginsGood = gst_all_1.gst-plugins-good.override {
+    gtkSupport = true;
+  };
+
   base = haskellPackages.callCabal2nix "gifcurry" src { };
 in
 haskell.lib.doJailbreak (
   base.overrideAttrs (old: {
     inherit src version;
 
-    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ wrapGAppsHook3 ];
+    nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
+      makeWrapper
+      wrapGAppsHook3
+    ];
     buildInputs = (old.buildInputs or [ ]) ++ [
       gtk3
       gdk-pixbuf
       gsettings-desktop-schemas
       gst_all_1.gstreamer
       gst_all_1.gst-plugins-base
-      gst_all_1.gst-plugins-good
+      gstPluginsGood
       gst_all_1.gst-plugins-bad
+      gst_all_1.gst-plugins-ugly
       gst_all_1.gst-libav
     ];
 
@@ -63,6 +72,31 @@ haskell.lib.doJailbreak (
         gst_all_1.gstreamer
       ]}"
     ];
+
+    postFixup = (old.postFixup or "") + ''
+      gstPluginPath="${
+        lib.makeSearchPath "lib/gstreamer-1.0" [
+          gst_all_1.gst-plugins-base
+          gstPluginsGood
+          gst_all_1.gst-plugins-bad
+          gst_all_1.gst-plugins-ugly
+          gst_all_1.gst-libav
+        ]
+      }"
+      for exe in $out/bin/gifcurry_gui $out/bin/gifcurry_cli; do
+        if [ -e "$exe" ]; then
+          wrapProgram "$exe" --prefix PATH : "${
+            lib.makeBinPath [
+              ffmpeg
+              imagemagick
+              gst_all_1.gstreamer
+            ]
+          }" \
+          --prefix GST_PLUGIN_PATH : "$gstPluginPath" \
+          --prefix GST_PLUGIN_SYSTEM_PATH_1_0 : "$gstPluginPath"
+        fi
+      done
+    '';
 
     postInstall = (old.postInstall or "") + ''
       install -Dm644 packaging/linux/common/com.lettier.gifcurry.desktop \

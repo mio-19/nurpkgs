@@ -197,7 +197,6 @@ in
 
     inherit (thunderbird-unwrapped.passthru) # icu73
       icu77
-      icu78
       ;
   }
 ).overrideAttrs

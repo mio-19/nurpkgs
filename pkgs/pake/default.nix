@@ -11,6 +11,33 @@
   pkg-config,
   python3,
   vips,
+  glib,
+  gtk4,
+  gtk3,
+  gdk-pixbuf,
+  pango,
+  cairo,
+  atk,
+  xorg,
+  wayland,
+  libxkbcommon,
+  fontconfig,
+  libepoxy,
+  fribidi,
+  harfbuzz,
+  libthai,
+  freetype,
+  libpng,
+  libsoup_3,
+  libayatana-indicator,
+  ayatana-ido,
+  libdbusmenu,
+  webkitgtk_4_1,
+  glib-networking,
+  libayatana-appindicator,
+  openssl,
+  libsysprof-capture,
+  gst_all_1,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
@@ -24,6 +51,10 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-sEjj0a9aGCwv5EFn7PWkYU1j3U5MLO7lj0qL2CkfKOM=";
   };
 
+  patches = [
+    ./runtime-dir.patch
+  ];
+
   nativeBuildInputs = [
     nodejs_22
     pnpmConfigHook
@@ -34,7 +65,9 @@ stdenv.mkDerivation (finalAttrs: {
     python3
   ];
 
-  buildInputs = [ vips ];
+  buildInputs = [
+    vips
+  ];
 
   pnpmDeps = fetchPnpmDeps {
     inherit (finalAttrs) pname version src;
@@ -76,7 +109,64 @@ stdenv.mkDerivation (finalAttrs: {
     mv * $out/lib/node_modules/pake/
     makeWrapper ${lib.getExe nodejs_22} $out/bin/pake \
       --add-flags "$out/lib/node_modules/pake/dist/cli.js" \
-      --set NODE_PATH "$out/lib/node_modules/pake/node_modules"
+      --add-flags "--targets deb" \
+      --set NODE_PATH "$out/lib/node_modules/pake/node_modules" \
+      --set PKG_CONFIG ${pkg-config}/bin/pkg-config \
+      --set-default PAKE_SKIP_INSTALL 1 \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          pkg-config
+        ]
+      } \
+      --set PKG_CONFIG_PATH ${
+        lib.makeSearchPath "lib/pkgconfig" [
+          (lib.getDev glib)
+          (lib.getDev gtk3)
+          (lib.getDev gtk4)
+          (lib.getDev gdk-pixbuf)
+          (lib.getDev pango)
+          (lib.getDev cairo)
+          (lib.getDev atk)
+          (lib.getDev xorg.libX11)
+          (lib.getDev xorg.libXext)
+          (lib.getDev xorg.libXi)
+          (lib.getDev xorg.libXrandr)
+          (lib.getDev xorg.libXcursor)
+          (lib.getDev xorg.libXfixes)
+          (lib.getDev xorg.libXcomposite)
+          (lib.getDev xorg.libXdamage)
+          (lib.getDev xorg.libXinerama)
+          (lib.getDev wayland)
+          (lib.getDev libxkbcommon)
+          (lib.getDev fontconfig)
+          (lib.getDev libepoxy)
+          (lib.getDev fribidi)
+          (lib.getDev harfbuzz)
+          (lib.getDev libthai)
+          (lib.getDev freetype)
+          (lib.getDev libpng)
+          (lib.getDev xorg.libXrender)
+          (lib.getDev xorg.libXft)
+          (lib.getDev libsoup_3)
+          (lib.getDev libayatana-indicator)
+          (lib.getDev ayatana-ido)
+          (lib.getDev libdbusmenu)
+          (lib.getDev webkitgtk_4_1)
+          (lib.getDev glib-networking)
+          (lib.getDev libayatana-appindicator)
+          (lib.getDev openssl)
+          (lib.getDev libsysprof-capture)
+          (lib.getDev gst_all_1.gst-plugins-base)
+          (lib.getDev gst_all_1.gst-plugins-bad)
+          (lib.getDev gst_all_1.gst-plugins-good)
+          (lib.getDev gst_all_1.gst-plugins-rs)
+        ]
+      } \
+      --prefix LD_LIBRARY_PATH : ${
+        lib.makeLibraryPath [
+          libayatana-appindicator
+        ]
+      }
 
     runHook postInstall
   '';

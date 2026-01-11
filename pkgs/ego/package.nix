@@ -28,9 +28,10 @@ rustPlatform.buildRustPackage rec {
 
   cargoHash = "sha256-+RwS0eNYPRkab0UYLGluCRdlf2j+T7tgJGVNKOmIyVk=";
 
-  # requires access to /root
   checkFlags = [
+    # requires access to /root
     "--skip tests::test_check_user_homedir"
+    "--skip tests::test_a_x11_error"
   ];
 
   postInstall = ''

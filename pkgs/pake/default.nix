@@ -1,7 +1,10 @@
 {
   lib,
   stdenv,
+  stdenvNoCC,
+  writeShellScriptBin,
   fetchFromGitHub,
+  fetchurl,
   nodejs_22,
   fetchPnpmDeps,
   pnpmConfigHook,
@@ -40,6 +43,50 @@
   gst_all_1,
 }:
 
+let
+  appRun = fetchurl {
+    url = "https://github.com/tauri-apps/binary-releases/releases/download/apprun-old/AppRun-x86_64";
+    hash = "sha256-8wFApDoKWeRtshve/fdJuenyxpRukq+rus+YuK5z+08=";
+  };
+
+  linuxdeploy = fetchurl {
+    url = "https://github.com/tauri-apps/binary-releases/releases/download/linuxdeploy/linuxdeploy-x86_64.AppImage";
+    hash = "sha256-52K+qFyOsNSzUI1G5cHwN/cX0PkwOuO0qvyLBJkfoe8=";
+  };
+
+  linuxdeployPluginAppimage = fetchurl {
+    url = "https://github.com/linuxdeploy/linuxdeploy-plugin-appimage/releases/download/continuous/linuxdeploy-plugin-appimage-x86_64.AppImage";
+    hash = "sha256-gueLhAZ3TgVqToMmtgaf7DwHoK5Q2TPSAQBRipiaDkc=";
+  };
+
+  appimageTools =
+    if stdenv.hostPlatform.isx86_64 then
+      stdenvNoCC.mkDerivation {
+        pname = "pake-appimage-tools";
+        version = "2026-01-11";
+        dontUnpack = true;
+        installPhase = ''
+          install -Dm755 ${appRun} $out/AppRun-x86_64
+          install -Dm755 ${linuxdeploy} $out/linuxdeploy-x86_64.AppImage
+          install -Dm755 ${linuxdeployPluginAppimage} $out/linuxdeploy-plugin-appimage.AppImage
+        '';
+      }
+    else
+      null;
+
+  pakePkgConfig = writeShellScriptBin "pkg-config" ''
+    if [ "$1" = "--libs-only-L" ]; then
+      case "$2" in
+        ayatana-appindicator3-0.1|appindicator3-0.1)
+          echo "-L${libayatana-appindicator}/lib"
+          exit 0
+          ;;
+      esac
+    fi
+
+    exec ${pkg-config}/bin/pkg-config "$@"
+  '';
+in
 stdenv.mkDerivation (finalAttrs: {
   pname = "pake";
   version = "3.7.7";
@@ -110,11 +157,13 @@ stdenv.mkDerivation (finalAttrs: {
     makeWrapper ${lib.getExe nodejs_22} $out/bin/pake \
       --add-flags "$out/lib/node_modules/pake/dist/cli.js" \
       --add-flags "--targets deb" \
+      ${lib.optionalString (appimageTools != null) "--set PAKE_APPIMAGE_TOOLS_DIR ${appimageTools} \\"}
       --set NODE_PATH "$out/lib/node_modules/pake/node_modules" \
-      --set PKG_CONFIG ${pkg-config}/bin/pkg-config \
+      --set PKG_CONFIG ${pakePkgConfig}/bin/pkg-config \
       --set-default PAKE_SKIP_INSTALL 1 \
       --prefix PATH : ${
         lib.makeBinPath [
+          pakePkgConfig
           pkg-config
         ]
       } \

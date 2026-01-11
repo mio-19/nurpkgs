@@ -32,6 +32,7 @@ let
       ./gifcurry-data-text-qualify.patch
       ./gifcurry-gui-misc-text-qualify.patch
       ./gifcurry-gui-main-text-qualify.patch
+      ./gifcurry-use-magick.patch
     ];
   };
 
@@ -57,7 +58,7 @@ haskell.lib.doJailbreak (
       "--prefix"
       "PATH"
       ":"
-      "${lib.makeBinPath [
+    "${lib.makeBinPath [
         ffmpeg
         imagemagick
         gst_all_1.gstreamer

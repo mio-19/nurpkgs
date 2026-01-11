@@ -300,4 +300,6 @@ rec {
         ))
       ];
     });
+
+  rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
 }

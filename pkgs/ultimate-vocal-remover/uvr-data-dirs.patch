@@ -110,10 +110,10 @@ index dcb4f10..4eda190 100644
 \ No newline at end of file
 +    root.mainloop()
 diff --git a/gui_data/app_size_values.py b/gui_data/app_size_values.py
-index 676186d..0e94028 100644
+index 676186d..11dbf15 100644
 --- a/gui_data/app_size_values.py
 +++ b/gui_data/app_size_values.py
-@@ -6,11 +6,14 @@ from PIL import ImageTk
+@@ -6,11 +6,11 @@ from PIL import ImageTk
  
  OPERATING_SYSTEM = platform.system()
  
@@ -123,17 +123,14 @@ index 676186d..0e94028 100644
 -        raise Exception("Failed to get screen height")
 -    return monitors[0].height, monitors[0].width
 +def get_screen_height():
-+    try:
-+        monitors = get_monitors()
-+        if len(monitors) == 0:
-+            raise Exception("Failed to get screen height")
-+        return monitors[0].height, monitors[0].width
-+    except Exception:
-+        return 1080, 1920
++    monitors = get_monitors()
++    if len(monitors) == 0:
++        raise Exception("Failed to get screen height")
++    return monitors[0].height, monitors[0].width
  
  def scale_values(value):
      if not SCALE_WIN_SIZE == 1920:
-@@ -129,12 +132,14 @@ class ImagePath():
+@@ -129,12 +129,14 @@ class ImagePath():
          img = Image.open(path).convert(mode='RGBA')
          ratio = img.height/img.width
          img = img.rotate(angle=-rotate)
@@ -154,7 +151,7 @@ index 676186d..0e94028 100644
                  
          return ImageTk.PhotoImage(img)
  
-@@ -367,4 +372,4 @@ Y_OFFSET_CONSOLE_FRAME_1080P = IMAGE_HEIGHT + FILEPATHS_HEIGHT + OPTIONS_HEIGHT
+@@ -367,4 +369,4 @@ Y_OFFSET_CONSOLE_FRAME_1080P = IMAGE_HEIGHT + FILEPATHS_HEIGHT + OPTIONS_HEIGHT
  LABEL_Y_OFFSET = MAIN_ROW_Y[0]
  ENTRY_X_OFFSET = SUB_ENT_ROW_X
  ENTRY_Y_OFFSET = MAIN_ROW_Y[1]

@@ -24,14 +24,14 @@ let
   };
   minipkgs = {
     prismlauncher =
-      if (builtins.compareVersions pkgs.prismlauncher.version minipkgs0.prismlauncher.version) > 0 then
+      if (builtins.compareVersions pkgs.prismlauncher.version minipkgs0.prismlauncher.version) >= 0 then
         pkgs.prismlauncher
       else
         minipkgs0.prismlauncher;
     prismlauncher-unwrapped =
       if
         (builtins.compareVersions pkgs.prismlauncher-unwrapped.version minipkgs0.prismlauncher-unwrapped.version)
-        > 0
+        >= 0
       then
         pkgs.prismlauncher-unwrapped
       else

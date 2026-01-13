@@ -14,9 +14,10 @@ mkWindowsAppNoCC rec {
   pname = "line";
   version = "9.2.0"; # :version:
 
+  # https://community.chocolatey.org/packages/line#files
   src = fetchurl {
-    url = "https://dw.uptodown.net/dwn/d-j2hYrpH1l7Yai6-Sx1G1mqPZ5MdNdvZYHvkFptDlaA01rZdXIgXHjWINKSQ8LvppcrHM4GzCx27onCSeMKXZP59JAxTRumxrjU3pg7P5XAn7QPu6H9veP-q5sMFNJu/_pnWqtP0_KJFx2ijIPyobk_iET9Kaz7A7EFfUSyxdQLEVnr83cnXKgIqa69lhUh67ehKJSalm4XxanONZdLXlAPV-DPL2ugO2Lb3_WFKSYUkCKk5PkX_iOhoRK77ENC1/u3xGWdVjdntPmREAKX9emg6EGDshLP_15DrdnL4ERQMfh8qztNUCUJJtESyA9CERhmfg-flbf_9oUiLX72fyeg==/line-9-2-0-build-3431.exe";
-    sha256 = "469421829b4eda17af44236f1a684fe970899324677f741f22033a2218b40bf5"; # :hash:
+    url = "https://desktop.line-scdn.net/win/new/LineInst.exe";
+    hash = "sha256-NQGOGJghiPxfSF9GLnp3+t5+DLYy+vYy4WNiKBW56Qo="; # :hash:
   };
 
   dontUnpack = true;

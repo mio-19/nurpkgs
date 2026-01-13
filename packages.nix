@@ -303,13 +303,11 @@ rec {
 
   # https://github.com/NixOS/nixpkgs/issues/10165
   # https://discourse.nixos.org/t/what-is-your-approach-to-packaging-wine-applications-with-nix-derivations/12799/1
-  notepad-plus-plus = nonurbot (
-    callPackage ./pkgs/notepad++.nix {
-      inherit pkgs;
-      build = lib;
-      wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
-    }
-  );
+  notepad-plus-plus = callPackage ./pkgs/notepad++.nix {
+    inherit pkgs;
+    build = lib;
+    wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
+  };
 
   prismlauncher-diegiwg =
     let

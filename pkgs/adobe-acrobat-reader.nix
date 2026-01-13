@@ -16,8 +16,8 @@ mkWindowsAppNoCC rec {
   version = "2025.1.20997";
 
   src = fetchurl {
-    url = "https://ardownload3.adobe.com/pub/adobe/reader/win/AcrobatDC/2500120997/AcroRdrDC2500120997_MUI.exe";
-    hash = "sha256-AIUB5ZV7NQK7VYD0KHo0Asp7q3GoXehwnSy9pEobLIg=";
+    url = "https://ardownload3.adobe.com/pub/adobe/acrobat/win/AcrobatDC/2500120997/AcroRdrDCx642500120997_MUI.exe";
+    hash = "sha256-sQgm8K8+2iCFnY/muh2LBKzI+D/msv8rIJYF+Hk3EbI=";
   };
 
   dontUnpack = true;
@@ -39,7 +39,7 @@ mkWindowsAppNoCC rec {
   winAppInstall = ''
     work="$(mktemp -d)"
     ${p7zip}/bin/7z x -y -o"$work" ${src}
-    $WINE msiexec /i "$work/AcroRead.msi" \
+    $WINE msiexec /i "$work/AcroPro.msi" \
       TRANSFORMS="$work/Transforms/1033.mst" \
       /qn /norestart ALLUSERS=1 EULA_ACCEPT=YES DISABLEDESKTOPSHORTCUT=1
     wineserver -w

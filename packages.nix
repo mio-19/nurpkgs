@@ -303,7 +303,7 @@ rec {
   notepadpp = callPackage ./pkgs/notepad++.nix {
     inherit pkgs;
     build = lib;
-    wine = pkgs.wineWowPackages.base;
+    #wine = pkgs.wineWowPackages.base;
   };
 
   prismlauncher-diegiwg =

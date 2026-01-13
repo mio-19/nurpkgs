@@ -21,8 +21,8 @@ let
   };
 
   newtonsoftJson = fetchzip {
-    url = "https://www.nuget.org/api/v2/package/Newtonsoft.Json/13.0.3";
-    hash = "sha256-5VHoicAPQxsHwKO/PI+urXivxPV1XnjK7+LVkX2iFxs=";
+    url = "https://www.nuget.org/api/v2/package/Newtonsoft.Json/13.0.4";
+    hash = "sha256-+nd5WU/JDMxGEsYIk4GGRH3HfT0a9/gSmnjrXgALGhg=";
     extension = "zip";
     stripRoot = false;
   };
@@ -68,9 +68,9 @@ stdenv.mkDerivation (finalAttrs: {
       ln -s PSARCBrowser.cs RocksmithToTabLib/PsarcBrowser.cs
     fi
 
-    mkdir -p packages/CommandLineParser.1.9.71 packages/Newtonsoft.Json.13.0.3 packages/zlib.net.1.0.4.0
+    mkdir -p packages/CommandLineParser.1.9.71 packages/Newtonsoft.Json.13.0.4 packages/zlib.net.1.0.4.0
     cp -R ${commandLineParser}/* packages/CommandLineParser.1.9.71/
-    cp -R ${newtonsoftJson}/* packages/Newtonsoft.Json.13.0.3/
+    cp -R ${newtonsoftJson}/* packages/Newtonsoft.Json.13.0.4/
     cp -R ${zlibNet}/* packages/zlib.net.1.0.4.0/
   '';
 

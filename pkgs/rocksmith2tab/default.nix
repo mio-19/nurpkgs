@@ -68,6 +68,11 @@ stdenv.mkDerivation (finalAttrs: {
       ln -s PSARCBrowser.cs RocksmithToTabLib/PsarcBrowser.cs
     fi
 
+    substituteInPlace RocksmithToTabLib/RocksmithToTabLib.csproj \
+      --replace-fail "Newtonsoft.Json.13.0.3" "Newtonsoft.Json.13.0.4"
+    substituteInPlace RocksmithToTabLib/packages.config \
+      --replace-fail "version=\"13.0.3\"" "version=\"13.0.4\""
+
     mkdir -p packages/CommandLineParser.1.9.71 packages/Newtonsoft.Json.13.0.4 packages/zlib.net.1.0.4.0
     cp -R ${commandLineParser}/* packages/CommandLineParser.1.9.71/
     cp -R ${newtonsoftJson}/* packages/Newtonsoft.Json.13.0.4/

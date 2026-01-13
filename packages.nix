@@ -312,6 +312,9 @@ rec {
     inherit (pkgs) xorg;
     wine = pkgs.winePackages.full;
   };
+  adobe-acrobat-reader_virtualDesktop = adobe-acrobat-reader.override {
+    virtualDesktop = true;
+  };
 
   # https://github.com/NixOS/nixpkgs/issues/10165
   # https://discourse.nixos.org/t/what-is-your-approach-to-packaging-wine-applications-with-nix-derivations/12799/1

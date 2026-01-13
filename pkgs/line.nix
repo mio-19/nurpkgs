@@ -14,10 +14,9 @@ mkWindowsAppNoCC rec {
   pname = "line";
   version = "9.2.0"; # :version:
 
-  # https://community.chocolatey.org/packages/line#files
   src = fetchurl {
-    url = "https://desktop.line-scdn.net/win/new/LineInst.exe";
-    hash = "sha256-NQGOGJghiPxfSF9GLnp3+t5+DLYy+vYy4WNiKBW56Qo="; # :hash:
+    url = "https://web.archive.org/web/20260113123008if_/https://dl5.filehippo.com/d36/e13/1aca8e2afb2dd5e0ed17abef69d7a56eb3/LINE_V9.2.0.3431.exe?Expires=1768350598&Signature=bc1a2cdefb659fd5c3892fe5146398dc5ac6fefa&url=https://filehippo.com/download_line/9.2.0.3431/&Filename=LINE_V9.2.0.3431.exe";
+    sha256 = "469421829b4eda17af44236f1a684fe970899324677f741f22033a2218b40bf5"; # :hash:
   };
 
   dontUnpack = true;

@@ -304,7 +304,8 @@ rec {
   adobe-acrobat-reader = callPackage ./pkgs/adobe-acrobat-reader.nix {
     inherit (lib) mkWindowsAppNoCC makeDesktopIcon copyDesktopIcons;
     inherit (pkgs) copyDesktopItems makeDesktopItem p7zip;
-    wine = pkgs.wineWowPackages.full; # avoid mono boot prompt
+    inherit (pkgs) xorg;
+    wine = pkgs.winePackages.full;
   };
 
   # https://github.com/NixOS/nixpkgs/issues/10165

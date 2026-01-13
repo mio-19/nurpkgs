@@ -8,7 +8,9 @@
   copyDesktopItems,
   copyDesktopIcons,
   p7zip,
+  xorg,
 }:
+# Based on AUR acroread-dc-wine (maintainer Smoolak), adapted for mkWindowsAppNoCC.
 mkWindowsAppNoCC rec {
   inherit wine;
 
@@ -16,14 +18,14 @@ mkWindowsAppNoCC rec {
   version = "2025.1.20997";
 
   src = fetchurl {
-    url = "https://ardownload3.adobe.com/pub/adobe/acrobat/win/AcrobatDC/2500120997/AcroRdrDCx642500120997_MUI.exe";
-    hash = "sha256-sQgm8K8+2iCFnY/muh2LBKzI+D/msv8rIJYF+Hk3EbI=";
+    url = "https://ardownload2.adobe.com/pub/adobe/reader/win/AcrobatDC/2500120997/AcroRdrDC2500120997_en_US.exe";
+    hash = "sha256-gznoj4yY9Fktz8LVWhjBwArUqSlQOUX9/r6ukojATG8=";
   };
 
   dontUnpack = true;
-  wineArch = "win64";
+  wineArch = "win32";
   persistRegistry = false;
-  persistRuntimeLayer = false;
+  persistRuntimeLayer = true;
   enableMonoBootPrompt = false;
   graphicsDriver = "auto";
 
@@ -36,33 +38,56 @@ mkWindowsAppNoCC rec {
     desktop = false;
   };
 
+  regTweaks = fetchurl {
+    url = "https://aur.archlinux.org/cgit/aur.git/plain/acroread-dc.reg?h=acroread-dc-wine";
+    hash = "sha256-EXFuBh+altFKojYtrrviQkLi5LFCFeGo2VPhfNFlvj4=";
+  };
+
   winAppInstall = ''
+    export WINEDEBUG="-all"
     work="$(mktemp -d)"
-    ${p7zip}/bin/7z x -y -o"$work" ${src}
-    $WINE msiexec /i "$work/AcroPro.msi" \
-      TRANSFORMS="$work/Transforms/1033.mst" \
-      /qn /norestart ALLUSERS=1 EULA_ACCEPT=YES DISABLEDESKTOPSHORTCUT=1
+
+    winetricks --unattended mspatcha >/dev/null 2>&1 || true
+    winetricks --unattended riched20 >/dev/null 2>&1 || true
+    winetricks --unattended vcrun2015 >/dev/null 2>&1 || true
+
+    ${p7zip}/bin/7z x -y -o"$work" ${src} >/dev/null 2>&1 || true
+    setup="$(find "$work" -maxdepth 2 -iname 'setup.exe' | head -n1)"
+    if [ -n "$setup" ]; then
+      $WINE "$setup" /sAll
+      wineserver -w
+    else
+      echo "Acrobat setup.exe not found in extracted files" >&2
+      exit 1
+    fi
+
+    $WINE regedit ${regTweaks} >/dev/null 2>&1 || true
     wineserver -w
+
+    winetricks --unattended win7 >/dev/null 2>&1 || true
   '';
 
   winAppRun = ''
-    app=""
-    for candidate in \
-      "$WINEPREFIX/drive_c/Program Files/Adobe/Acrobat Reader DC/Reader/AcroRd32.exe" \
-      "$WINEPREFIX/drive_c/Program Files (x86)/Adobe/Acrobat Reader DC/Reader/AcroRd32.exe" \
-      "$WINEPREFIX/drive_c/Program Files/Adobe/Acrobat DC/Acrobat/Acrobat.exe" \
-      "$WINEPREFIX/drive_c/Program Files (x86)/Adobe/Acrobat DC/Acrobat/Acrobat.exe"
-    do
-      if [ -f "$candidate" ]; then
-        app="$candidate"
-        break
-      fi
-    done
-    if [ -z "$app" ]; then
+    export WINEDEBUG="-all"
+    reader="$WINEPREFIX/drive_c/Program Files (x86)/Adobe/Acrobat Reader DC/Reader/AcroRd32.exe"
+    if [ ! -f "$reader" ]; then
+      reader="$WINEPREFIX/drive_c/Program Files/Adobe/Acrobat Reader DC/Reader/AcroRd32.exe"
+    fi
+    if [ ! -f "$reader" ]; then
       echo "Adobe Acrobat Reader executable not found in Wine prefix" >&2
       exit 1
     fi
-    $WINE start /unix "$app" "$ARGS"
+
+    if [ "''${ACROREAD_NO_VIRTUAL_DESKTOP:-0}" != "1" ]; then
+      if command -v ${xorg.xrandr}/bin/xrandr >/dev/null 2>&1; then
+        res="$(${xorg.xrandr}/bin/xrandr 2>/dev/null | grep '\\*' | head -n1 | awk '{print $1}')"
+      else
+        res="1920x1080"
+      fi
+      $WINE explorer /desktop=AcroRead,"$res" "$reader" "$ARGS"
+    else
+      $WINE "$reader" "$ARGS"
+    fi
   '';
 
   installPhase = ''
@@ -78,8 +103,7 @@ mkWindowsAppNoCC rec {
       name = pname;
       exec = pname;
       icon = pname;
-      desktopName = "Adobe Acrobat Reader";
-      genericName = "PDF Viewer";
+      desktopName = "Adobe Acrobat Reader DC";
       categories = [
         "Office"
         "Viewer"
@@ -100,8 +124,8 @@ mkWindowsAppNoCC rec {
   };
 
   meta = with lib; {
-    homepage = "https://www.adobe.com/acrobat/pdf-reader.html";
-    description = "Adobe Acrobat Reader DC (Windows version via Wine)";
+    description = "Adobe Acrobat Reader DC - PDF viewer (via Wine)";
+    homepage = "https://www.adobe.com/products/reader.html";
     license = licenses.unfree;
     platforms = [ "x86_64-linux" ];
   };

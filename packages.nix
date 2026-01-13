@@ -301,6 +301,11 @@ rec {
     inherit (lib) mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
     wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
   };
+  adobe-acrobat-reader = callPackage ./pkgs/adobe-acrobat-reader.nix {
+    inherit (lib) mkWindowsAppNoCC makeDesktopIcon copyDesktopIcons;
+    inherit (pkgs) copyDesktopItems makeDesktopItem p7zip;
+    wine = pkgs.wineWowPackages.full; # avoid mono boot prompt
+  };
 
   # https://github.com/NixOS/nixpkgs/issues/10165
   # https://discourse.nixos.org/t/what-is-your-approach-to-packaging-wine-applications-with-nix-derivations/12799/1

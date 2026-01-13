@@ -40,6 +40,12 @@ mkWindowsAppNoCC rec {
     desktop = false;
   };
 
+  fileMap = {
+    "$HOME/.config/adobe-acrobat-reader/Local" = "drive_c/users/$USER/AppData/Local/Adobe";
+    "$HOME/.config/adobe-acrobat-reader/LocalLow" = "drive_c/users/$USER/AppData/LocalLow/Adobe";
+    "$HOME/.config/adobe-acrobat-reader/Roaming" = "drive_c/users/$USER/AppData/Roaming/Adobe";
+  };
+
   regTweaks = fetchurl {
     url = "https://aur.archlinux.org/cgit/aur.git/plain/acroread-dc.reg?h=acroread-dc-wine";
     hash = "sha256-EXFuBh+altFKojYtrrviQkLi5LFCFeGo2VPhfNFlvj4=";

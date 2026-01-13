@@ -315,6 +315,7 @@ rec {
   adobe-acrobat-reader_virtualDesktop = adobe-acrobat-reader.override {
     virtualDesktop = true;
   };
+  firejail-profiles = pkgs.callPackage ./pkgs/firejail-profiles { };
 
   wineshell-wine64 = callPackage ./pkgs/wineshell/default.nix {
     inherit (lib) mkWindowsApp;

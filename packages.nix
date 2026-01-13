@@ -303,7 +303,7 @@ rec {
     };
   */
 
-  notepadpp = nonurbot (
+  notepad-plus-plus = nonurbot (
     callPackage ./pkgs/notepad++.nix {
       inherit pkgs;
       build = lib;

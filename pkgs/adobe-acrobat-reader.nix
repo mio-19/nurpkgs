@@ -8,6 +8,7 @@
   copyDesktopItems,
   copyDesktopIcons,
   p7zip,
+  gawk,
   xorg,
 }:
 # Based on AUR acroread-dc-wine (maintainer Smoolak), adapted for mkWindowsAppNoCC.
@@ -61,7 +62,9 @@ mkWindowsAppNoCC rec {
       exit 1
     fi
 
-    $WINE regedit ${regTweaks} >/dev/null 2>&1 || true
+    regfile="$WINEPREFIX/drive_c/acroread-dc.reg"
+    cp ${regTweaks} "$regfile"
+    $WINE regedit "$($WINE winepath -w "$regfile")" >/dev/null 2>&1 || true
     wineserver -w
 
     winetricks --unattended win7 >/dev/null 2>&1 || true
@@ -79,9 +82,8 @@ mkWindowsAppNoCC rec {
     fi
 
     if [ "''${ACROREAD_NO_VIRTUAL_DESKTOP:-0}" != "1" ]; then
-      if command -v ${xorg.xrandr}/bin/xrandr >/dev/null 2>&1; then
-        res="$(${xorg.xrandr}/bin/xrandr 2>/dev/null | grep '\\*' | head -n1 | awk '{print $1}')"
-      else
+      res="$(${xorg.xrandr}/bin/xrandr 2>/dev/null | ${gawk}/bin/awk '/\\*/ && $1 ~ /^[0-9]+x[0-9]+$/ {print $1; exit}')"
+      if [ -z "$res" ]; then
         res="1920x1080"
       fi
       $WINE explorer /desktop=AcroRead,"$res" "$reader" "$ARGS"

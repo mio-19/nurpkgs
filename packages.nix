@@ -303,7 +303,12 @@ rec {
   };
   adobe-acrobat-reader = callPackage ./pkgs/adobe-acrobat-reader.nix {
     inherit (lib) mkWindowsAppNoCC makeDesktopIcon copyDesktopIcons;
-    inherit (pkgs) copyDesktopItems makeDesktopItem p7zip;
+    inherit (pkgs)
+      copyDesktopItems
+      makeDesktopItem
+      p7zip
+      gawk
+      ;
     inherit (pkgs) xorg;
     wine = pkgs.winePackages.full;
   };

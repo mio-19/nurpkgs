@@ -12,14 +12,14 @@ in
 mkWindowsAppNoCC rec {
   inherit wine;
   pname = "notepad-plus-plus";
-  version = "8.7.3";
+  version = "8.9";
   src = fetchurl {
-    url = "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v${version}/npp.${version}.Installer.exe";
-    sha256 = "0qb8x7fy2840wvc0ypmqk0zn806va3zrpdz6cdzrqwcyn76j3ymf";
+    url = "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v${version}/npp.${version}.Installer.x64.exe";
+    sha256 = "sha256-jiJyV1b6VnyGFw02ASKLvmI7nFsMSEbFRjGO/SrIpuM=";
   };
 
   dontUnpack = true;
-  wineArch = "win32";
+  wineArch = "win64";
 
   fileMap = {
     "$HOME/.config/Notepad++" = "drive_c/users/$USER/AppData/Roaming/Notepad++";

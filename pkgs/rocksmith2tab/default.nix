@@ -9,10 +9,17 @@
   perl,
   libgdiplus,
   fontconfig,
-  rocksmithCustomSongToolkit,
+  rocksmith-custom-song-toolkit,
 }:
 
 let
+  commandLineParser = fetchzip {
+    url = "https://www.nuget.org/api/v2/package/CommandLineParser/1.9.71";
+    hash = "sha256-q+wwMRO90T1E3QV8quT5cJo9CHUagX277PD1sNowuVg=";
+    extension = "zip";
+    stripRoot = false;
+  };
+
   newtonsoftJson = fetchzip {
     url = "https://www.nuget.org/api/v2/package/Newtonsoft.Json/13.0.3";
     hash = "sha256-5VHoicAPQxsHwKO/PI+urXivxPV1XnjK7+LVkX2iFxs=";
@@ -48,19 +55,21 @@ stdenv.mkDerivation (finalAttrs: {
   buildInputs = [
     libgdiplus
     fontconfig
-    rocksmithCustomSongToolkit
+    rocksmith-custom-song-toolkit
   ];
 
   postPatch = ''
-    rm -f libraries/RocksmithToolkitLib.dll
-    cp ${rocksmithCustomSongToolkit}/lib/rocksmith-custom-song-toolkit/lib/RocksmithToolkitLib.dll \
+    # Drop any bundled DLLs to avoid using prebuilt blobs.
+    find . -type f -iname '*.dll' -delete
+    cp ${rocksmith-custom-song-toolkit}/lib/rocksmith-custom-song-toolkit/lib/RocksmithToolkitLib.dll \
       libraries/RocksmithToolkitLib.dll
 
     if [ ! -e RocksmithToTabLib/PsarcBrowser.cs ]; then
       ln -s PSARCBrowser.cs RocksmithToTabLib/PsarcBrowser.cs
     fi
 
-    mkdir -p packages/Newtonsoft.Json.13.0.3 packages/zlib.net.1.0.4.0
+    mkdir -p packages/CommandLineParser.1.9.71 packages/Newtonsoft.Json.13.0.3 packages/zlib.net.1.0.4.0
+    cp -R ${commandLineParser}/* packages/CommandLineParser.1.9.71/
     cp -R ${newtonsoftJson}/* packages/Newtonsoft.Json.13.0.3/
     cp -R ${zlibNet}/* packages/zlib.net.1.0.4.0/
   '';

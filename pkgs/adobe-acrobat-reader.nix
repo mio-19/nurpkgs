@@ -72,7 +72,9 @@ mkWindowsAppNoCC rec {
   '';
 
   winAppRun = ''
-    $WINE reg add "HKCU\Software\Wine\X11 Driver" /v Decorated /t REG_SZ /d N /f
+    ${lib.optionalString (
+      !virtualDesktop
+    ) ''$WINE reg add "HKCU\Software\Wine\X11 Driver" /v Decorated /t REG_SZ /d N /f''}
     export WINEDEBUG="-all"
     reader="$WINEPREFIX/drive_c/Program Files (x86)/Adobe/Acrobat Reader DC/Reader/AcroRd32.exe"
     if [ ! -f "$reader" ]; then

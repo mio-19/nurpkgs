@@ -291,7 +291,9 @@ rec {
     studioVariant = true;
   };
 
-  mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
+  mkwindowsapp-tools = lib.mkIf (!nurbot) (
+    callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; }
+  );
 
   /*
     line = callPackage ./pkgs/line.nix {
@@ -300,11 +302,13 @@ rec {
     };
   */
 
-  notepadpp = callPackage ./pkgs/notepad++.nix {
-    inherit pkgs;
-    build = lib;
-    #wine = pkgs.wineWowPackages.base;
-  };
+  notepadpp = lib.mkIf (!nurbot) (
+    callPackage ./pkgs/notepad++.nix {
+      inherit pkgs;
+      build = lib;
+      #wine = pkgs.wineWowPackages.base;
+    }
+  );
 
   prismlauncher-diegiwg =
     let

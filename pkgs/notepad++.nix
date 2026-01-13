@@ -80,7 +80,6 @@ mkWindowsAppNoCC rec {
     maintainers = [ "maydayv7" ];
     platforms = [
       "x86_64-linux"
-      "i686-linux"
     ];
   };
 }

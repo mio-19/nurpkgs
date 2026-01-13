@@ -316,6 +316,75 @@ rec {
     virtualDesktop = true;
   };
 
+  wineshell-wine64 = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.wine64Packages.stableFull;
+    wineArch = "win64";
+    wineFlavor = "wine64";
+  };
+
+  wineshell-wineWow64 = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.wineWowPackages.stableFull;
+    wineArch = "win64";
+    wineFlavor = "wineWow64";
+  };
+
+  wineshell-wine = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.winePackages.stableFull;
+    wineArch = "win32";
+    wineFlavor = "wine";
+  };
+
+  wineshell-wine64-base = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.wine64Packages.base;
+    wineArch = "win64";
+    wineFlavor = "wine64";
+    enableMonoBootPrompt = false;
+  };
+
+  wineshell-wineWow64-base = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.wineWowPackages.base;
+    wineArch = "win64";
+    wineFlavor = "wineWow64";
+    enableMonoBootPrompt = false;
+  };
+
+  wineshell-wine-base = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.winePackages.base;
+    wineArch = "win32";
+    wineFlavor = "wine";
+    enableMonoBootPrompt = false;
+  };
+
+  wineshell-wine64-vulkan = wineshell-wine64.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wineWow64-vulkan = wineshell-wineWow64.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wine-vulkan = wineshell-wine.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wine64-base-vulkan = wineshell-wine64-base.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wineWow64-base-vulkan = wineshell-wineWow64-base.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wine-base-vulkan = wineshell-wine-base.override {
+    enableVulkan = true;
+  };
+
   # https://github.com/NixOS/nixpkgs/issues/10165
   # https://discourse.nixos.org/t/what-is-your-approach-to-packaging-wine-applications-with-nix-derivations/12799/1
   notepad-plus-plus = callPackage ./pkgs/notepad++.nix {

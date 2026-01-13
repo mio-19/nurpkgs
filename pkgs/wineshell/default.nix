@@ -48,5 +48,6 @@ mkWindowsApp rec {
       "i686-linux"
       "x86_64-linux"
     ];
+    mainProgram = "wineshell-${wineFlavor}";
   };
 }

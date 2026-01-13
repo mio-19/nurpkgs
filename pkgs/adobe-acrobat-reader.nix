@@ -140,5 +140,6 @@ mkWindowsAppNoCC rec {
     homepage = "https://www.adobe.com/products/reader.html";
     license = licenses.unfree;
     platforms = [ "x86_64-linux" ];
+    mainProgram = "adobe-acrobat-reader";
   };
 }

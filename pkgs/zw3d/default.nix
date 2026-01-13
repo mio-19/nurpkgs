@@ -52,6 +52,9 @@ stdenv.mkDerivation (finalAttrs: {
     wayland
     libglvnd
     stdenv.cc.cc.lib
+    xorg.libX11
+    xorg.libXmu
+    xorg.libXt
     libjpeg_turbo
     libwebp
     freetype
@@ -115,6 +118,7 @@ stdenv.mkDerivation (finalAttrs: {
     description = "ZW3D proprietary CAD software";
     homepage = "https://www.zwsoft.cn/product/zw3d/linux";
     license = lib.licenses.unfree;
+    mainProgram = "zw3d";
     platforms = [ "x86_64-linux" ];
     sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
   };

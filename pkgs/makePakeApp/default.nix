@@ -75,11 +75,9 @@ let
     hash = iconHash;
   };
 
-  _assertPnameLowercase =
-    assert lib.assertMsg (pname == lib.toLower pname) "makePakeApp: pname must be lowercase";
-    true;
   executableName = "pake-${pname}";
 in
+assert lib.assertMsg (pname == lib.toLower pname) "makePakeApp: pname must be lowercase";
 stdenv.mkDerivation (finalAttrs: {
   inherit pname version;
 

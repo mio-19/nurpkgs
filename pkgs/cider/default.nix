@@ -49,7 +49,6 @@ stdenv.mkDerivation (finalAttrs: {
     npm_config_build_from_source = "true";
     NPM_CONFIG_MANAGE_PACKAGE_MANAGER_VERSIONS = "false";
     ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
-    CIDER_TOKEN = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IldlYlBsYXlLaWQifQ.eyJpc3MiOiJBTVBXZWJQbGF5IiwiaWF0IjoxNzY0ODAyNzIxLCJleHAiOjE3NzIwNjAzMjEsInJvb3RfaHR0cHNfb3JpZ2luIjpbImFwcGxlLmNvbSJdfQ.0Mu4BWoXnb1m2P05pXlHnq7kL1TNOHI9Pl-Z_6ZrJxnf8b6luxPaMvZ6O6WC7ArDvocA1kLyvehvi-T7TbI_nw";
   };
 
   postPatch = ''
@@ -91,6 +90,7 @@ stdenv.mkDerivation (finalAttrs: {
     makeWrapper ${lib.getExe electron} $out/bin/sh.cider.Cider \
       --add-flags $out/lib/cider/build/index.js \
       --set NODE_PATH "$out/lib/cider/node_modules" \
+      --set CIDER_TOKEN eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IldlYlBsYXlLaWQifQ.eyJpc3MiOiJBTVBXZWJQbGF5IiwiaWF0IjoxNzY0ODAyNzIxLCJleHAiOjE3NzIwNjAzMjEsInJvb3RfaHR0cHNfb3JpZ2luIjpbImFwcGxlLmNvbSJdfQ.0Mu4BWoXnb1m2P05pXlHnq7kL1TNOHI9Pl-Z_6ZrJxnf8b6luxPaMvZ6O6WC7ArDvocA1kLyvehvi-T7TbI_nw \
       --set ELECTRON_FORCE_IS_PACKAGED 1 \
       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true --wayland-text-input-version=3}}" \
       --set-default ELECTRON_IS_DEV 0 \

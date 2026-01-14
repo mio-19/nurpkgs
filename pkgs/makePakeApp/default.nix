@@ -6,6 +6,7 @@
   pake,
   dpkg,
   autoPatchelfHook,
+  makeWrapper,
   nodejs_22,
   pnpm,
   cargo,
@@ -92,6 +93,7 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     autoPatchelfHook
     dpkg
+    makeWrapper
     pake
     nodejs_22
     pnpm
@@ -201,6 +203,8 @@ stdenv.mkDerivation (finalAttrs: {
     done
 
     mkdir -p "$out/bin"
+    wrapProgram "$out/usr/bin/${executableName}" \
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libayatana-appindicator ]}"
     ln -s "$out/usr/bin/${executableName}" "$out/bin/${pname}"
 
     runHook postInstall

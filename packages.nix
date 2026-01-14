@@ -231,6 +231,7 @@ rec {
   apple-music = pkgs.callPackage ./pkgs/apple-music/package.nix {
     inherit makePakeApp;
   };
+  altus = pkgs.callPackage ./pkgs/altus/package.nix { };
   apple-music-desktop = pkgs.callPackage ./pkgs/apple-music-desktop/package.nix {
     electron = electron_castlabs_38;
   };

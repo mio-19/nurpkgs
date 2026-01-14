@@ -196,8 +196,10 @@ stdenv.mkDerivation (finalAttrs: {
     done
 
     mkdir -p "$out/bin"
+    # __NV_DISABLE_EXPLICIT_SYNC -> https://github.com/tauri-apps/tauri/issues/10702
     wrapProgram "$out/usr/bin/${executableName}" \
-      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libayatana-appindicator ]}"
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [ libayatana-appindicator ]}" \
+      --set __NV_DISABLE_EXPLICIT_SYNC 1
     ln -s "$out/usr/bin/${executableName}" "$out/bin/${pname}"
 
     runHook postInstall

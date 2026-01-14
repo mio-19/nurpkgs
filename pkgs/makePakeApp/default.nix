@@ -60,12 +60,7 @@
 }:
 
 let
-  pakeSrc = fetchFromGitHub {
-    owner = "tw93";
-    repo = "Pake";
-    rev = "838cc932ffd1db6bc5ca81ced64f73bcd8568175";
-    hash = "sha256-sEjj0a9aGCwv5EFn7PWkYU1j3U5MLO7lj0qL2CkfKOM=";
-  };
+  pakeSrc = pake.src;
 
   cargoDeps = rustPlatform.fetchCargoVendor {
     pname = "pake";

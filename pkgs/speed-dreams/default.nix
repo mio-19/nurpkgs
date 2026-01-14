@@ -104,7 +104,7 @@ stdenv.mkDerivation rec {
     ln -s "$out/share/games/speed-dreams-2/data/icons/icon.png" "$out/share/pixmaps/speed-dreams-2.png"
     substituteInPlace "$out/share/applications/speed-dreams.desktop" \
       --replace-fail "Exec=$out/games/speed-dreams-2" "Exec=$out/bin/speed-dreams" \
-      --replace-fail "Icon=$out/share/games/speed-dreams-2/data/icons/icon.png" "Icon=$out/share/pixmaps/speed-dreams-2.png"
+      --replace-fail "Icon=/build/speed-dreams-code/speed-dreams-data/data/data/icons/icon.png" "Icon=$out/share/pixmaps/speed-dreams-2.png"
   '';
 
   # RPATH of binary /nix/store/.../lib64/games/speed-dreams-2/drivers/shadow_sc/shadow_sc.so contains a forbidden reference to /build/

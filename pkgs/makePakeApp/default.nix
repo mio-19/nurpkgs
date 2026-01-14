@@ -178,7 +178,7 @@ stdenv.mkDerivation (finalAttrs: {
 
     mkdir -p build
     cd build
-    pake "${url}" --name "${appName}" --icon "$icon_rgba"
+    pake "${url}" --name "${appName}" --icon "$icon_rgba" --targets deb
 
     runHook postBuild
   '';

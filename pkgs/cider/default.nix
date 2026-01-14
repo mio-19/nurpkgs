@@ -49,12 +49,17 @@ stdenv.mkDerivation (finalAttrs: {
     npm_config_build_from_source = "true";
     NPM_CONFIG_MANAGE_PACKAGE_MANAGER_VERSIONS = "false";
     ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
+    CIDER_TOKEN = "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IldlYlBsYXlLaWQifQ.eyJpc3MiOiJBTVBXZWJQbGF5IiwiaWF0IjoxNzY0ODAyNzIxLCJleHAiOjE3NzIwNjAzMjEsInJvb3RfaHR0cHNfb3JpZ2luIjpbImFwcGxlLmNvbSJdfQ.0Mu4BWoXnb1m2P05pXlHnq7kL1TNOHI9Pl-Z_6ZrJxnf8b6luxPaMvZ6O6WC7ArDvocA1kLyvehvi-T7TbI_nw";
   };
 
   postPatch = ''
     # Avoid pnpm trying to self-manage the version (network access) in the build.
     sed -i '/"packageManager":/d' package.json
   '';
+
+  patches = [
+    ./cider-env-token.patch
+  ];
 
   buildPhase = ''
     runHook preBuild

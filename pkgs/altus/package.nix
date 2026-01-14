@@ -8,6 +8,7 @@
   electron_39,
   yarn-berry_4,
   nodejs,
+  zip,
   writableTmpDirAsHomeHook,
 }:
 
@@ -41,6 +42,7 @@ stdenv.mkDerivation (finalAttrs: {
     writableTmpDirAsHomeHook
     nodejs
     (nodejs.python.withPackages (ps: with ps; [ setuptools ]))
+    zip
   ];
 
   env = {
@@ -49,6 +51,16 @@ stdenv.mkDerivation (finalAttrs: {
 
   buildPhase = ''
     runHook preBuild
+
+    cp -r "${electron.dist}" electron-dist
+    chmod -R u+w electron-dist
+    pushd electron-dist
+    zip -0Xqr ../electron.zip .
+    popd
+    rm -rf electron-dist
+
+    substituteInPlace node_modules/@electron/packager/dist/packager.js \
+      --replace-fail "await this.getElectronZipPath(downloadOpts)" "\"$(pwd)/electron.zip\""
 
     mkdir -p "$HOME/.electron-dist"
     cp -r "${electron.dist}/." "$HOME/.electron-dist/"
@@ -77,7 +89,9 @@ stdenv.mkDerivation (finalAttrs: {
 
     makeWrapper ${lib.getExe electron} "$out/bin/altus" \
       --add-flags "$out/opt/altus/resources/app.asar" \
-      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true --wayland-text-input-version=3}}"
+      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true --wayland-text-input-version=3}}" \
+      --set-default ELECTRON_FORCE_IS_PACKAGED 1 \
+      --set-default ELECTRON_IS_DEV 0
 
     runHook postInstall
   '';

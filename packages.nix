@@ -293,9 +293,42 @@ rec {
     studioVariant = true;
   };
 
-  mkwindowsapp-tools = nonurbot (
-    callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; }
-  );
+  firejail-profiles = pkgs.callPackage ./pkgs/firejail-profiles { };
+
+  prismlauncher-diegiwg =
+    let
+      # https://github.com/NixOS/nixpkgs/blob/ab0821a8289da5bd2cde49ae89cbf6db1e5931ae/pkgs/by-name/pr/prismlauncher/package.nix#L41
+      msaClientID = null;
+      prismlauncher = minipkgs.prismlauncher;
+      prismlauncher-unwrapped = minipkgs.prismlauncher-unwrapped;
+    in
+    prismlauncher.overrideAttrs (old: {
+      paths = [
+        # https://github.com/NixOS/nixpkgs/blob/ab0821a8289da5bd2cde49ae89cbf6db1e5931ae/pkgs/by-name/pr/prismlauncher/package.nix#L61
+        (v3overrideAttrs (
+          (prismlauncher-unwrapped.override { inherit msaClientID; }).overrideAttrs (old': {
+            patches = (old.patches or [ ]) ++ [
+              (pkgs.fetchpatch {
+                name = "12a.patch";
+                url = "https://github.com/PrismLauncher/PrismLauncher/commit/12acabdb57ba6f12fcf9047c28ec8afa7a4fb970.patch";
+                sha256 = "sha256-t+sanKiSEuqmshy6Y+Y9tfpDf+7L3A8d0CBcA+oqLUs=";
+              })
+              (pkgs.fetchpatch {
+                name = "911.patch";
+                url = "https://github.com/PrismLauncher/PrismLauncher/commit/911c0f3593dd6b825f6d91900e48bdf3b59ad3a9.patch";
+                sha256 = "sha256-mCkZ613f7kvMQTW+UOi2dcnvzHg/c2vhPcPGCvdz+0k=";
+              })
+            ];
+          })
+        ))
+      ];
+    });
+
+  rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
+}
+// (lib.optionalAttrs (!nurbot) {
+
+  mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
 
   line = callPackage ./pkgs/line.nix {
     inherit (lib) mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
@@ -315,8 +348,6 @@ rec {
   adobe-acrobat-reader_virtualDesktop = adobe-acrobat-reader.override {
     virtualDesktop = true;
   };
-  firejail-profiles = pkgs.callPackage ./pkgs/firejail-profiles { };
-
   wineshell-wine64 = callPackage ./pkgs/wineshell/default.nix {
     inherit (lib) mkWindowsApp;
     wine = pkgs.wine64Packages.stableFull;
@@ -394,34 +425,4 @@ rec {
     wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
   };
 
-  prismlauncher-diegiwg =
-    let
-      # https://github.com/NixOS/nixpkgs/blob/ab0821a8289da5bd2cde49ae89cbf6db1e5931ae/pkgs/by-name/pr/prismlauncher/package.nix#L41
-      msaClientID = null;
-      prismlauncher = minipkgs.prismlauncher;
-      prismlauncher-unwrapped = minipkgs.prismlauncher-unwrapped;
-    in
-    prismlauncher.overrideAttrs (old: {
-      paths = [
-        # https://github.com/NixOS/nixpkgs/blob/ab0821a8289da5bd2cde49ae89cbf6db1e5931ae/pkgs/by-name/pr/prismlauncher/package.nix#L61
-        (v3overrideAttrs (
-          (prismlauncher-unwrapped.override { inherit msaClientID; }).overrideAttrs (old': {
-            patches = (old.patches or [ ]) ++ [
-              (pkgs.fetchpatch {
-                name = "12a.patch";
-                url = "https://github.com/PrismLauncher/PrismLauncher/commit/12acabdb57ba6f12fcf9047c28ec8afa7a4fb970.patch";
-                sha256 = "sha256-t+sanKiSEuqmshy6Y+Y9tfpDf+7L3A8d0CBcA+oqLUs=";
-              })
-              (pkgs.fetchpatch {
-                name = "911.patch";
-                url = "https://github.com/PrismLauncher/PrismLauncher/commit/911c0f3593dd6b825f6d91900e48bdf3b59ad3a9.patch";
-                sha256 = "sha256-mCkZ613f7kvMQTW+UOi2dcnvzHg/c2vhPcPGCvdz+0k=";
-              })
-            ];
-          })
-        ))
-      ];
-    });
-
-  rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
-}
+})

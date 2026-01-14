@@ -60,7 +60,40 @@ stdenv.mkDerivation rec {
     # Wrapper for main executable
     cat > "$out/bin/speed-dreams" <<EOF
     #!${runtimeShell}
-    export LD_LIBRARY_PATH="$out/lib/games/speed-dreams-2/lib:$out/lib"
+    export LD_LIBRARY_PATH="$out/lib/games/speed-dreams-2/lib:$out/lib:${lib.makeLibraryPath [
+      libGL
+      libGLU
+      libglut
+      libX11
+      plib
+      openal
+      freealut
+      libXrandr
+      libXext
+      libSM
+      libICE
+      libXi
+      libXt
+      libXrender
+      libXxf86vm
+      openscenegraph
+      expat
+      libpng
+      zlib
+      SDL2
+      SDL2_mixer
+      enet
+      libjpeg
+      libvorbis
+      curl
+      cjson
+      minizip
+      rhash
+      stdenv.cc.cc.lib
+    ]}"
+    if [ -e "${libGL}/lib/libGL.so.1" ]; then
+      export LD_PRELOAD="${libGL}/lib/libGL.so.1''${LD_PRELOAD:+:$LD_PRELOAD}"
+    fi
     exec "$out/games/speed-dreams-2" "$@"
     EOF
     chmod a+x "$out/bin/speed-dreams"

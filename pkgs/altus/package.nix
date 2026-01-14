@@ -88,7 +88,7 @@ stdenv.mkDerivation (finalAttrs: {
       "$out/share/icons/hicolor/256x256/apps/altus.png"
 
     makeWrapper ${lib.getExe electron} "$out/bin/altus" \
-      --add-flags "$out/opt/altus/resources/app.asar" \
+      --add-flags "$out/opt/altus/resources/app" \
       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true --wayland-text-input-version=3}}" \
       --set-default ELECTRON_FORCE_IS_PACKAGED 1 \
       --set-default ELECTRON_IS_DEV 0

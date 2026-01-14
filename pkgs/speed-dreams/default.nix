@@ -94,6 +94,7 @@ stdenv.mkDerivation rec {
     if [ -e "${libGL}/lib/libGL.so.1" ]; then
       export LD_PRELOAD="${libGL}/lib/libGL.so.1''${LD_PRELOAD:+:$LD_PRELOAD}"
     fi
+    export SDL_VIDEODRIVER="x11"
     exec "$out/games/speed-dreams-2" "$@"
     EOF
     chmod a+x "$out/bin/speed-dreams"

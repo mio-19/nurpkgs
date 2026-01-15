@@ -26,11 +26,11 @@
   shaderc,
 }:
 let
-  assets = fetchsvn {
-    url = "https://svn.code.sf.net/p/supertuxkart/code/stk-assets";
-    rev = "18626";
-    sha256 = "0g6xgs6ih4lym52q1h7iml0a0fzzyb3xmxgnk7rz2jgcba7ymhvd";
-    name = "stk-assets";
+  assets = fetchFromGitHub {
+    owner = "Pttn";
+    repo = "stk-assets";
+    rev = "94a957db16f16d82409f6bfe9c1961d07d8a90e6";
+    sha256 = "sha256-BGhriCSGDg8n7MnYvzklJgB60VGBzqQGzYpWV76eKho=";
   };
 
   # List of bundled libraries in stk-code/lib to keep
@@ -134,7 +134,8 @@ stdenv.mkDerivation rec {
     if [ -d $out/supertuxkart.app ]; then
       mv $out/supertuxkart.app $out/SuperTuxKart-Evolution.app
     fi
-  '' + lib.optionalString stdenv.hostPlatform.isDarwin ''
+  ''
+  + lib.optionalString stdenv.hostPlatform.isDarwin ''
     mkdir -p $out/bin
     if [ -d $out/SuperTuxKart-Evolution.app ]; then
       mv $out/SuperTuxKart-Evolution.app/Contents/MacOS/supertuxkart $out/bin/supertuxkart-evolution

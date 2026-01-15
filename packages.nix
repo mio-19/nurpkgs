@@ -220,7 +220,6 @@ rec {
   apple-music-desktop = pkgs.callPackage ./pkgs/apple-music-desktop/package.nix {
     electron = electron_castlabs_38;
   };
-  prospect-mail = pkgs.callPackage ./pkgs/prospect-mail/package.nix { };
 
   proton-cachyos = pkgs.callPackage ./pkgs/proton-bin {
     toolTitle = "Proton-CachyOS";
@@ -434,4 +433,5 @@ rec {
     wine = pkgs.wineWowPackages.full;
   };
 
+  prospect-mail = pkgs.callPackage ./pkgs/prospect-mail/package.nix { };
 })

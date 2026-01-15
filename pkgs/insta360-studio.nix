@@ -22,9 +22,8 @@ mkWindowsAppNoCC rec {
   dontUnpack = true;
   wineArch = "win64";
 
-  # Note: Adjust paths if necessary after first run/debug
   fileMap = {
-    "$HOME/.config/Insta360/Studio" = "drive_c/users/$USER/AppData/Roaming/Insta360/Studio";
+    "$HOME/.config/Insta360/Local" = "drive_c/users/$USER/AppData/Local/Insta360";
   };
 
   enableMonoBootPrompt = false;

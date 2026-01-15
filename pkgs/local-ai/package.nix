@@ -296,8 +296,8 @@ let
     src = fetchFromGitHub {
       owner = "ggerganov";
       repo = "whisper.cpp";
-      rev = "6266a9f9e56a5b925e9892acf650f3eb1245814d";
-      hash = "sha256-y30ZccpF3SCdRGa+P3ddF1tT1KnvlI4Fexx81wZxfTk=";
+      rev = "v1.8.2";
+      hash = "sha256-OU5mDnLZHmtdSEN5u0syJcU91L+NCO45f9eG6OsgFfU=";
     };
 
     nativeBuildInputs = [

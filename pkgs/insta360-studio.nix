@@ -34,7 +34,7 @@ mkWindowsAppNoCC rec {
   ];
 
   winAppInstall = ''
-    $WINE start /unix ${src} /S
+    $WINE start /unix ${src} /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
     wineserver -w
     rm -f "$WINEPREFIX/drive_c/Program Files/Insta360 Studio/uninstall.exe"
     rm -fR "$WINEPREFIX/drive_c/Program Files/Insta360 Studio/updater"

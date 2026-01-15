@@ -29,6 +29,7 @@ Some packages are only available without nur as they failed to evaluate under nu
 + line
 + notepad-plus-plus
 + adobe-acrobat-reader
++ insta360-studio
 
 ```
 inputs.mio.packages.${pkgs.stdenv.hostPlatform.system}.downkyicore

@@ -91,3 +91,4 @@ files are copied from following locations. some are modified in this repo and so
 + art-standalone nixpkgs commit d9f0b9cb3d82342268db374b40bf062ea9a5f044
 + local-ai nixpkgs commit 7377f649a8671844d42dde9ea739961f06ce7edf
 + <https://github.com/maydayv7/dotfiles/raw/refs/heads/stable/packages/wine/notepad++.nix>
++ rclone-ui nixpkgs commit df70bd515ec9175798339adf2ae6a22052d86577

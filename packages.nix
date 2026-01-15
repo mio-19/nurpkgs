@@ -327,6 +327,8 @@ rec {
     });
 
   rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
+
+  rclone-browser = pkgs.callPackage ./pkgs/rclone-browser/package.nix { };
 }
 // (lib.optionalAttrs (!nurbot) rec {
 

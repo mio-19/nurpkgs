@@ -24,27 +24,13 @@
   sqlite,
   libsamplerate,
   shaderc,
-  symlinkJoin,
 }:
 let
-  assets2 = fetchsvn {
+  assets = fetchsvn {
     url = "https://svn.code.sf.net/p/supertuxkart/code/media/trunk";
     rev = "18626";
     sha256 = "sha256-Ka3Ft9apQIGk0I/2DTuZ278W0xOkfumCeqthGpCJYds=";
-    name = "stk-assets-media";
-  };
-  assets1 = fetchsvn {
-    url = "https://svn.code.sf.net/p/supertuxkart/code/stk-assets";
-    rev = "18626";
-    sha256 = "0g6xgs6ih4lym52q1h7iml0a0fzzyb3xmxgnk7rz2jgcba7ymhvd";
     name = "stk-assets";
-  };
-  assets = symlinkJoin {
-    name = "merged-stk-assets";
-    paths = [
-      assets1
-      assets2
-    ];
   };
 
   # List of bundled libraries in stk-code/lib to keep

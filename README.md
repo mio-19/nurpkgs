@@ -31,6 +31,7 @@ Some packages are only available without nur as they failed to evaluate under nu
 + notepad-plus-plus
 + adobe-acrobat-reader
 + insta360-studio
++ rclone-browser (qt6)
 
 ```
 inputs.mio.packages.${pkgs.stdenv.hostPlatform.system}.downkyicore

@@ -116,21 +116,41 @@ stdenv.mkDerivation rec {
     "-include stdexcept"
   ];
 
-  postInstall = lib.optionalString stdenv.hostPlatform.isDarwin ''
-    mkdir $out/bin
-    mv $out/{supertuxkart.app/Contents/MacOS,bin}/supertuxkart
-    rm -rf $out/supertuxkart.app
+  postInstall = ''
+    # Rename binary
+    if [ -f $out/bin/supertuxkart ]; then
+      mv $out/bin/supertuxkart $out/bin/supertuxkart-evolution
+    fi
+
+    # Handle desktop file
+    if [ -d $out/share/applications ]; then
+      mv $out/share/applications/supertuxkart.desktop $out/share/applications/supertuxkart-evolution.desktop
+      substituteInPlace $out/share/applications/supertuxkart-evolution.desktop \
+        --replace-fail "Exec=supertuxkart" "Exec=supertuxkart-evolution" \
+        --replace-fail "Name=SuperTuxKart" "Name=SuperTuxKart Evolution"
+    fi
+
+    # Handle macOS .app
+    if [ -d $out/supertuxkart.app ]; then
+      mv $out/supertuxkart.app $out/SuperTuxKart-Evolution.app
+    fi
+  '' + lib.optionalString stdenv.hostPlatform.isDarwin ''
+    mkdir -p $out/bin
+    if [ -d $out/SuperTuxKart-Evolution.app ]; then
+      mv $out/SuperTuxKart-Evolution.app/Contents/MacOS/supertuxkart $out/bin/supertuxkart-evolution
+      rm -rf $out/SuperTuxKart-Evolution.app
+    fi
   '';
 
   preFixup = ''
-    wrapProgram $out/bin/supertuxkart \
+    wrapProgram $out/bin/supertuxkart-evolution \
       --set-default SUPERTUXKART_ASSETS_DIR "${assets}" \
       --set-default SUPERTUXKART_DATADIR "$out/share/supertuxkart" \
   '';
 
   meta = {
     description = "3D open-source arcade racer (Evolution branch)";
-    mainProgram = "supertuxkart";
+    mainProgram = "supertuxkart-evolution";
     homepage = "https://supertuxkart.net/";
     license = lib.licenses.gpl3Plus;
     platforms = lib.platforms.linux;

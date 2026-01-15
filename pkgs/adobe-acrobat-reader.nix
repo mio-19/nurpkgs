@@ -120,9 +120,12 @@ mkWindowsAppNoCC rec {
         "Office"
         "Viewer"
       ];
-      mimeTypes = [
-        "application/pdf"
-      ];
+      # Unfortunately opening files is not working
+      /*
+        mimeTypes = [
+          "application/pdf"
+        ];
+      */
     })
   ];
 

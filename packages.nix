@@ -130,24 +130,6 @@ rec {
   cider = pkgs.callPackage ./pkgs/cider {
     electron = electron_castlabs_38;
   };
-  jellyfin-media-player = v3override (
-    pkgs.kdePackages.callPackage ./pkgs/jellyfin-media-player {
-      mpvqt = pkgs.kdePackages.mpvqt.overrideAttrs (old: {
-        meta = old.meta // {
-          platforms = pkgs.lib.platforms.unix;
-        };
-
-        propagatedBuildInputs = map (
-          pkg:
-          pkg.overrideAttrs (oldPkg: {
-            meta = (oldPkg.meta or { }) // {
-              platforms = pkgs.lib.platforms.unix;
-            };
-          })
-        ) old.propagatedBuildInputs;
-      });
-    }
-  );
   local-ai = pkgs.callPackage ./pkgs/local-ai/package.nix { };
   local-ai-cuda = local-ai.override { with_cublas = true; };
   mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });

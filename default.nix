@@ -189,6 +189,7 @@ let
           android-translation-layer
           pake
           cider
+          rocksmith2tab
           ;
       };
     }

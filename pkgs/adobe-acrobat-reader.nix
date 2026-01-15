@@ -12,7 +12,7 @@
   xorg,
   virtualDesktop ? false,
 }:
-# Based on AUR acroread-dc-wine (maintainer Smoolak), adapted for mkWindowsAppNoCC.
+# Based on AUR acroread-dc-wine (maintainer Smoolak), adapted for mkWindowsAppNoCC. https://aur.archlinux.org/packages/acroread-dc-wine
 mkWindowsAppNoCC rec {
   inherit wine;
 

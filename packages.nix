@@ -130,24 +130,6 @@ rec {
   cider = pkgs.callPackage ./pkgs/cider {
     electron = electron_castlabs_38;
   };
-  jellyfin-media-player = v3override (
-    pkgs.kdePackages.callPackage ./pkgs/jellyfin-media-player {
-      mpvqt = pkgs.kdePackages.mpvqt.overrideAttrs (old: {
-        meta = old.meta // {
-          platforms = pkgs.lib.platforms.unix;
-        };
-
-        propagatedBuildInputs = map (
-          pkg:
-          pkg.overrideAttrs (oldPkg: {
-            meta = (oldPkg.meta or { }) // {
-              platforms = pkgs.lib.platforms.unix;
-            };
-          })
-        ) old.propagatedBuildInputs;
-      });
-    }
-  );
   local-ai = pkgs.callPackage ./pkgs/local-ai/package.nix { };
   local-ai-cuda = local-ai.override { with_cublas = true; };
   mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });
@@ -187,23 +169,21 @@ rec {
     libName = "betterbird";
   };
 
-  /*
-    mygui-next = x8664linux (
-      fixcmake (
-        pkgs.callPackage ./pkgs/mygui-next/package.nix {
-        }
-      )
-    );
-    ogre-next_3 = x8664linux (
-      v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-next/default.nix { }).ogre-next_3
-    );
-    stuntrally3 = wip (
-      pkgs.callPackage ./pkgs/stuntrally3 {
-        ogre-next_3 = ogre-next_3;
-        mygui = mygui-next;
+  mygui-next = x8664linux (
+    fixcmake (
+      pkgs.callPackage ./pkgs/mygui-next/package.nix {
       }
-    );
-  */
+    )
+  );
+  ogre-next_3 = x8664linux (
+    v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-next/default.nix { }).ogre-next_3
+  );
+  stuntrally3 = (
+    pkgs.callPackage ./pkgs/stuntrally3 {
+      ogre-next_3 = ogre-next_3;
+      mygui = mygui-next;
+    }
+  );
   speed_dreams = nodarwin (pkgs.callPackage ./pkgs/speed-dreams { });
 
   plezy = nodarwin (pkgs.callPackage ./pkgs/plezy { });
@@ -238,7 +218,6 @@ rec {
   apple-music-desktop = pkgs.callPackage ./pkgs/apple-music-desktop/package.nix {
     electron = electron_castlabs_38;
   };
-  prospect-mail = pkgs.callPackage ./pkgs/prospect-mail/package.nix { };
 
   proton-cachyos = pkgs.callPackage ./pkgs/proton-bin {
     toolTitle = "Proton-CachyOS";
@@ -346,6 +325,8 @@ rec {
     });
 
   rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
+
+  rclone-browser = pkgs.callPackage ./pkgs/rclone-browser/package.nix { };
 }
 // (lib.optionalAttrs (!nurbot) rec {
 
@@ -446,4 +427,11 @@ rec {
     wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
   };
 
+  insta360-studio = callPackage ./pkgs/insta360-studio.nix {
+    inherit pkgs;
+    build = lib;
+    wine = pkgs.wineWowPackages.full;
+  };
+
+  prospect-mail = pkgs.callPackage ./pkgs/prospect-mail/package.nix { };
 })

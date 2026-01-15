@@ -227,10 +227,10 @@ rec {
   makePakeApp = pkgs.callPackage ./pkgs/makePakeApp {
     inherit pake;
   };
-  chatgpt = pkgs.callPackage ./pkgs/chatgpt/package.nix {
+  chatgpt-pake = pkgs.callPackage ./pkgs/chatgpt-pake/package.nix {
     inherit makePakeApp;
   };
-  apple-music = pkgs.callPackage ./pkgs/apple-music/package.nix {
+  apple-music-pake = pkgs.callPackage ./pkgs/apple-music-pake/package.nix {
     inherit makePakeApp;
   };
   altus = pkgs.callPackage ./pkgs/altus/package.nix { };

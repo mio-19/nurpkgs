@@ -446,4 +446,10 @@ rec {
     wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
   };
 
+  insta360-studio = callPackage ./pkgs/insta360-studio.nix {
+    inherit pkgs;
+    build = lib;
+    wine = pkgs.wineWowPackages.full;
+  };
+
 })

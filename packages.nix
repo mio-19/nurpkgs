@@ -148,6 +148,8 @@ rec {
       });
     }
   );
+  local-ai = pkgs.callPackage ./pkgs/local-ai/package.nix { };
+  local-ai-cuda = local-ai.override { with_cublas = true; };
   mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });
   miscutil = pkgs.callPackage ./pkgs/miscutil { };
   gifcurry = nonurbot (pkgs.callPackage ./pkgs/gifcurry { });

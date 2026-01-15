@@ -433,5 +433,7 @@ rec {
     wine = pkgs.wineWowPackages.full;
   };
 
+  supertuxkart-evolution = pkgs.callPackage ./pkgs/supertuxkart-evolution/default.nix { };
+
   prospect-mail = pkgs.callPackage ./pkgs/prospect-mail/package.nix { };
 })

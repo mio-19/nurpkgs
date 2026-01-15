@@ -579,7 +579,8 @@ let
       ''
         wrapProgram $out/bin/${pname} \
         --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath LD_LIBRARY_PATH}" \
-        --prefix PATH : "${ffmpeg}/bin"
+        --prefix PATH : "${ffmpeg}/bin" \
+        --set PCIDB_ENABLE_NETWORK_FETCH "1"
       '';
 
     passthru.local-packages = {

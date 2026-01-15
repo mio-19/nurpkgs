@@ -327,7 +327,6 @@ rec {
 
   rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
 
-  rclone-browser = pkgs.callPackage ./pkgs/rclone-browser/package.nix { };
 }
 // (lib.optionalAttrs (!nurbot) rec {
 
@@ -437,4 +436,6 @@ rec {
   supertuxkart-evolution = pkgs.callPackage ./pkgs/supertuxkart-evolution/default.nix { };
 
   prospect-mail = pkgs.callPackage ./pkgs/prospect-mail/package.nix { };
+
+  rclone-browser = pkgs.callPackage ./pkgs/rclone-browser/package.nix { };
 })

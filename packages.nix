@@ -152,6 +152,8 @@ rec {
   };
   beammp-server = pkgs.callPackage ./pkgs/beammp-server/package.nix { };
   chatall = pkgs.callPackage ./pkgs/chatall/package.nix { };
+  superTux = pkgs.callPackage ./pkgs/superTux/package.nix { };
+
   firefox_nightly-unwrapped = v3override (
     v3overrideAttrs (
       pkgs.callPackage ./pkgs/firefox-nightly {
@@ -326,7 +328,8 @@ rec {
 
   rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
 
-  rclone-browser = pkgs.callPackage ./pkgs/rclone-browser/package.nix { };
+  stuntrally = pkgs.callPackage ./pkgs/stuntrally { };
+
 }
 // (lib.optionalAttrs (!nurbot) rec {
 
@@ -433,5 +436,15 @@ rec {
     wine = pkgs.wineWowPackages.full;
   };
 
+  supertuxkart-evolution = v3override (
+    pkgs.callPackage ./pkgs/supertuxkart-evolution/default.nix { }
+  );
+
+  chatgpt-desktop-client = pkgs.callPackage ./pkgs/chatgpt-desktop-client/default.nix { };
+
   prospect-mail = pkgs.callPackage ./pkgs/prospect-mail/package.nix { };
+
+  rclone-browser = pkgs.callPackage ./pkgs/rclone-browser/package.nix { };
+
+  forku-chatgpt = v3overrideAttrs (pkgs.callPackage ./pkgs/forku-chatgpt/package.nix { });
 })

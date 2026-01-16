@@ -122,10 +122,11 @@ stdenv.mkDerivation rec {
     echo "Plugin=RenderSystem_GL3Plus" >> $out/share/stuntrally/plugins.cfg
     echo "Plugin=Plugin_ParticleFX" >> $out/share/stuntrally/plugins.cfg
 
-    # Wrap binaries to find data
+    # Wrap binaries to find data and force X11
     for bin in stuntrally3 sr-editor3; do
       wrapProgram $out/bin/$bin \
-        --chdir "$out/share/stuntrally"
+        --chdir "$out/share/stuntrally" \
+        --set SDL_VIDEODRIVER x11
     done
 
     runHook postInstall

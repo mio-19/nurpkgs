@@ -44,6 +44,7 @@ mkWindowsAppNoCC rec {
     $WINE ${src} /S
     wineserver -w
     mkdir -p "$WINEPREFIX/drive_c/users/$USER/AppData/Local/LINE/Data"
+    winetricks --unattended cjkfonts >/dev/null 2>&1
   '';
 
   winAppRun = ''
@@ -86,5 +87,6 @@ mkWindowsAppNoCC rec {
     license = licenses.unfree;
     maintainers = with maintainers; [ emmanuelrosa ];
     platforms = [ "x86_64-linux" ];
+    mainProgram = "line";
   };
 }

@@ -126,24 +126,12 @@ rec {
   #'';
   # audacity4 = nodarwin (pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { });
   cb = pkgs.callPackage ./pkgs/cb { };
-  jellyfin-media-player = v3override (
-    pkgs.kdePackages.callPackage ./pkgs/jellyfin-media-player {
-      mpvqt = pkgs.kdePackages.mpvqt.overrideAttrs (old: {
-        meta = old.meta // {
-          platforms = pkgs.lib.platforms.unix;
-        };
-
-        propagatedBuildInputs = map (
-          pkg:
-          pkg.overrideAttrs (oldPkg: {
-            meta = (oldPkg.meta or { }) // {
-              platforms = pkgs.lib.platforms.unix;
-            };
-          })
-        ) old.propagatedBuildInputs;
-      });
-    }
-  );
+  electron_castlabs_38 = pkgs.callPackage ./pkgs/electron-castlabs-38 { };
+  cider = pkgs.callPackage ./pkgs/cider {
+    electron = electron_castlabs_38;
+  };
+  local-ai = pkgs.callPackage ./pkgs/local-ai/package.nix { };
+  local-ai-cuda = local-ai.override { with_cublas = true; };
   mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });
   miscutil = pkgs.callPackage ./pkgs/miscutil { };
   gifcurry = nonurbot (pkgs.callPackage ./pkgs/gifcurry { });
@@ -163,6 +151,9 @@ rec {
     cacert_3108 = pkgs.callPackage ./pkgs/cacert_3108 { };
   };
   beammp-server = pkgs.callPackage ./pkgs/beammp-server/package.nix { };
+  chatall = pkgs.callPackage ./pkgs/chatall/package.nix { };
+  superTux = pkgs.callPackage ./pkgs/superTux/package.nix { };
+
   firefox_nightly-unwrapped = v3override (
     v3overrideAttrs (
       pkgs.callPackage ./pkgs/firefox-nightly {
@@ -180,23 +171,21 @@ rec {
     libName = "betterbird";
   };
 
-  /*
-    mygui-next = x8664linux (
-      fixcmake (
-        pkgs.callPackage ./pkgs/mygui-next/package.nix {
-        }
-      )
-    );
-    ogre-next_3 = x8664linux (
-      v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-next/default.nix { }).ogre-next_3
-    );
-    stuntrally3 = wip (
-      pkgs.callPackage ./pkgs/stuntrally3 {
-        ogre-next_3 = ogre-next_3;
-        mygui = mygui-next;
+  mygui-next = x8664linux (
+    fixcmake (
+      pkgs.callPackage ./pkgs/mygui-next/package.nix {
       }
-    );
-  */
+    )
+  );
+  ogre-next_3 = x8664linux (
+    v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-next/default.nix { }).ogre-next_3
+  );
+  stuntrally3 = (
+    pkgs.callPackage ./pkgs/stuntrally3 {
+      ogre-next_3 = ogre-next_3;
+      mygui = mygui-next;
+    }
+  );
   speed_dreams = nodarwin (pkgs.callPackage ./pkgs/speed-dreams { });
 
   plezy = nodarwin (pkgs.callPackage ./pkgs/plezy { });
@@ -218,6 +207,19 @@ rec {
   };
   ultimate-vocal-remover = pkgs.callPackage ./pkgs/ultimate-vocal-remover { };
   pake = pkgs.callPackage ./pkgs/pake { };
+  makePakeApp = pkgs.callPackage ./pkgs/makePakeApp {
+    inherit pake;
+  };
+  chatgpt-pake = pkgs.callPackage ./pkgs/chatgpt-pake/package.nix {
+    inherit makePakeApp;
+  };
+  apple-music-pake = pkgs.callPackage ./pkgs/apple-music-pake/package.nix {
+    inherit makePakeApp;
+  };
+  altus = pkgs.callPackage ./pkgs/altus/package.nix { };
+  apple-music-desktop = pkgs.callPackage ./pkgs/apple-music-desktop/package.nix {
+    electron = electron_castlabs_38;
+  };
 
   proton-cachyos = pkgs.callPackage ./pkgs/proton-bin {
     toolTitle = "Proton-CachyOS";
@@ -293,22 +295,7 @@ rec {
     studioVariant = true;
   };
 
-  mkwindowsapp-tools = nonurbot (
-    callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; }
-  );
-
-  line = callPackage ./pkgs/line.nix {
-    inherit (lib) mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
-    wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
-  };
-
-  # https://github.com/NixOS/nixpkgs/issues/10165
-  # https://discourse.nixos.org/t/what-is-your-approach-to-packaging-wine-applications-with-nix-derivations/12799/1
-  notepad-plus-plus = callPackage ./pkgs/notepad++.nix {
-    inherit pkgs;
-    build = lib;
-    wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
-  };
+  firejail-profiles = pkgs.callPackage ./pkgs/firejail-profiles { };
 
   prismlauncher-diegiwg =
     let
@@ -340,4 +327,124 @@ rec {
     });
 
   rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
+
+  stuntrally = pkgs.callPackage ./pkgs/stuntrally { };
+
 }
+// (lib.optionalAttrs (!nurbot) rec {
+
+  mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
+
+  line = callPackage ./pkgs/line.nix {
+    inherit (lib) mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
+    wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
+  };
+  adobe-acrobat-reader = callPackage ./pkgs/adobe-acrobat-reader.nix {
+    inherit (lib) mkWindowsAppNoCC makeDesktopIcon copyDesktopIcons;
+    inherit (pkgs)
+      copyDesktopItems
+      makeDesktopItem
+      p7zip
+      gawk
+      ;
+    inherit (pkgs) xorg;
+    wine = pkgs.winePackages.full;
+  };
+  adobe-acrobat-reader_virtualDesktop = adobe-acrobat-reader.override {
+    virtualDesktop = true;
+  };
+  wineshell-wine64 = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.wine64Packages.stableFull;
+    wineArch = "win64";
+    wineFlavor = "wine64";
+  };
+
+  wineshell-wineWow64 = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.wineWowPackages.stableFull;
+    wineArch = "win64";
+    wineFlavor = "wineWow64";
+  };
+
+  wineshell-wine = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.winePackages.stableFull;
+    wineArch = "win32";
+    wineFlavor = "wine";
+  };
+
+  wineshell-wine64-base = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.wine64Packages.base;
+    wineArch = "win64";
+    wineFlavor = "wine64";
+    enableMonoBootPrompt = false;
+  };
+
+  wineshell-wineWow64-base = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.wineWowPackages.base;
+    wineArch = "win64";
+    wineFlavor = "wineWow64";
+    enableMonoBootPrompt = false;
+  };
+
+  wineshell-wine-base = callPackage ./pkgs/wineshell/default.nix {
+    inherit (lib) mkWindowsApp;
+    wine = pkgs.winePackages.base;
+    wineArch = "win32";
+    wineFlavor = "wine";
+    enableMonoBootPrompt = false;
+  };
+
+  wineshell-wine64-vulkan = wineshell-wine64.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wineWow64-vulkan = wineshell-wineWow64.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wine-vulkan = wineshell-wine.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wine64-base-vulkan = wineshell-wine64-base.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wineWow64-base-vulkan = wineshell-wineWow64-base.override {
+    enableVulkan = true;
+  };
+
+  wineshell-wine-base-vulkan = wineshell-wine-base.override {
+    enableVulkan = true;
+  };
+
+  # https://github.com/NixOS/nixpkgs/issues/10165
+  # https://discourse.nixos.org/t/what-is-your-approach-to-packaging-wine-applications-with-nix-derivations/12799/1
+  notepad-plus-plus = callPackage ./pkgs/notepad++.nix {
+    inherit pkgs;
+    build = lib;
+    wine = pkgs.wineWowPackages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
+  };
+
+  insta360-studio = callPackage ./pkgs/insta360-studio.nix {
+    inherit pkgs;
+    build = lib;
+    wine = pkgs.wineWowPackages.full;
+  };
+
+  supertuxkart-evolution = v3override (
+    pkgs.callPackage ./pkgs/supertuxkart-evolution/default.nix { }
+  );
+
+  chatgpt-desktop-client = pkgs.callPackage ./pkgs/chatgpt-desktop-client/default.nix { };
+
+  prospect-mail = pkgs.callPackage ./pkgs/prospect-mail/package.nix { };
+
+  rclone-browser = pkgs.callPackage ./pkgs/rclone-browser/package.nix { };
+
+  forku-chatgpt = v3overrideAttrs (pkgs.callPackage ./pkgs/forku-chatgpt/package.nix { });
+})

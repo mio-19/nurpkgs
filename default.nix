@@ -178,7 +178,6 @@ let
           beammp-launcher
           mdbook-generate-summary
           #betterbird
-          jellyfin-media-player
           eden
           plezy
           downkyicore
@@ -188,6 +187,11 @@ let
           ghidra
           prismlauncher-diegiwg
           android-translation-layer
+          pake
+          cider
+          rocksmith2tab
+          superTux
+          stuntrally3
           ;
       };
     }

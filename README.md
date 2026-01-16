@@ -13,6 +13,35 @@ To use modules: (Note that system isn't defined by default in some contexts. You
   ];
 ```
 
+Use without nur: add to flake.nix inputs
+
+```
+
+    mio = {
+      url = "git+https://github.com/mio-19/nurpkgs.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+```
+
+Some packages are only available without nur as they failed to evaluate under nur constraints:
+
++ gifcurry
++ prospect-mail
++ line
++ notepad-plus-plus
++ adobe-acrobat-reader
++ insta360-studio
++ rclone-browser (qt6)
++ supertuxkart-evolution
+
+```
+inputs.mio.packages.${pkgs.stdenv.hostPlatform.system}.downkyicore
+pkgs.nur.repos.mio.downkyicore
+
+inputs.mio.legacyPackages."${system}".modules.howdy
+inputs.nur.legacyPackages."${system}".repos.mio.modules.howdy
+```
+
 ## cache
 
 binary cache is provided as best effort. binary cache is frequently *NOT* up to date and you will frequently have to build packages from source code because github actions is often not sufficient to compile packages. Solutions to provide up to date binary cache do require money every month
@@ -45,7 +74,6 @@ files are copied from following locations. some are modified in this repo and so
 + minetest591 - from nixos-24.11 commit 50ab793786d9de88ee30ec4e4c24fb4236fc2674 <https://github.com/NixOS/nixpkgs/blob/nixos-24.11/pkgs/games/minetest/default.nix>
 + minetest580 & irrlichtmt - parent of <https://github.com/NixOS/nixpkgs/commit/d61c03fe460f6349e5173e007fb2b678c33bed36> commit 33c8b1a7202d4c22d74f4db73666e9a868069d2c
 + wireguird <https://discourse.nixos.org/t/go-version-error-requires-go1-17-or-later/69176/4>
-+ jellyfin-media-player copy from nixpkgs commit 785bbdc5607f801196c734a1e560907d999d7cd3
 + firefox_nightly, nss_git, shared folder, proton-bin, zfs-impermanence-on-shutdown.nix <https://github.com/chaotic-cx/nyx/commit/aacb796ccd42be1555196c20013b9b674b71df75>
 + betterbird parent of <https://github.com/NixOS/nixpkgs/commit/544076a4a1e72d9267b1ff7601ada5e714cdf101> <https://github.com/NixOS/nixpkgs/raw/7eabf557d4fd5e7195cb3e372304ffdeb04170a9/pkgs/applications/networking/mailreaders/betterbird/default.nix>
 + beammp-launcher nixpkgs commit 68990df0529b74cde8b63cd1d5f5f5550e630a0c
@@ -58,9 +86,12 @@ files are copied from following locations. some are modified in this repo and so
 + ego nixpkgs commit 9a1f8b7804ff4bc685b58543c483c52ae967ca63
 + systemd257 <https://github.com/NixOS/nixpkgs/commit/70ca21d3c4982d7f95e48688d02cd9ef6b1347f5>  70ca21d3c4982d7f95e48688d02cd9ef6b1347f5^ <https://github.com/NixOS/nixpkgs/commit/38b523e9e8e607bcd8f638d8a53608bb1658a0e4>
 + davinci-resolve nixpkgs commit 49a636772fd8ea6f25b9c9ff9c5a04434e90b96f^
-+ <https://github.com/emmanuelrosa/erosanix/tree/master/pkgs/mkwindowsapp> commit 464f070d952afff764d82041d371cfee3e689d2a mkwindowsapp mkwindowsapp-tools line.nix hooks lib
++ <https://github.com/emmanuelrosa/erosanix/tree/master/pkgs/mkwindowsapp> commit 464f070d952afff764d82041d371cfee3e689d2a mkwindowsapp mkwindowsapp-tools line.nix hooks lib pkgs/wineshell
 + unmodified - prismlauncher-unwrapped prismlauncher materialgram telegram-desktop swt - should sync with nixpkgs
 + android-translation-layer nixpkgs commit d9f0b9cb3d82342268db374b40bf062ea9a5f044
 + bionic-translation nixpkgs commit d9f0b9cb3d82342268db374b40bf062ea9a5f044
 + art-standalone nixpkgs commit d9f0b9cb3d82342268db374b40bf062ea9a5f044
++ local-ai nixpkgs commit 7377f649a8671844d42dde9ea739961f06ce7edf
 + <https://github.com/maydayv7/dotfiles/raw/refs/heads/stable/packages/wine/notepad++.nix>
++ rclone-ui nixpkgs commit df70bd515ec9175798339adf2ae6a22052d86577
++ pkgs/games/stuntrally/ nixpkgs commit 249e5cbb33fb2ba40ba49cf4ef4bd4c240503516

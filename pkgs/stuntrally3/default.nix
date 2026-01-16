@@ -110,7 +110,7 @@ stdenv.mkDerivation rec {
 
     # Copy data and config
     cp -r ../data $out/share/stuntrally/
-    cp -r ../config $out/share/stuntrally/
+    cp -r ../config/* $out/share/stuntrally/
 
     # Symlink tracks (already done in preConfigure, but cp -r might have dereferenced or copied symlinks? 
     # The preConfigure symlinked ${tracks}/ to data/tracks. 

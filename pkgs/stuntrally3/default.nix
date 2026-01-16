@@ -116,6 +116,11 @@ stdenv.mkDerivation rec {
     # The preConfigure symlinked ${tracks}/ to data/tracks. 
     # cp -r data will copy the symlink. We need to make sure the symlink matches the runtime structure or copy content.
     # Nix store paths are absolute, so the symlink should point to the separate store path for tracks.
+    
+    # Generate plugins.cfg
+    echo "PluginFolder=${stuntrally_ogre}/lib/OGRE" > $out/share/stuntrally/plugins.cfg
+    echo "Plugin=RenderSystem_GL3Plus" >> $out/share/stuntrally/plugins.cfg
+    echo "Plugin=Plugin_ParticleFX" >> $out/share/stuntrally/plugins.cfg
 
     # Wrap binaries to find data
     for bin in stuntrally3 sr-editor3; do

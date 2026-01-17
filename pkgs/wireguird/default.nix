@@ -140,9 +140,6 @@ stdenv.mkDerivation {
     #!/bin/sh
     mkdir -p /etc/wireguard 2>/dev/null || true
     if [ "\$(id -u)" -ne 0 ]; then
-      if [ -n "''${DISPLAY:-}" ] || [ -n "''${WAYLAND_DISPLAY:-}" ]; then
-        exec ${polkit}/bin/pkexec --disable-internal-agent "$out/bin/wireguird" "\$@"
-      fi
       if command -v sudo >/dev/null 2>&1; then
         exec sudo -p "wireguird must be run as root. Password for %u: " -- "$out/bin/wireguird" "\$@"
       fi

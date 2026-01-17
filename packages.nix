@@ -329,7 +329,11 @@ rec {
 
   stuntrally2 = pkgs.callPackage ./pkgs/stuntrally { };
 
-  stuntrally = v3overrideAttrs (pkgs.callPackage ./pkgs/stuntrally-445054/package.nix { });
+  ogre-next-445054 = v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-next-445054/package.nix { });
+
+  stuntrally = v3overrideAttrs (
+    pkgs.callPackage ./pkgs/stuntrally-445054/package.nix { orge-next = ogre-next-445054; }
+  );
 
 }
 // (lib.optionalAttrs (!nurbot) rec {

@@ -25,10 +25,7 @@ rustPlatform.buildRustPackage rec {
     libxcb
   ];
 
-  nativeBuildInputs = [
-    makeBinaryWrapper
-    patchelf
-  ];
+  nativeBuildInputs = [ makeBinaryWrapper patchelf ];
 
   cargoHash = "sha256-+RwS0eNYPRkab0UYLGluCRdlf2j+T7tgJGVNKOmIyVk=";
 

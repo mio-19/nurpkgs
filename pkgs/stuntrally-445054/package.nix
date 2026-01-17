@@ -102,6 +102,11 @@ stdenv.mkDerivation rec {
     Terminal=false
     Categories=Game;Racing;
     EOF
+    # Wrap binaries to find data and force X11
+    for bin in stuntrally3 sr-editor3; do
+      wrapProgram $out/bin/$bin \
+        --set SDL_VIDEODRIVER x11
+    done
 
     popd
 

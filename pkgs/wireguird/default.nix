@@ -153,8 +153,8 @@ buildGoModule {
     # Ensure wg/wg-quick & resolvconf are available at runtime.
     wrapProgram "$out/bin/wireguird" \
       --set GSETTINGS_SCHEMA_DIR \
-        "${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}" \
-      --prefix XDG_DATA_DIRS : "${gsettings-desktop-schemas}/share" \
+        "${glib.getSchemaPath gsettings-desktop-schemas}" \
+      --prefix XDG_DATA_DIRS : "${lib.makeSearchPath "share" [ gsettings-desktop-schemas ]}" \
       --prefix PATH : ${
         lib.makeBinPath [
           wireguard-tools

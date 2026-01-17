@@ -8,6 +8,7 @@
   gdk-pixbuf,
   glib,
   gsettings-desktop-schemas,
+  wrapGAppsHook3,
   xorg,
   pkg-config,
   makeWrapper,
@@ -117,28 +118,28 @@ stdenv.mkDerivation {
 
   nativeBuildInputs = [
     makeWrapper
+    wrapGAppsHook3
   ];
 
-  phases = [
-    "installPhase"
+  buildInputs = [
+    gtk3
+    gsettings-desktop-schemas
   ];
+
+  dontUnpack = true;
+  dontBuild = true;
 
   installPhase = ''
     mkdir -p "$out/bin" "$out/share"
     ln -s ${wireguird-unwrapped}/share/icons "$out/share/icons"
     ln -s ${wireguird-unwrapped}/share/wireguird "$out/share/wireguird"
 
-    makeWrapper ${wireguird-unwrapped}/bin/wireguird "$out/bin/wireguird" \
-      --run 'mkdir -p /etc/wireguard 2>/dev/null || true' \
-      --set GSETTINGS_SCHEMA_DIR \
-        "${lib.makeSearchPath "share/gsettings-schemas" [ gtk3 gsettings-desktop-schemas ]}" \
-      --prefix XDG_DATA_DIRS : "${lib.makeSearchPath "share" [ gtk3 gsettings-desktop-schemas ]}" \
-      --prefix PATH : ${
-        lib.makeBinPath [
-          wireguard-tools
-          openresolv
-        ]
-      }
+    cat > "$out/bin/wireguird" <<EOF
+    #!/bin/sh
+    mkdir -p /etc/wireguard 2>/dev/null || true
+    exec ${wireguird-unwrapped}/bin/wireguird "\$@"
+    EOF
+    chmod +x "$out/bin/wireguird"
 
     # Desktop entry
     install -Dm644 /dev/stdin "$out/share/applications/wireguird.desktop" <<EOF
@@ -173,6 +174,17 @@ stdenv.mkDerivation {
         </action>
       </policyconfig>
     EOF
+  '';
+
+  postFixup = ''
+    wrapProgram "$out/bin/wireguird" \
+      ''${gappsWrapperArgs[@]} \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          wireguard-tools
+          openresolv
+        ]
+      }
   '';
 
   passthru.unwrapped = wireguird-unwrapped;

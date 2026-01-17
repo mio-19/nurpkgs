@@ -327,7 +327,9 @@ rec {
 
   rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
 
-  stuntrally = pkgs.callPackage ./pkgs/stuntrally { };
+  stuntrally2 = pkgs.callPackage ./pkgs/stuntrally { };
+
+  stuntrally = pkgs.callPackage ./pkgs/stuntrally-445054 { };
 
 }
 // (lib.optionalAttrs (!nurbot) rec {

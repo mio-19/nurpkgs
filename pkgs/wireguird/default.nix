@@ -131,8 +131,8 @@ stdenv.mkDerivation {
     makeWrapper ${wireguird-unwrapped}/bin/wireguird "$out/bin/wireguird" \
       --run 'mkdir -p /etc/wireguard 2>/dev/null || true' \
       --set GSETTINGS_SCHEMA_DIR \
-        "${glib.getSchemaPath gsettings-desktop-schemas}" \
-      --prefix XDG_DATA_DIRS : "${lib.makeSearchPath "share" [ gsettings-desktop-schemas ]}" \
+        "${lib.makeSearchPath "share/gsettings-schemas" [ gtk3 gsettings-desktop-schemas ]}" \
+      --prefix XDG_DATA_DIRS : "${lib.makeSearchPath "share" [ gtk3 gsettings-desktop-schemas ]}" \
       --prefix PATH : ${
         lib.makeBinPath [
           wireguard-tools

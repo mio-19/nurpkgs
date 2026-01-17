@@ -143,8 +143,8 @@ stdenv.mkDerivation {
       if [ -n "''${DISPLAY:-}" ] || [ -n "''${WAYLAND_DISPLAY:-}" ]; then
         exec ${polkit}/bin/pkexec --disable-internal-agent "$out/bin/wireguird" "\$@"
       fi
-      if [ -x /run/wrappers/bin/sudo ]; then
-        exec /run/wrappers/bin/sudo -p "wireguird must be run as root. Password for %u: " -- "$out/bin/wireguird" "\$@"
+      if command -v sudo >/dev/null 2>&1; then
+        exec sudo -p "wireguird must be run as root. Password for %u: " -- "$out/bin/wireguird" "\$@"
       fi
       exec ${polkit}/bin/pkexec --disable-internal-agent "$out/bin/wireguird" "\$@"
     fi

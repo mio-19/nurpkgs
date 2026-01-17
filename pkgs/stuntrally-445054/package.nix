@@ -87,6 +87,20 @@ stdenv.mkDerivation rec {
     mkdir -p $out/bin
     cp bin/Release/{sr-editor3,sr-translator,stuntrally3} $out/bin
 
+    # Desktop file + icon
+    install -m644 ./data/gui/stuntrally.png \
+      $out/share/icons/hicolor/256x256/apps/stuntrally3.png
+    cat > $out/share/applications/stuntrally3.desktop <<'EOF'
+    [Desktop Entry]
+    Type=Application
+    Name=Stunt Rally 3
+    Comment=Stunt Rally game with Track Editor, based on VDrift and OGRE
+    Exec=stuntrally3
+    Icon=stuntrally3
+    Terminal=false
+    Categories=Game;Racing;
+    EOF
+
     popd
 
     runHook postInstall

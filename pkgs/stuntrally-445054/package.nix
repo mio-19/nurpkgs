@@ -19,7 +19,7 @@
 }:
 
 let
-  mygui = callPackage ./mygui.nix { };
+  mygui = callPackage ./mygui.nix { inherit ogre-next; };
 in
 stdenv.mkDerivation rec {
   pname = "stuntrally";

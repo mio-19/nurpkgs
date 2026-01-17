@@ -118,5 +118,6 @@ stdenv.mkDerivation rec {
     license = lib.licenses.gpl3Plus;
     maintainers = with lib.maintainers; [ pSub ];
     platforms = lib.platforms.linux;
+    mainProgram = "stuntrally3";
   };
 }

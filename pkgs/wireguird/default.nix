@@ -201,7 +201,7 @@ stdenv.mkDerivation {
   passthru.unwrapped = wireguird-unwrapped;
 
   meta = wireguird-unwrapped.meta // {
-    description = "Wireguard GUI (wrapped)";
+    description = "Wireguard GUI";
     mainProgram = "wireguird";
   };
 }

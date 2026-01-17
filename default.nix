@@ -17,6 +17,7 @@
 }:
 with (import ./private.nix { inherit pkgs; });
 let
+  inherit (pkgs) callPackage;
   stdenv = pkgs.stdenv;
   llvmPackages_19 = pkgs.llvmPackages_19;
   minipkgs0 = rec {
@@ -151,6 +152,7 @@ let
           patches = (old.patches or [ ]) ++ [ ./patches/ghidra-ui-scale.patch ];
         })
       );
+      nix-output-monitor = callPackage ./pkgs/nix-output-monitor/package.nix { };
 
       cached = {
         pkgscache = (

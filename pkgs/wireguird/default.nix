@@ -12,7 +12,6 @@
   xorg,
   systemd,
   polkit,
-  sudo,
   pkg-config,
   makeWrapper,
   wireguard-tools,
@@ -144,7 +143,10 @@ stdenv.mkDerivation {
       if [ -n "''${DISPLAY:-}" ] || [ -n "''${WAYLAND_DISPLAY:-}" ]; then
         exec ${polkit}/bin/pkexec --disable-internal-agent "$out/bin/wireguird" "\$@"
       fi
-      exec ${sudo}/bin/sudo -p "wireguird must be run as root. Password for %u: " -- "$out/bin/wireguird" "\$@"
+      if [ -x /run/wrappers/bin/sudo ]; then
+        exec /run/wrappers/bin/sudo -p "wireguird must be run as root. Password for %u: " -- "$out/bin/wireguird" "\$@"
+      fi
+      exec ${polkit}/bin/pkexec --disable-internal-agent "$out/bin/wireguird" "\$@"
     fi
     exec ${wireguird-unwrapped}/bin/wireguird "\$@"
     EOF
@@ -192,7 +194,6 @@ stdenv.mkDerivation {
           wireguard-tools
           systemd
           polkit
-          sudo
         ]
       }
   '';

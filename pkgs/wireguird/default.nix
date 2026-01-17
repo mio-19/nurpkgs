@@ -10,10 +10,10 @@
   gsettings-desktop-schemas,
   wrapGAppsHook3,
   xorg,
+  systemd,
   pkg-config,
   makeWrapper,
   wireguard-tools,
-  openresolv,
 }:
 let
   # Build fileb0x separately so we can use it to regenerate static/ab0x.go
@@ -124,6 +124,7 @@ stdenv.mkDerivation {
   buildInputs = [
     gtk3
     gsettings-desktop-schemas
+    systemd
   ];
 
   dontUnpack = true;
@@ -182,7 +183,7 @@ stdenv.mkDerivation {
       --prefix PATH : ${
         lib.makeBinPath [
           wireguard-tools
-          openresolv
+          systemd
         ]
       }
   '';

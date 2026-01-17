@@ -88,6 +88,8 @@ stdenv.mkDerivation rec {
     cp bin/Release/{sr-editor3,sr-translator,stuntrally3} $out/bin
 
     # Desktop file + icon
+    mkdir -p $out/share/applications
+    mkdir -p $out/share/icons/hicolor/256x256/apps
     install -m644 ./data/gui/stuntrally.png \
       $out/share/icons/hicolor/256x256/apps/stuntrally3.png
     cat > $out/share/applications/stuntrally3.desktop <<'EOF'

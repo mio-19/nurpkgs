@@ -329,7 +329,7 @@ rec {
 
   stuntrally2 = pkgs.callPackage ./pkgs/stuntrally { };
 
-  stuntrally = pkgs.callPackage ./pkgs/stuntrally-445054 { };
+  stuntrally = v3overrideAttrs (pkgs.callPackage ./pkgs/stuntrally-445054 { });
 
 }
 // (lib.optionalAttrs (!nurbot) rec {

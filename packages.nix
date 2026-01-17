@@ -180,7 +180,7 @@ rec {
   ogre-next_3 = x8664linux (
     v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-next/default.nix { }).ogre-next_3
   );
-  stuntrally3 = (
+  stuntrally3_deprecated = (
     pkgs.callPackage ./pkgs/stuntrally3 {
       ogre-next_3 = ogre-next_3;
       mygui = mygui-next;

@@ -50,7 +50,7 @@ stdenv.mkDerivation rec {
   ];
 
   patches = [
-    ./fix-pitch.patch
+    ./debug_fix.patch
   ]; 
 
   postPatch = ''

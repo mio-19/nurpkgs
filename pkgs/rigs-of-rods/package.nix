@@ -95,7 +95,9 @@ stdenv.mkDerivation (finalAttrs: {
       --replace-fail "@CFG_COMMENT_RENDERSYSTEM_D3D11@" "# " \
       --replace-fail "@CFG_COMMENT_RENDERSYSTEM_GL@" "" \
       --replace-fail "@CFG_COMMENT_RENDERSYSTEM_GL3PLUS@" "# " \
-      --replace-fail "@CFG_OGRE_PLUGIN_CAELUM@" "${if caelum != null then "Plugin=libCaelum.so" else "# Plugin=libCaelum.so"}" \
+      --replace-fail "@CFG_OGRE_PLUGIN_CAELUM@" "${
+        if caelum != null then "Plugin=libCaelum.so" else "# Plugin=libCaelum.so"
+      }" \
       --replace-fail "Plugin=Codec_FreeImage" "Plugin=Codec_STBI" \
       --replace-fail "Plugin=Plugin_CgProgramManager" "# Plugin=Plugin_CgProgramManager"
 

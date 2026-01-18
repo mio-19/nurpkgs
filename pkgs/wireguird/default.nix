@@ -144,10 +144,11 @@ stdenv.mkDerivation {
       if command -v pkexec >/dev/null 2>&1; then
         # pkexec sanitizes env; explicitly forward GUI vars
         exec pkexec --disable-internal-agent env \
-          DISPLAY="''${DISPLAY}" \
-          XAUTHORITY="''${XAUTHORITY}" \
-          WAYLAND_DISPLAY="''${WAYLAND_DISPLAY}" \
-          XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR}" \
+          DISPLAY="\$DISPLAY" \
+          XAUTHORITY="\$XAUTHORITY" \
+          WAYLAND_DISPLAY="\$WAYLAND_DISPLAY" \
+          XDG_RUNTIME_DIR="\$XDG_RUNTIME_DIR" \
+          DBUS_SESSION_BUS_ADDRESS="\$DBUS_SESSION_BUS_ADDRESS" \
           "$out/bin/wireguird" "\$@"
       fi
       echo "wireguird: pkexec not found in PATH (need a setuid pkexec, e.g. /run/wrappers/bin/pkexec on NixOS)" >&2

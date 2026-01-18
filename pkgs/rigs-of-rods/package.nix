@@ -64,6 +64,7 @@ stdenv.mkDerivation (finalAttrs: {
     ./fix-rornet-include.patch
     ./fix-dashboard-regex-include.patch
     ./fix-curlfailinfo.patch
+    ./fix-mygui-stringview.patch
   ];
 
   cmakeFlags = [

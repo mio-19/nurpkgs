@@ -1,0 +1,83 @@
+diff --git a/awl/colorlabel.h b/awl/colorlabel.h
+index b206f1a51d..b7a6eb1532 100644
+--- a/awl/colorlabel.h
++++ b/awl/colorlabel.h
+@@ -20,6 +20,11 @@
+ #ifndef __AWLCOLORLABEL_H__
+ #define __AWLCOLORLABEL_H__
+ 
++#include <QColor>
++#include <QPixmap>
++#include <QPushButton>
++#include <QSize>
++
+ namespace Awl {
+ 
+ //---------------------------------------------------------
+@@ -53,4 +58,3 @@ class ColorLabel : public QPushButton {
+ 
+ }  // namespace Awl
+ #endif
+-
+diff --git a/awl/denomspinbox.h b/awl/denomspinbox.h
+index 9ee03a0742..637671b4e3 100644
+--- a/awl/denomspinbox.h
++++ b/awl/denomspinbox.h
+@@ -20,6 +20,10 @@
+ #ifndef __AWLDENOMSPINBOX_H__
+ #define __AWLDENOMSPINBOX_H__
+ 
++#include <QSpinBox>
++#include <QString>
++#include <QValidator>
++
+ namespace Awl {
+ 
+ //---------------------------------------------------------
+@@ -39,4 +43,3 @@ class DenominatorSpinBox : public QSpinBox {
+ }
+ 
+ #endif
+-
+diff --git a/awl/knob.cpp b/awl/knob.cpp
+index cd7fc238c7..d53f27a996 100644
+--- a/awl/knob.cpp
++++ b/awl/knob.cpp
+@@ -19,6 +19,10 @@
+ 
+ #include "knob.h"
+ 
++#include <QPainter>
++#include <QPainterPath>
++#include <QPen>
++
+ namespace Awl {
+ 
+ //---------------------------------------------------------
+@@ -271,4 +275,3 @@ void Knob::paintEvent(QPaintEvent* /*ev*/)
+             }
+       }
+ }
+-
+diff --git a/awl/knob.h b/awl/knob.h
+index d0f1ba5712..3cce12a7c3 100644
+--- a/awl/knob.h
++++ b/awl/knob.h
+@@ -23,6 +23,12 @@
+ #include "aslider.h"
+ // #include <QtDesigner/QDesignerExportWidget>
+ #include <QIcon>
++#include <QSize>
++#include <QString>
++
++class QMouseEvent;
++class QPaintEvent;
++class QPainterPath;
+ 
+ namespace Awl {
+ 
+@@ -86,4 +92,3 @@ class Q_DECL_EXPORT Knob : public AbstractSlider {
+ }
+ 
+ #endif
+-

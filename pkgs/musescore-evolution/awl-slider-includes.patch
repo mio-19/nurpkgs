@@ -1,0 +1,35 @@
+diff --git a/awl/mslider.cpp b/awl/mslider.cpp
+index 755eda5f40..cb29a6be70 100644
+--- a/awl/mslider.cpp
++++ b/awl/mslider.cpp
+@@ -20,6 +20,10 @@
+ #include "fastlog.h"
+ #include "mslider.h"
+ 
++#include <QLinearGradient>
++#include <QPainter>
++#include <QPen>
++
+ namespace Awl {
+ 
+ #define METER_LEFT_EDGE 18
+diff --git a/awl/slider.cpp b/awl/slider.cpp
+index 066c442ac4..23bbf38412 100644
+--- a/awl/slider.cpp
++++ b/awl/slider.cpp
+@@ -19,6 +19,10 @@
+ 
+ #include "slider.h"
+ 
++#include <QPainter>
++#include <QPainterPath>
++#include <QPen>
++
+ namespace Awl {
+ 
+ //---------------------------------------------------------
+@@ -248,4 +252,3 @@ void Slider::paintEvent(QPaintEvent* /*ev*/)
+      	p.drawPath(*points);
+       }
+ }
+-

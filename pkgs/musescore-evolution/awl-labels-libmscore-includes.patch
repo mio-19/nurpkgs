@@ -1,0 +1,70 @@
+diff --git a/awl/pitchlabel.cpp b/awl/pitchlabel.cpp
+index 8575f1b563..f664c5027c 100644
+--- a/awl/pitchlabel.cpp
++++ b/awl/pitchlabel.cpp
+@@ -20,6 +20,9 @@
+ #include "pitchlabel.h"
+ #include "utils.h"
+ 
++#include <QApplication>
++#include <QStyle>
++
+ namespace Awl {
+ 
+ //---------------------------------------------------------
+@@ -106,4 +109,3 @@ void PitchLabel::setPitch(int val)
+       setValue(val);
+       }
+ }
+-
+diff --git a/awl/poslabel.cpp b/awl/poslabel.cpp
+index 22be1ed0a2..4cc6c13fa5 100644
+--- a/awl/poslabel.cpp
++++ b/awl/poslabel.cpp
+@@ -20,6 +20,9 @@
+ #include "poslabel.h"
+ #include "libmscore/pos.h"
+ 
++#include <QApplication>
++#include <QStyle>
++
+ namespace Awl {
+ 
+ //---------------------------------------------------------
+@@ -126,4 +129,3 @@ void PosLabel::setSmpte(bool val)
+       updateValue();
+       }
+ }
+-
+diff --git a/libmscore/chordlist.h b/libmscore/chordlist.h
+index 47d91ff86f..1fb388a98f 100644
+--- a/libmscore/chordlist.h
++++ b/libmscore/chordlist.h
+@@ -13,6 +13,9 @@
+ #ifndef __CHORDLIST_H__
+ #define __CHORDLIST_H__
+ 
++#include <QMap>
++#include <QString>
++
+ namespace Ms {
+ 
+ class XmlWriter;
+@@ -261,4 +264,3 @@ class ChordList : public QMap<int, ChordDescription> {
+ 
+ }     // namespace Ms
+ #endif
+-
+diff --git a/libmscore/style.h b/libmscore/style.h
+index 5713197ea1..a8e223cb89 100644
+--- a/libmscore/style.h
++++ b/libmscore/style.h
+@@ -13,6 +13,8 @@
+ #ifndef __STYLE_H__
+ #define __STYLE_H__
+ 
++#include <QFile>
++
+ #include "chordlist.h"
+ #include "types.h"
+ 

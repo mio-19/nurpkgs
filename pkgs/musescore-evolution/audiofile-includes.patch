@@ -1,0 +1,40 @@
+diff --git a/audiofile/audiofile.cpp b/audiofile/audiofile.cpp
+index b56ffc704c..9b0c47fe0d 100644
+--- a/audiofile/audiofile.cpp
++++ b/audiofile/audiofile.cpp
+@@ -12,6 +12,13 @@
+ 
+ #include "audiofile.h"
+ 
++#include <QtGlobal>
++
++#include <climits>
++#include <cmath>
++#include <cstring>
++#include <vector>
++
+ static sf_count_t getFileLen(void* f) {
+       return ((AudioFile*)f)->getFileLen();
+       }
+@@ -143,4 +150,3 @@ sf_count_t AudioFile::write(const void* /*ptr*/, sf_count_t /*count*/)
+ //printf("write\n");
+       return 0;
+       }
+-
+diff --git a/audiofile/audiofile.h b/audiofile/audiofile.h
+index d2b9eb6e15..4381130f0d 100644
+--- a/audiofile/audiofile.h
++++ b/audiofile/audiofile.h
+@@ -13,6 +13,7 @@
+ #ifndef __AUDIOFILE_H__
+ #define __AUDIOFILE_H__
+ 
++#include <QByteArray>
+ #include <sndfile.h>
+ 
+ //---------------------------------------------------------
+@@ -56,4 +57,3 @@ class AudioFile {
+       };
+ 
+ #endif
+-

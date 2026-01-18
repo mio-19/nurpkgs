@@ -36,6 +36,18 @@ stdenv.mkDerivation (finalAttrs: {
     sha256 = "sha256-piOXHKlnfCO1n0kAgeszqa6JVoHgF8B2OF7agpadGKQ=";
   };
 
+  patches = [
+    ./rtf2html-qt-includes.patch
+    ./cocoabridge-qt-headers.patch
+    ./awl-qwidget-include.patch
+    ./awl-qt-moc-includes.patch
+    ./awl-qt-labels-types-includes.patch
+    ./audiofile-includes.patch
+    ./awl-slider-includes.patch
+    ./awl-labels-libmscore-includes.patch
+    ./awl-pitchedit-colorlabel-includes.patch
+  ];
+
   # From top-level CMakeLists.txt:
   # - DOWNLOAD_SOUNDFONT defaults ON and tries to fetch from the network.
   # Download manually at Help > Manage Resources

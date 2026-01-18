@@ -1,0 +1,46 @@
+diff --git a/awl/colorlabel.cpp b/awl/colorlabel.cpp
+index c4ca00775d..4e2246b501 100644
+--- a/awl/colorlabel.cpp
++++ b/awl/colorlabel.cpp
+@@ -19,6 +19,9 @@
+ 
+ #include "colorlabel.h"
+ 
++#include <QColorDialog>
++#include <QPainter>
++
+ namespace Awl {
+ 
+ //---------------------------------------------------------
+diff --git a/awl/pitchedit.h b/awl/pitchedit.h
+index 42bae20de7..bf85490842 100644
+--- a/awl/pitchedit.h
++++ b/awl/pitchedit.h
+@@ -20,6 +20,11 @@
+ #ifndef __AWLPITCHEDIT_H__
+ #define __AWLPITCHEDIT_H__
+ 
++#include <QObject>
++#include <QKeyEvent>
++#include <QSpinBox>
++#include <QString>
++
+ namespace Awl {
+ 
+ //---------------------------------------------------------
+diff --git a/awl/utils.h b/awl/utils.h
+index 653d3a83eb..28e9ec38ca 100644
+--- a/awl/utils.h
++++ b/awl/utils.h
+@@ -20,9 +20,10 @@
+ #ifndef __AWLUTILS_H__
+ #define __AWLUTILS_H__
+ 
++#include <QString>
++
+ namespace Awl {
+       extern QString pitch2string(int);
+       }
+ 
+ #endif
+-

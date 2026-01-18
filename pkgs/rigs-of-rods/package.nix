@@ -82,6 +82,17 @@ stdenv.mkDerivation (finalAttrs: {
 
   postInstall = ''
     mkdir -p "$out/bin"
+    export PLUGINS_FOLDER="${ogre}/lib/OGRE"
+    export CFG_COMMENT_RENDERSYSTEM_D3D9="# "
+    export CFG_COMMENT_RENDERSYSTEM_D3D11="# "
+    export CFG_COMMENT_RENDERSYSTEM_GL=""
+    export CFG_COMMENT_RENDERSYSTEM_GL3PLUS="# "
+    export CFG_OGRE_PLUGIN_CAELUM=""
+    substituteAll "$src/source/main/plugins.cfg.in" "$out/plugins.cfg"
+    substituteInPlace "$out/plugins.cfg" \
+      --replace-fail "Codec_FreeImage" "Codec_STBI" \
+      --replace-fail "Plugin=Plugin_CgProgramManager" "# Plugin=Plugin_CgProgramManager" \
+      --replace-fail "@CFG_OGRE_PLUGIN_CAELUM@" "# Plugin=libCaelum.so"
     makeWrapper "$out/RunRoR" "$out/bin/rigs-of-rods" \
       --chdir "$out"
   '';

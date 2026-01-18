@@ -37,15 +37,7 @@ stdenv.mkDerivation (finalAttrs: {
   };
 
   patches = [
-    ./rtf2html-qt-includes.patch
-    ./cocoabridge-qt-headers.patch
-    ./awl-qwidget-include.patch
-    ./awl-qt-moc-includes.patch
-    ./awl-qt-labels-types-includes.patch
-    ./audiofile-includes.patch
-    ./awl-slider-includes.patch
-    ./awl-labels-libmscore-includes.patch
-    ./awl-pitchedit-colorlabel-includes.patch
+    ./musescore-evolution-fixes.patch
   ];
 
   # From top-level CMakeLists.txt:

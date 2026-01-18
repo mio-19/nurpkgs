@@ -20,14 +20,3 @@
  
  #if defined(_MSC_VER) && defined(GetObject) // This MS Windows macro from <wingdi.h> (Windows Kit 8.1) clashes with RapidJSON
  #   undef GetObject
---- a/source/main/gui/panels/GUI_GameControls.cpp
-+++ b/source/main/gui/panels/GUI_GameControls.cpp
-@@ -68,7 +68,7 @@
-             ImGui::TextColored(GRAY_HINT_TEXT, "%s", App::GetInputEngine()->eventIDToDescription(m_active_event).c_str());
-             // Keys preview
-             ImGui::NewLine();
--            ImGui::Text(keys_pressed.c_str());
-+            ImGui::Text("%s", keys_pressed.c_str());
-             // EXPL checkbox + tooltip
-             ImGui::NewLine();
-             ImGui::Checkbox(_LC("GameControls", "EXPL"), &m_interactive_keybinding_expl);

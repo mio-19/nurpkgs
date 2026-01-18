@@ -42,23 +42,22 @@ stdenv.mkDerivation (finalAttrs: {
     python3
   ];
 
-  buildInputs =
-    [
-      ogre
-      ois
-      mygui
-      fmt
-      rapidjson
-      openal
-      xorg.libX11
-    ]
-    ++ lib.optionals (curl != null) [ curl ]
-    ++ lib.optionals (openssl != null) [ openssl ]
-    ++ lib.optionals (angelscript != null) [ angelscript ]
-    ++ lib.optionals (discord-rpc != null) [ discord-rpc ]
-    ++ lib.optionals (socketw != null) [ socketw ]
-    ++ lib.optionals (caelum != null) [ caelum ]
-    ++ lib.optionals (pagedgeometry != null) [ pagedgeometry ];
+  buildInputs = [
+    ogre
+    ois
+    mygui
+    fmt
+    rapidjson
+    openal
+    xorg.libX11
+  ]
+  ++ lib.optionals (curl != null) [ curl ]
+  ++ lib.optionals (openssl != null) [ openssl ]
+  ++ lib.optionals (angelscript != null) [ angelscript ]
+  ++ lib.optionals (discord-rpc != null) [ discord-rpc ]
+  ++ lib.optionals (socketw != null) [ socketw ]
+  ++ lib.optionals (caelum != null) [ caelum ]
+  ++ lib.optionals (pagedgeometry != null) [ pagedgeometry ];
 
   cmakeFlags = [
     "-DCMAKE_CXX_STANDARD=17"

@@ -1,0 +1,33 @@
+--- a/source/main/gui/panels/GUI_RepositorySelector.cpp
++++ b/source/main/gui/panels/GUI_RepositorySelector.cpp
+@@ -49,7 +49,18 @@
+ #ifdef USE_CURL
+ #   include <curl/curl.h>
+ #   include <curl/easy.h>
+-#endif //USE_CURL
++#endif //USE_CURL
++
++#if defined(USE_CURL) && !defined(USE_SOCKETW)
++namespace RoR {
++struct CurlFailInfo
++{
++    std::string title;
++    CURLcode curl_result = CURLE_OK;
++    long http_response = 0;
++};
++}
++#endif
+ 
+ #if defined(_MSC_VER) && defined(GetObject) // This MS Windows macro from <wingdi.h> (Windows Kit 8.1) clashes with RapidJSON
+ #   undef GetObject
+--- a/source/main/gui/panels/GUI_GameControls.cpp
++++ b/source/main/gui/panels/GUI_GameControls.cpp
+@@ -68,7 +68,7 @@
+             ImGui::TextColored(GRAY_HINT_TEXT, "%s", App::GetInputEngine()->eventIDToDescription(m_active_event).c_str());
+             // Keys preview
+             ImGui::NewLine();
+-            ImGui::Text(keys_pressed.c_str());
++            ImGui::Text("%s", keys_pressed.c_str());
+             // EXPL checkbox + tooltip
+             ImGui::NewLine();
+             ImGui::Checkbox(_LC("GameControls", "EXPL"), &m_interactive_keybinding_expl);

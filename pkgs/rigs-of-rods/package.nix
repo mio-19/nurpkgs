@@ -62,8 +62,10 @@ stdenv.mkDerivation (finalAttrs: {
   patches = [
     ./disable-peeroptions-without-socketw.patch
     ./fix-rornet-include.patch
-    ./fix-mygui-stringview.patch
+    ./fix-dashboard-regex-include.patch
     ./fix-imgui-format-security.patch
+    ./fix-imgui-format-security-panels.patch
+    ./fix-curlfailinfo-and-gamecontrols.patch
   ];
 
   cmakeFlags = [

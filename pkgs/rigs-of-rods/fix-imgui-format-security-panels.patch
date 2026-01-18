@@ -1,0 +1,120 @@
+--- a/source/main/gui/panels/GUI_TopMenubar.cpp
++++ b/source/main/gui/panels/GUI_TopMenubar.cpp
+@@ -822,7 +822,7 @@
+ 
+             ImGui::PushItemWidth(125.f); // Width includes [+/-] buttons
+             ImGui::Separator();
+-            ImGui::TextColored(GRAY_HINT_TEXT, _LC("TopMenubar", "Visual options:"));
++            ImGui::TextColored(GRAY_HINT_TEXT, "%s", _LC("TopMenubar", "Visual options:"));
+             DrawGIntSlider(App::gfx_polygon_mode, _LC("TopMenubar", "Polygon mode"), 1, 3);
+             if (ImGui::IsItemHovered())
+             {
+@@ -1414,7 +1414,7 @@
+                         {
+                             ImGui::BeginTooltip();
+                             std::string w = "x:" + std::to_string(ai_waypoints[i].position.x) + " y:" + std::to_string(ai_waypoints[i].position.y) + " z:" + std::to_string(ai_waypoints[i].position.z);
+-                            ImGui::Text(w.c_str());
++                            ImGui::Text("%s", w.c_str());
+                             ImGui::EndTooltip();
+                         }
+                         ImGui::SameLine();
+@@ -1428,10 +1428,10 @@
+                         if (ImGui::IsItemHovered())
+                         {
+                             ImGui::BeginTooltip();
+-                            ImGui::Text(_LC("TopMenubar", "Set waypoint speed in km/h for land vehicles"));
++                            ImGui::Text("%s", _LC("TopMenubar", "Set waypoint speed in km/h for land vehicles"));
+                             ImGui::Separator();
+-                            ImGui::Text(_LC("TopMenubar", "Value -1: Ignore, vehicle will use default speed"));
+-                            ImGui::Text(_LC("TopMenubar", "Value >= 5: Override default speed"));
++                            ImGui::Text("%s", _LC("TopMenubar", "Value -1: Ignore, vehicle will use default speed"));
++                            ImGui::Text("%s", _LC("TopMenubar", "Value >= 5: Override default speed"));
+                             ImGui::EndTooltip();
+                         }
+                         ImGui::PopID();
+@@ -1470,7 +1470,7 @@
+                 TuneupDefPtr& tuneup_def = tuning_actor->getWorkingTuneupDef();
+ 
+                 // SAVED TUNEUPS
+-                ImGui::TextDisabled(fmt::format(_LC("Tuning", "Saved tuneups ({})"), tuning_saves.cqy_results.size()).c_str());
++                ImGui::TextDisabled("%s", fmt::format(_LC("Tuning", "Saved tuneups ({})"), tuning_saves.cqy_results.size()).c_str());
+                 for (CacheQueryResult& tuneup_result: tuning_saves.cqy_results)
+                 {
+                     ImGui::PushID(tuneup_result.cqr_entry->fname.c_str());
+@@ -1516,7 +1516,7 @@
+                 // WORKING TUNEUP
+                 ImGui::Separator();
+                 ImGui::AlignTextToFramePadding();
+-                ImGui::TextDisabled(_LC("Tuning", "Working tuneup"));
++                ImGui::TextDisabled("%s", _LC("Tuning", "Working tuneup"));
+                 if (tuning_savebox_visible)
+                 {
+                     ImGui::InputText(_LC("Tuning", "Name"), tuning_savebox_buf.GetBuffer(), tuning_savebox_buf.GetCapacity());
+@@ -2009,9 +2009,9 @@
+                             ImGui::SameLine();
+                             switch (vcam.vcam_role)
+                             {
+-                            case VCAM_ROLE_MIRROR_PROP_LEFT: ImGui::TextDisabled(_LC("Tuning", "(Mirror prop - Left)")); break;
+-                            case VCAM_ROLE_MIRROR_PROP_RIGHT: ImGui::TextDisabled(_LC("Tuning", "(Mirror prop - Right)")); break;
+-                            default: ImGui::TextDisabled(_LC("Tuning", "(Videocamera)")); break;
++                            case VCAM_ROLE_MIRROR_PROP_LEFT: ImGui::TextDisabled("%s", _LC("Tuning", "(Mirror prop - Left)")); break;
++                            case VCAM_ROLE_MIRROR_PROP_RIGHT: ImGui::TextDisabled("%s", _LC("Tuning", "(Mirror prop - Right)")); break;
++                            default: ImGui::TextDisabled("%s", _LC("Tuning", "(Videocamera)")); break;
+                             }
+                         }
+ 
+@@ -2249,12 +2249,12 @@
+ 
+ void DrawRepairBoxEvent(events ev, std::string const& desc)
+ {
+-    ImDrawEventHighlighted(ev); ImGui::SameLine(); ImGui::TextDisabled(desc.c_str()); ImGui::NextColumn();
++    ImDrawEventHighlighted(ev); ImGui::SameLine(); ImGui::TextDisabled("%s", desc.c_str()); ImGui::NextColumn();
+ }
+ 
+ void DrawRepairBoxModkey(OIS::KeyCode modkey, std::string const& desc)
+ {
+-    ImDrawModifierKeyHighlighted(modkey); ImGui::SameLine(); ImGui::TextDisabled(desc.c_str()); ImGui::NextColumn();
++    ImDrawModifierKeyHighlighted(modkey); ImGui::SameLine(); ImGui::TextDisabled("%s", desc.c_str()); ImGui::NextColumn();
+ }
+ 
+ void TopMenubar::DrawSpecialStateBox(float top_offset)
+@@ -2421,7 +2421,7 @@
+             else if (m_state_box == StateBox::STATEBOX_RACE)
+             {
+                 ImGui::SameLine();
+-                ImGui::Text(special_text_b.c_str());
++                ImGui::Text("%s", special_text_b.c_str());
+                 ImGui::SetCursorPosX((ImGui::GetWindowSize().x / 2) - (ImGui::CalcTextSize(special_text_c.c_str()).x / 2));
+                 ImGui::TextColored(special_color_c,"%s", special_text_c.c_str());
+ 
+@@ -2431,7 +2431,7 @@
+ 
+                 if (!special_text_d.empty())
+                 {
+-                    ImGui::TextDisabled(text);
++                    ImGui::TextDisabled("%s", text.ToCStr());
+                 }
+             }
+             else if (m_state_box == StateBox::STATEBOX_LIVE_REPAIR || m_state_box == StateBox::STATEBOX_QUICK_REPAIR)
+--- a/source/main/gui/panels/GUI_GameSettings.cpp
++++ b/source/main/gui/panels/GUI_GameSettings.cpp
+@@ -134,7 +134,7 @@
+         ImGui::SetCursorPos(box_pos);
+         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.7f, 0.1f, 1.f));
+         ImGui::BeginChildFrame(ImGuiID(123), box_size);
+-        ImGui::TextColored(ImVec4(0.1f, 0.1f, 0.1f, 1.f), text.c_str());
++        ImGui::TextColored(ImVec4(0.1f, 0.1f, 0.1f, 1.f), "%s", text.c_str());
+         ImGui::EndChildFrame();
+         ImGui::PopStyleColor(); // FrameBg
+     }
+--- a/source/main/gui/panels/GUI_MainSelector.cpp
++++ b/source/main/gui/panels/GUI_MainSelector.cpp
+@@ -167,7 +167,7 @@
+     // advanced search hint
+     const char* searchbox_hint = "(?)";
+     ImGui::SetCursorPos(searchbox_cursor + ImVec2(searchbox_width - (ImGui::CalcTextSize(searchbox_hint).x + ImGui::GetStyle().FramePadding.x), ImGui::GetStyle().FramePadding.y));
+-    ImGui::TextDisabled(searchbox_hint);
++    ImGui::TextDisabled("%s", searchbox_hint);
+     if (ImGui::IsItemHovered())
+     {
+         ImGui::BeginTooltip();

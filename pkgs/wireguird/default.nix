@@ -137,8 +137,6 @@ stdenv.mkDerivation {
 
     cat > "$out/bin/wireguird" <<EOF
     #!/bin/sh
-    mkdir -p /etc/wireguard 2>/dev/null || true
-
     if [ "\$(id -u)" -ne 0 ]; then
       if [ -t 0 ] && command -v sudo >/dev/null 2>&1; then
         exec sudo -p "wireguird must be run as root. Password for %u: " \
@@ -157,6 +155,7 @@ stdenv.mkDerivation {
       echo "wireguird: pkexec not found in PATH (need a setuid pkexec, e.g. /run/wrappers/bin/pkexec on NixOS)" >&2
       exit 1
     fi
+    mkdir -p /etc/wireguard 2>/dev/null || true
     exec ${wireguird-unwrapped}/bin/wireguird "\$@"
     EOF
     chmod +x "$out/bin/wireguird"

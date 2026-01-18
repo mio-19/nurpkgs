@@ -34,7 +34,7 @@ let
 
   wireguird-unwrapped = buildGoModule {
     pname = "wireguird-unwrapped";
-    version = "unstable-2025-09-04";
+    version = "1.1.0";
 
     src = fetchFromGitHub {
       owner = "UnnoTed";

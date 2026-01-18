@@ -1,0 +1,13 @@
+diff --git a/sdl12main.c b/sdl12main.c
+index db6d76d..fd9be33 100644
+--- a/sdl12main.c
++++ b/sdl12main.c
+@@ -139,7 +139,7 @@ static void loadbmpscale(char* filename, SDL_Surface** s) {
+ 	for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
+ 		unsigned char pix = getpixel(bmp, x, y);
+ 		for (int i = 0; i < scale; i++) for (int j = 0; j < scale; j++) {
+-			data[x*scale+i + (y*scale+j)*w*scale] = pix;
++			data[x*scale+i + (y*scale+j)*surf->pitch] = pix;
+ 		}
+ 	}
+ 	SDL_FreeSurface(bmp);

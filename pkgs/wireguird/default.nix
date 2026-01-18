@@ -34,7 +34,7 @@ let
 
   wireguird-unwrapped = buildGoModule {
     pname = "wireguird-unwrapped";
-    version = "unstable-2025-09-04";
+    version = "1.1.0";
 
     src = fetchFromGitHub {
       owner = "UnnoTed";
@@ -128,12 +128,21 @@ stdenv.mkDerivation {
 
   dontUnpack = true;
   dontBuild = true;
+  dontWrapGApps = true; # we only want $gappsWrapperArgs here
 
   installPhase = ''
     mkdir -p "$out/bin" "$out/share"
     ln -s ${wireguird-unwrapped}/share/icons "$out/share/icons"
     ln -s ${wireguird-unwrapped}/share/wireguird "$out/share/wireguird"
 
+    makeWrapper "${wireguird-unwrapped}/bin/wireguird" "$out/libexec/wireguird-wrapped" \
+      ''${gappsWrapperArgs[@]} \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          wireguard-tools
+          systemd
+        ]
+      }
     cat > "$out/bin/wireguird" <<EOF
     #!/bin/sh
     if [ "\$(id -u)" -ne 0 ]; then
@@ -143,17 +152,21 @@ stdenv.mkDerivation {
       if command -v pkexec >/dev/null 2>&1; then
         # pkexec sanitizes env; explicitly forward GUI vars
         exec pkexec --disable-internal-agent env \
-          DISPLAY="''${DISPLAY}" \
-          XAUTHORITY="''${XAUTHORITY}" \
-          WAYLAND_DISPLAY="''${WAYLAND_DISPLAY}" \
-          XDG_RUNTIME_DIR="''${XDG_RUNTIME_DIR}" \
+          DISPLAY="\$DISPLAY" \
+          XAUTHORITY="\$XAUTHORITY" \
+          WAYLAND_DISPLAY="\$WAYLAND_DISPLAY" \
+          XDG_RUNTIME_DIR="\$XDG_RUNTIME_DIR" \
+          XDG_DATA_DIRS="\$XDG_DATA_DIRS" \
+          XDG_CONFIG_DIRS="\$XDG_CONFIG_DIRS" \
+          XDG_CURRENT_DESKTOP="\$XDG_CURRENT_DESKTOP" \
+          DBUS_SESSION_BUS_ADDRESS="\$DBUS_SESSION_BUS_ADDRESS" \
           "$out/bin/wireguird" "\$@"
       fi
       echo "wireguird: pkexec not found in PATH (need a setuid pkexec, e.g. /run/wrappers/bin/pkexec on NixOS)" >&2
       exit 1
     fi
     mkdir -p /etc/wireguard 2>/dev/null || true
-    exec ${wireguird-unwrapped}/bin/wireguird "\$@"
+    exec $out/libexec/wireguird-wrapped "\$@"
     EOF
     chmod +x "$out/bin/wireguird"
 
@@ -189,17 +202,6 @@ stdenv.mkDerivation {
         </action>
       </policyconfig>
     EOF
-  '';
-
-  postFixup = ''
-    wrapProgram "$out/bin/wireguird" \
-      ''${gappsWrapperArgs[@]} \
-      --prefix PATH : ${
-        lib.makeBinPath [
-          wireguard-tools
-          systemd
-        ]
-      }
   '';
 
   passthru.unwrapped = wireguird-unwrapped;

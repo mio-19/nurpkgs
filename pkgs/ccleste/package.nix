@@ -42,7 +42,9 @@ stdenv.mkDerivation rec {
   postPatch = ''
     substituteInPlace sdl12main.c \
       --replace-fail 'snprintf(path, n, "data%c%s", pathsep, fname);' \
-                'snprintf(path, n, "'$out'/share/ccleste/data%c%s", pathsep, fname);'
+                'snprintf(path, n, "'$out'/share/ccleste/data%c%s", pathsep, fname);' \
+      --replace-fail 'data[x*scale+i + (y*scale+j)*w*scale] = pix;' \
+                'data[x*scale+i + (y*scale+j)*surf->pitch] = pix;'
   '';
 
   installPhase = let

@@ -129,6 +129,7 @@ stdenv.mkDerivation {
 
   dontUnpack = true;
   dontBuild = true;
+  dontWrapGApps = true; # we only want $gappsWrapperArgs here
 
   installPhase = ''
     mkdir -p "$out/bin" "$out/share"

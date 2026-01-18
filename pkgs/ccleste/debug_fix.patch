@@ -1,5 +1,5 @@
 diff --git a/sdl12main.c b/sdl12main.c
-index db6d76d..d670936 100644
+index db6d76d..b1efdc8 100644
 --- a/sdl12main.c
 +++ b/sdl12main.c
 @@ -135,11 +135,12 @@ static void loadbmpscale(char* filename, SDL_Surface** s) {
@@ -20,7 +20,7 @@ index db6d76d..d670936 100644
  		unsigned char* srcpix = src->pixels;
  		int srcpitch = src->pitch;
  		Uint32* dstpix = dst->pixels;
-+if (y==0 && x==0) printf("DEBUG: Xblit dst->w=%d dst->pitch=%d (pitch/4)=%d\n", dst->w, dst->pitch, dst->pitch/4);
++printf("DEBUG: Xblit dst->w=%d dst->pitch=%d (pitch/4)=%d\n", dst->w, dst->pitch, dst->pitch/4);
      #define _blitter(dp, xflip) do                                                                  \
      for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {                                       \
        unsigned char p = srcpix[!xflip ? srcx+x+(srcy+y)*srcpitch : srcx+(w-x-1)+(srcy+y)*srcpitch]; \

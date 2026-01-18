@@ -80,8 +80,6 @@ stdenv.mkDerivation (finalAttrs: {
 
   NIX_CFLAGS_COMPILE = "-Wno-error=delete-incomplete -Wno-delete-incomplete -DAS_DEPRECATED -Wno-error -Wno-error=format-security -Wno-error=format -Wno-error=format-extra-args";
 
-
-
   postInstall = ''
     mkdir -p "$out/bin"
     makeWrapper "$out/RunRoR" "$out/bin/rigs-of-rods" \

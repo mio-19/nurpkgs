@@ -5,7 +5,7 @@
   cmake,
   ninja,
   pkg-config,
-  makeWrapper,
+  makeBinaryWrapper,
   python3,
   ogre,
   ois,
@@ -38,7 +38,7 @@ stdenv.mkDerivation (finalAttrs: {
     cmake
     ninja
     pkg-config
-    makeWrapper
+    makeBinaryWrapper
     python3
   ];
 

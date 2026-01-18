@@ -5,6 +5,8 @@
   pkg-config,
   SDL2,
   SDL2_mixer,
+  makeDesktopItem,
+  copyDesktopItems,
 }:
 
 stdenv.mkDerivation rec {
@@ -18,11 +20,23 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [
     pkg-config
+    copyDesktopItems
   ];
 
   buildInputs = [
     SDL2
     SDL2_mixer
+  ];
+
+  desktopItems = [
+    (makeDesktopItem {
+      name = "ccleste";
+      desktopName = "Ccleste";
+      exec = "ccleste";
+      icon = "ccleste";
+      comment = "Celeste Classic C source port";
+      categories = [ "Game" "ActionGame" ];
+    })
   ];
 
   postPatch = ''
@@ -31,11 +45,20 @@ stdenv.mkDerivation rec {
                 'snprintf(path, n, "'$out'/share/ccleste/data%c%s", pathsep, fname);'
   '';
 
-  installPhase = ''
+  installPhase = let
+    icon = fetchurl {
+      url = "https://raw.githubusercontent.com/PapirusDevelopmentTeam/papirus-icon-theme/master/Papirus/64x64/apps/celeste.svg";
+      sha256 = "sha256-PS43zAYy/+oNm8ykTvi/aGv8vWxVtqnbaKtVJI/prNY=";
+    };
+  in ''
     runHook preInstall
-    mkdir -p $out/bin $out/share/ccleste
+    mkdir -p $out/bin $out/share/ccleste $out/share/icons/hicolor/scalable/apps
     cp ccleste $out/bin/
     cp -r data $out/share/ccleste/
+    
+    # Install icon
+    ln -s ${icon} $out/share/icons/hicolor/scalable/apps/ccleste.svg
+    
     runHook postInstall
   '';
 

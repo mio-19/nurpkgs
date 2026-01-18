@@ -194,7 +194,6 @@ stdenv.mkDerivation {
         lib.makeBinPath [
           wireguard-tools
           systemd
-          polkit
         ]
       }
   '';

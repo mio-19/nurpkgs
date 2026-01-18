@@ -143,7 +143,7 @@ flutter.buildFlutterApplication rec {
     homepage = "https://github.com/edde746/plezy";
     mainProgram = "plezy";
     license = lib.licenses.gpl3Only;
-    maintainers = with lib.maintainers; [ mio ];
+    maintainers = with lib.maintainers; [ ];
     platforms = lib.platforms.linux;
     sourceProvenance = with lib.sourceTypes; [
       fromSource

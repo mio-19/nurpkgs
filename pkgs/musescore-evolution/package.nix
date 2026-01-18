@@ -238,7 +238,7 @@ stdenv.mkDerivation (finalAttrs: {
     description = "Music notation and composition software";
     homepage = "https://github.com/Jojo-Schmitz/MuseScore";
     license = lib.licenses.gpl2Only;
-    maintainers = with lib.maintainers; [ nemeott ];
+    maintainers = with lib.maintainers; [ ];
     mainProgram = "mscore-evo";
     platforms = lib.platforms.unix;
   };

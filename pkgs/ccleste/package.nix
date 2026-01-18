@@ -50,7 +50,7 @@ stdenv.mkDerivation rec {
   ];
 
   patches = [
-    ./debug_graphics.patch
+    ./fix-palette.patch
   ]; 
 
   postPatch = ''

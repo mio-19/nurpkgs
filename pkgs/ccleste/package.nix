@@ -44,6 +44,7 @@ stdenv.mkDerivation rec {
 
   patches = [
     ./fix-pitch.patch
+    ./debug.patch
   ];
 
   postPatch = ''

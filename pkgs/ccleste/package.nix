@@ -49,8 +49,9 @@ stdenv.mkDerivation rec {
     })
   ];
 
-  # Removing patches for now as we are switching repo
-  # patches = [ ./fix-pitch.patch ]; 
+  patches = [
+    ./fix-pitch.patch
+  ]; 
 
   postPatch = ''
     substituteInPlace sdl12main.c \

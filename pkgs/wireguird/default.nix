@@ -139,9 +139,7 @@ stdenv.mkDerivation {
     #!/bin/sh
     if [ "\$(id -u)" -ne 0 ]; then
       if [ -t 0 ] && command -v sudo >/dev/null 2>&1; then
-        exec sudo -p "wireguird must be run as root. Password for %u: " \
-          --preserve-env=DISPLAY,XAUTHORITY,WAYLAND_DISPLAY,XDG_RUNTIME_DIR \
-          -- "$out/bin/wireguird" "\$@"
+        exec sudo -p "wireguird must be run as root. Password for %u: " "$out/bin/wireguird" "\$@"
       fi
       if command -v pkexec >/dev/null 2>&1; then
         # pkexec sanitizes env; explicitly forward GUI vars

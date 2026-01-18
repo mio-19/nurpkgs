@@ -25,10 +25,17 @@ stdenv.mkDerivation rec {
     SDL2_mixer
   ];
 
+  postPatch = ''
+    substituteInPlace sdl12main.c \
+      --replace-fail 'snprintf(path, n, "data%c%s", pathsep, fname);' \
+                'snprintf(path, n, "'$out'/share/ccleste/data%c%s", pathsep, fname);'
+  '';
+
   installPhase = ''
     runHook preInstall
-    mkdir -p $out/bin
+    mkdir -p $out/bin $out/share/ccleste
     cp ccleste $out/bin/
+    cp -r data $out/share/ccleste/
     runHook postInstall
   '';
 

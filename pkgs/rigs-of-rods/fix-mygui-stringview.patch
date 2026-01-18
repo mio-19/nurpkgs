@@ -1,0 +1,26 @@
+--- a/source/main/gui/DashBoardManager.cpp
++++ b/source/main/gui/DashBoardManager.cpp
+@@ -1142,12 +1142,18 @@
+                         ctrl.geometricAnimationCount++;
+ 
+                         // parse more attributes
+-                        geometricAnim.wmin = StringConverter::parseReal(w->getUserString(minNumStr));
+-                        geometricAnim.wmax = StringConverter::parseReal(w->getUserString(maxNumStr));
+-                        geometricAnim.vmin = StringConverter::parseReal(w->getUserString(vminNumStr));
+-                        geometricAnim.vmax = StringConverter::parseReal(w->getUserString(vmaxNumStr));
++                        const std::string min_str = std::string(w->getUserString(minNumStr));
++                        const std::string max_str = std::string(w->getUserString(maxNumStr));
++                        const std::string vmin_str = std::string(w->getUserString(vminNumStr));
++                        const std::string vmax_str = std::string(w->getUserString(vmaxNumStr));
++                        const std::string direction_str = std::string(w->getUserString(directionNumStr));
+ 
+-                        String direction = w->getUserString(directionNumStr);
++                        geometricAnim.wmin = StringConverter::parseReal(min_str);
++                        geometricAnim.wmax = StringConverter::parseReal(max_str);
++                        geometricAnim.vmin = StringConverter::parseReal(vmin_str);
++                        geometricAnim.vmax = StringConverter::parseReal(vmax_str);
++
++                        String direction = direction_str;
+                         if (direction == "right")
+                             geometricAnim.direction = DIRECTION_RIGHT;
+                         else if (direction == "left")

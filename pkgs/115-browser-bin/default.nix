@@ -118,7 +118,7 @@ stdenv.mkDerivation (finalAttrs: {
     fi
 
     mkdir -p "$out/bin"
-    ln -s "/opt/115/115Browser/115.sh" "$out/bin/115-browser"
+    ln -s "$out/opt/115/115Browser/115.sh" "$out/bin/115-browser"
 
     install -Dm644 "$privacy" "$out/share/licenses/${finalAttrs.pname}/privacy.html"
     install -Dm644 "$copyright" "$out/share/licenses/${finalAttrs.pname}/copyright.html"

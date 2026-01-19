@@ -114,11 +114,41 @@ stdenv.mkDerivation (finalAttrs: {
 
     if [ -f "$out/opt/115/115Browser/115.sh" ]; then
       substituteInPlace "$out/opt/115/115Browser/115.sh" \
-        --replace-fail "/usr/local" "/opt/115"
+        --replace-fail "/usr/local" "/opt/115" \
+        --replace-fail "/opt/115" "$out/opt/115"
     fi
 
     mkdir -p "$out/bin"
-    ln -s "$out/opt/115/115Browser/115.sh" "$out/bin/115-browser"
+    cat > "$out/bin/115-browser" <<'EOF'
+    #!/bin/sh
+    set -eu
+
+    APP_DIR="$out/opt/115/115Browser"
+    APP_NAME="115Browser"
+    APP_PATH="$APP_DIR/$APP_NAME"
+
+    export LD_LIBRARY_PATH="$APP_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+    if [ ! -d "$APP_DIR" ]; then
+      echo "Error: $APP_DIR not found!" >&2
+      exit 1
+    fi
+
+    if [ ! -f "$APP_PATH" ]; then
+      echo "Error: $APP_PATH not found!" >&2
+      exit 1
+    fi
+
+    if [ ! -x "$APP_PATH" ]; then
+      echo "Error: $APP_PATH not executable!" >&2
+      exit 1
+    fi
+
+    cd "$APP_DIR"
+
+    exec "$APP_PATH" "$@"
+    EOF
+    chmod +x "$out/bin/115-browser"
 
     install -Dm644 "$privacy" "$out/share/licenses/${finalAttrs.pname}/privacy.html"
     install -Dm644 "$copyright" "$out/share/licenses/${finalAttrs.pname}/copyright.html"

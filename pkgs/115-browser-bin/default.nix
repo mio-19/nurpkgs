@@ -4,6 +4,7 @@
   autoPatchelfHook,
   dpkg,
   fetchurl,
+  makeWrapper,
   dbus,
   expat,
   glib,
@@ -48,6 +49,7 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     autoPatchelfHook
     dpkg
+    makeWrapper
   ];
 
   buildInputs = [
@@ -119,36 +121,9 @@ stdenv.mkDerivation (finalAttrs: {
     fi
 
     mkdir -p "$out/bin"
-    cat > "$out/bin/115-browser" <<'EOF'
-    #!/bin/sh
-    set -eu
-
-    APP_DIR="$out/opt/115/115Browser"
-    APP_NAME="115Browser"
-    APP_PATH="$APP_DIR/$APP_NAME"
-
-    export LD_LIBRARY_PATH="$APP_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-
-    if [ ! -d "$APP_DIR" ]; then
-      echo "Error: $APP_DIR not found!" >&2
-      exit 1
-    fi
-
-    if [ ! -f "$APP_PATH" ]; then
-      echo "Error: $APP_PATH not found!" >&2
-      exit 1
-    fi
-
-    if [ ! -x "$APP_PATH" ]; then
-      echo "Error: $APP_PATH not executable!" >&2
-      exit 1
-    fi
-
-    cd "$APP_DIR"
-
-    exec "$APP_PATH" "$@"
-    EOF
-    chmod +x "$out/bin/115-browser"
+    makeWrapper "$out/opt/115/115Browser/115Browser" "$out/bin/115-browser" \
+      --chdir "$out/opt/115/115Browser" \
+      --prefix LD_LIBRARY_PATH : "$out/opt/115/115Browser"
 
     install -Dm644 "$privacy" "$out/share/licenses/${finalAttrs.pname}/privacy.html"
     install -Dm644 "$copyright" "$out/share/licenses/${finalAttrs.pname}/copyright.html"

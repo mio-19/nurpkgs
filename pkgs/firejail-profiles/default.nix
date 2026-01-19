@@ -24,7 +24,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   meta = {
     description = "Firejail profiles for packages in this repository";
     homepage = "https://firejail.wordpress.com/";
-    license = lib.licenses.unfreeRedistributable or lib.licenses.unfree;
+    license = lib.licenses.mit;
     platforms = lib.platforms.linux;
   };
 })

@@ -50,7 +50,7 @@ flutter338.buildFlutterApplication rec {
       sed -i "/^  geolocator:/a\\  geolocator_linux: ^0.2.3" pubspec.yaml
     fi
 
-    # Provide stub API keys so the build does not fail when the file is missing.
+    # https://github.com/mio-19/Overmorrow/blob/master/lib/api_key_example.dart
     cat > lib/api_key.dart <<'APIKEYS'
     const String wapi_Key = "8f770061858941cda9f90707262001";
     const String wapi_key = wapi_Key;

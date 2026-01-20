@@ -105,7 +105,7 @@ stdenv.mkDerivation (finalAttrs: {
       --set QT_XKB_CONFIG_ROOT ${xkeyboard_config}/share/X11/xkb
       --set XKB_CONFIG_ROOT ${xkeyboard_config}/share/X11/xkb
     )
-    makeBinaryWrapper "$bin" "$out/bin/zw3d" "''${wrapperArgs[@]}"
+    makeWrapper "$bin" "$out/bin/zw3d" "''${wrapperArgs[@]}"
 
     runHook postInstall
   '';

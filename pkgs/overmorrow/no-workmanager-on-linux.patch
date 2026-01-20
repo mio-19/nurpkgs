@@ -1,3 +1,53 @@
+diff --git a/lib/daily.dart b/lib/daily.dart
+index f2a2714..c5d9eb0 100644
+--- a/lib/daily.dart
++++ b/lib/daily.dart
+@@ -110,7 +110,7 @@ class _BuildDaysState extends State<BuildDays> with AutomaticKeepAliveClientMixi
+         children: [
+           Padding(
+             padding: const EdgeInsets.only(left: 1, bottom: 14),
+-            child: Text(AppLocalizations.of(context)!.dailyLowercase, style: const TextStyle(fontSize: 17),)
++            child: Text(AppLocalizations.of(context)?.dailyLowercase ?? "daily", style: const TextStyle(fontSize: 17),)
+           ),
+ 
+           AnimatedSize(
+@@ -175,7 +175,7 @@ class _BuildDaysState extends State<BuildDays> with AutomaticKeepAliveClientMixi
+                 mainAxisAlignment: MainAxisAlignment.center,
+                 children: [
+                   Text(
+-                    isExpanded ? AppLocalizations.of(context)!.showLess : AppLocalizations.of(context)!.showMore,
++                    isExpanded ? (AppLocalizations.of(context)?.showLess ?? "show less") : (AppLocalizations.of(context)?.showMore ?? "show more"),
+                     style: TextStyle(color: Theme.of(context).colorScheme.onTertiaryContainer, fontSize: 16),
+                   ),
+                   const SizedBox(width: 4,),
+@@ -363,7 +363,7 @@ class DailyExpanded extends StatelessWidget {
+                   child: Padding(
+                     padding: const EdgeInsets.only(left: 15),
+                     child: Text(
+-                      conditionTranslation(day.condition, AppLocalizations.of(context)!) ?? "Translation Err",
++                      (AppLocalizations.of(context) != null ? conditionTranslation(day.condition, AppLocalizations.of(context)!) : day.condition) ?? "Translation Err",
+                       style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 22),
+                     )
+                   ),
+diff --git a/lib/hourly.dart b/lib/hourly.dart
+index ea313a0..e0fc115 100644
+--- a/lib/hourly.dart
++++ b/lib/hourly.dart
+@@ -78,10 +78,10 @@ class _NewHourlyState extends State<NewHourly> with AutomaticKeepAliveClientMixi
+                       : Theme.of(context).colorScheme.surface,
+                     label: Text(
+                       [
+-                      AppLocalizations.of(context)!.sumLowercase,
+-                      AppLocalizations.of(context)!.precipLowercase,
+-                      AppLocalizations.of(context)!.windLowercase,
+-                      AppLocalizations.of(context)!.uvLowercase,
++                      AppLocalizations.of(context)?.sumLowercase ?? "sum",
++                      AppLocalizations.of(context)?.precipLowercase ?? "precip",
++                      AppLocalizations.of(context)?.windLowercase ?? "wind",
++                      AppLocalizations.of(context)?.uvLowercase ?? "uv",
+                       ][index],
+                     ),
+                     selected: _value == index,
 diff --git a/lib/main.dart b/lib/main.dart
 index 912287b..8b51be7 100644
 --- a/lib/main.dart
@@ -220,3 +270,28 @@ index c829dab..1d678d3 100644
    }
  
    findCurrentPosition() async {
+diff --git a/lib/services/weather_service.dart b/lib/services/weather_service.dart
+index 99c21c0..b89b1da 100644
+--- a/lib/services/weather_service.dart
++++ b/lib/services/weather_service.dart
+@@ -100,13 +100,13 @@ DateTime? safeParseDate(String date) {
+ 
+ String getWeekName(int index, context) {
+   List<String> weeks = [
+-    AppLocalizations.of(context)!.mon,
+-    AppLocalizations.of(context)!.tue,
+-    AppLocalizations.of(context)!.wed,
+-    AppLocalizations.of(context)!.thu,
+-    AppLocalizations.of(context)!.fri,
+-    AppLocalizations.of(context)!.sat,
+-    AppLocalizations.of(context)!.sun
++    AppLocalizations.of(context)?.mon ?? "Mon",
++    AppLocalizations.of(context)?.tue ?? "Tue",
++    AppLocalizations.of(context)?.wed ?? "Wed",
++    AppLocalizations.of(context)?.thu ?? "Thu",
++    AppLocalizations.of(context)?.fri ?? "Fri",
++    AppLocalizations.of(context)?.sat ?? "Sat",
++    AppLocalizations.of(context)?.sun ?? "Sun"
+   ];
+   return weeks[index];
+ }

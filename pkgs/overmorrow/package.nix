@@ -52,7 +52,7 @@ flutter338.buildFlutterApplication rec {
 
     # Provide stub API keys so the build does not fail when the file is missing.
     cat > lib/api_key.dart <<'APIKEYS'
-    const String wapi_Key = "REPLACE_ME";
+    const String wapi_Key = "8f770061858941cda9f90707262001";
     const String wapi_key = wapi_Key;
     const String access_key = "REPLACE_ME";
     const String timezonedbKey = "REPLACE_ME";

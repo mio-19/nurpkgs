@@ -80,6 +80,111 @@ index 912287b..8b51be7 100644
        await Future.delayed(const Duration(milliseconds: 600));
        if (kDebugMode) {
          debugPrint('Stack trace: $stacktrace');
+diff --git a/lib/main_ui.dart b/lib/main_ui.dart
+index 3e01ed2..c396a3a 100644
+--- a/lib/main_ui.dart
++++ b/lib/main_ui.dart
+@@ -175,8 +175,8 @@ class _TempAndConditionTextState extends State<TempAndConditionText> {
+           fontSize: 77,
+         ),
+         Text(
+-          translateCondition(widget.data.current.condition,
+-              AppLocalizations.of(context)!),
++          (AppLocalizations.of(context) != null) ? translateCondition(widget.data.current.condition,
++              AppLocalizations.of(context)!) ?? widget.data.current.condition : widget.data.current.condition,
+           style: GoogleFonts.outfit(
+             color: colorsOnImage?.descColor ?? Theme.of(context).colorScheme.surface,
+             fontSize: 32,
+@@ -250,26 +250,26 @@ class Circles extends StatelessWidget {
+               DescriptionCircle(
+                 text: '${unitConversion(data.current.feelsLikeC,
+                     context.select((SettingsProvider p) => p.getTempUnit), decimals: 0)}°',
+-                undercaption: AppLocalizations.of(context)!.feelsLike,
++                undercaption: AppLocalizations.of(context)?.feelsLike ?? "Feels like",
+                 extra: '',
+                 dir: -1,
+               ),
+               DescriptionCircle(
+                 text: '${data.current.humidity}',
+-                undercaption: AppLocalizations.of(context)!.humidity,
++                undercaption: AppLocalizations.of(context)?.humidity ?? "Humidity",
+                 extra: '%',
+                 dir: -1,
+               ),
+               DescriptionCircle(
+                 text: '${unitConversion(data.current.precipMm ,context.select((SettingsProvider p) => p.getPrecipUnit))}',
+-                undercaption: AppLocalizations.of(context)!.precipCapital,
++                undercaption: AppLocalizations.of(context)?.precipCapital ?? "Precip.",
+                 extra: context.select((SettingsProvider p) => p.getPrecipUnit),
+                 dir: -1,
+               ),
+               DescriptionCircle(
+                 text: '${unitConversion(data.current.windKph,
+                     context.select((SettingsProvider p) => p.getWindUnit), decimals: 0)}',
+-                undercaption: AppLocalizations.of(context)!.windCapital,
++                undercaption: AppLocalizations.of(context)?.windCapital ?? "Wind",
+                 extra: context.select((SettingsProvider p) => p.getWindUnit),
+                 dir: data.current.windDirA + 180,
+               ),
+@@ -439,18 +439,18 @@ class _FadingWidgetState extends State<FadingWidget> with AutomaticKeepAliveClie
+     if (widget.imageService != null) {
+       final dif = widget.time.difference(widget.data.fetchDatetime).inMinutes;
+ 
+-      String text = AppLocalizations.of(context)!.updatedJustNow;
++      String text = AppLocalizations.of(context)?.updatedJustNow ?? "updated, just now";
+ 
+       if (dif > 0 && dif < 45) {
+-        text = AppLocalizations.of(context)!.updatedXMinutesAgo(dif);
++        text = AppLocalizations.of(context)?.updatedXMinutesAgo(dif) ?? "updated $dif minutes ago";
+       }
+       else if (dif >= 45 && dif < 1440) {
+         int hour = (dif + 30) ~/ 60;
+-        text = AppLocalizations.of(context)!.updatedXHoursAgo(hour);
++        text = AppLocalizations.of(context)?.updatedXHoursAgo(hour) ?? "updated $hour hours ago";
+       }
+       else if (dif >= 1440) { //number of minutes in a day
+         int day = (dif + 720) ~/ 1440;
+-        text = AppLocalizations.of(context)!.updatedXDaysAgo(day);
++        text = AppLocalizations.of(context)?.updatedXDaysAgo(day) ?? "updated $day days ago";
+       }
+ 
+       List<String> split = text.split(',');
+@@ -517,7 +517,7 @@ class SinceLastUpdate extends StatelessWidget {
+             ),
+             if (!data.isOnline) Padding(
+               padding: const EdgeInsets.only(right: 7),
+-              child: Text(AppLocalizations.of(context)!.offline, style: TextStyle(color: text, fontSize: 13),)
++              child: Text(AppLocalizations.of(context)?.offline ?? "offline", style: TextStyle(color: text, fontSize: 13),)
+             ),
+             if (data.isOnline) Padding(
+               padding: const EdgeInsets.only(right: 3, top: 1),
+@@ -531,7 +531,7 @@ class SinceLastUpdate extends StatelessWidget {
+         ),
+       );
+     } else{
+-      List<String> split = AppLocalizations.of(context)!.photoByXOnUnsplash.split(",");
++      List<String> split = (AppLocalizations.of(context)?.photoByXOnUnsplash ?? "Photo, by ,x, on ,Unsplash").split(",");
+       return Padding(
+         padding: const EdgeInsets.symmetric(horizontal: 31),
+         child: Row(
+@@ -543,7 +543,7 @@ class SinceLastUpdate extends StatelessWidget {
+             ),
+             if (!data.isOnline) Padding(
+               padding: const EdgeInsets.only(right: 7),
+-                child: Text(AppLocalizations.of(context)!.offline, style: TextStyle(color: text, fontSize: 14),)
++                child: Text(AppLocalizations.of(context)?.offline ?? "offline", style: TextStyle(color: text, fontSize: 14),)
+             ),
+             TextButton(
+               onPressed: () async {
+@@ -598,7 +598,7 @@ class ProviderSelector extends StatelessWidget {
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+-          Text(AppLocalizations.of(context)!.weatherProvderLowercase, style: const TextStyle(fontSize: 17),),
++          Text(AppLocalizations.of(context)?.weatherProvderLowercase ?? "weather provider", style: const TextStyle(fontSize: 17),),
+           Padding(
+             padding: const EdgeInsets.only(top: 12),
+             child: Row(
 diff --git a/lib/search_screens.dart b/lib/search_screens.dart
 index c829dab..1d678d3 100644
 --- a/lib/search_screens.dart

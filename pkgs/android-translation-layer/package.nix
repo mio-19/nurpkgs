@@ -81,8 +81,6 @@ stdenv.mkDerivation {
 
   postFixup = ''
     wrapProgram $out/bin/android-translation-layer \
-      --set BIONIC_LD_LIBRARY_PATH "${bionic-translation}/lib:$out/lib" \
-      --prefix XDG_DATA_DIRS : ${bionic-translation}/share \
       --prefix LD_LIBRARY_PATH : ${art-standalone}/lib/art \
       --prefix PATH : ${
         lib.makeBinPath [

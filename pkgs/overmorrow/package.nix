@@ -20,6 +20,10 @@ flutter338.buildFlutterApplication rec {
   pubspecLock = lib.importJSON ./pubspec.lock.json;
   gitHashes = lib.importJSON ./git-hashes.json;
 
+  patches = [
+    ./no-workmanager-on-linux.patch
+  ];
+
   nativeBuildInputs = [
     copyDesktopItems
   ];

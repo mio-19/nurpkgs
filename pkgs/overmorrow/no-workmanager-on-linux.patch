@@ -1,6 +1,8 @@
---- a/lib/main.dart	2026-01-20 20:00:16.938227471 +1100
-+++ b/lib/main.dart	2026-01-20 20:01:10.138404315 +1100
-@@ -41,7 +41,7 @@
+diff --git a/lib/main.dart b/lib/main.dart
+index 912287b..8b51be7 100644
+--- a/lib/main.dart
++++ b/lib/main.dart
+@@ -41,7 +41,7 @@ Future<void> main() async {
  
    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
  
@@ -9,20 +11,26 @@
      initializeWidgetServices();
    }
  
-@@ -238,24 +238,22 @@
+@@ -238,24 +238,22 @@ class MyHomePageState extends State<MyHomePage> {
      String latLon = context.read<SettingsProvider>().getLatLon;
      String location = context.read<SettingsProvider>().getLocation;
  
 -    if (!kIsWeb) {
 -      if (Platform.isAndroid) {
 -        Uri? appLaunchUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
--
++    if (!kIsWeb && Platform.isAndroid) {
++      Uri? appLaunchUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
+ 
 -        if (appLaunchUri != null) {
 -          if (appLaunchUri.host == "opened" && appLaunchUri.queryParameters.containsKey("location")
 -              && appLaunchUri.queryParameters.containsKey("latlon")) {
--
++      if (appLaunchUri != null) {
++        if (appLaunchUri.host == "opened" && appLaunchUri.queryParameters.containsKey("location")
++            && appLaunchUri.queryParameters.containsKey("latlon")) {
+ 
 -            if (appLaunchUri.queryParameters["location"] != null && appLaunchUri.queryParameters["latlon"] != null) {
--
++          if (appLaunchUri.queryParameters["location"] != null && appLaunchUri.queryParameters["latlon"] != null) {
+ 
 -              if (appLaunchUri.queryParameters["location"] == "CurrentLocation") {
 -                location = PreferenceUtils.getString('LastKnownPositionName', 'unknown');
 -                latLon = PreferenceUtils.getString('LastKnownPositionCord', 'unknown');
@@ -31,15 +39,6 @@
 -                location = appLaunchUri.queryParameters["location"]!;
 -                latLon = appLaunchUri.queryParameters["latlon"]!;
 -              }
-+    if (!kIsWeb && Platform.isAndroid) {
-+      Uri? appLaunchUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
-+
-+      if (appLaunchUri != null) {
-+        if (appLaunchUri.host == "opened" && appLaunchUri.queryParameters.containsKey("location")
-+            && appLaunchUri.queryParameters.containsKey("latlon")) {
-+
-+          if (appLaunchUri.queryParameters["location"] != null && appLaunchUri.queryParameters["latlon"] != null) {
-+
 +            if (appLaunchUri.queryParameters["location"] == "CurrentLocation") {
 +              location = PreferenceUtils.getString('LastKnownPositionName', 'unknown');
 +              latLon = PreferenceUtils.getString('LastKnownPositionCord', 'unknown');
@@ -50,3 +49,69 @@
              }
            }
          }
+@@ -275,8 +273,9 @@ class MyHomePageState extends State<MyHomePage> {
+     } on TimeoutException {
+       await Future.delayed(const Duration(milliseconds: 600));
+       setState(() {
++        var localizations = AppLocalizations.of(context);
+         weatherError = WeatherError(
+-          errorTitle: AppLocalizations.of(context)!.weakOrNoWifiConnection,
++          errorTitle: localizations?.weakOrNoWifiConnection ?? "Weak or no wifi connection",
+           errorIcon: Icons.signal_wifi_0_bar,
+           location: location,
+           latLon: latLon,
+@@ -300,8 +299,9 @@ class MyHomePageState extends State<MyHomePage> {
+     } on SocketException {
+       await Future.delayed(const Duration(milliseconds: 600));
+       setState(() {
++        var localizations = AppLocalizations.of(context);
+         weatherError = WeatherError(
+-          errorTitle: AppLocalizations.of(context)!.notConnectedToTheInternet,
++          errorTitle: localizations?.notConnectedToTheInternet ?? "Not connected to the internet",
+           errorIcon: Icons.wifi_off_rounded,
+           location: location,
+           latLon: latLon,
+@@ -310,6 +310,8 @@ class MyHomePageState extends State<MyHomePage> {
+       });
+     }
+     catch (e, stacktrace) {
++      print("General Error catch: $e");
++      print(stacktrace);
+       await Future.delayed(const Duration(milliseconds: 600));
+       if (kDebugMode) {
+         debugPrint('Stack trace: $stacktrace');
+diff --git a/lib/search_screens.dart b/lib/search_screens.dart
+index c829dab..1d678d3 100644
+--- a/lib/search_screens.dart
++++ b/lib/search_screens.dart
+@@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ 
+ import 'dart:async';
+ import 'dart:convert';
++import 'dart:io';
+ 
+ import 'package:flutter/foundation.dart';
+ import 'package:flutter/material.dart';
+@@ -94,7 +95,10 @@ class _MySearchWidgetState extends State<MySearchWidget> {
+ 
+     //Save the favorites so the widgets can access them when selecting location
+     String jsonString = jsonEncode(fav);
+-    WidgetService.saveData('widget.favorites', jsonString);
++
++    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
++      WidgetService.saveData('widget.favorites', jsonString);
++    }
+ 
+     setState(() {
+       favorites.value = fav;
+@@ -323,7 +327,9 @@ class _HeroSearchPageState extends State<HeroSearchPage> {
+   saveCurrentLocationToWidget(Position position) async {
+     await PreferenceUtils.setString('LastKnownPositionName', placeName);
+     await PreferenceUtils.setString('LastKnownPositionCord', "${position.latitude.toStringAsFixed(2)}, ${position.longitude.toStringAsFixed(2)}");
+-    WidgetService.saveData("widget.lastKnownPlace", placeName); //save the name of the place to the widgets
++    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
++      WidgetService.saveData("widget.lastKnownPlace", placeName); //save the name of the place to the widgets
++    }
+   }
+ 
+   findCurrentPosition() async {

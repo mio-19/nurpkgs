@@ -50,7 +50,7 @@ flutter338.buildFlutterApplication rec {
       sed -i "/^  geolocator:/a\\  geolocator_linux: ^0.2.3" pubspec.yaml
     fi
 
-    # https://github.com/mio-19/Overmorrow/blob/master/lib/api_key_example.dart
+    # https://github.com/bmaroti9/Overmorrow/blob/master/lib/api_key_example.dart
     cat > lib/api_key.dart <<APIKEYS
     const String wapi_Key = "$(echo OGY3NzAwNjE4NTg5NDFjZGE5ZjkwNzA3MjYyMDAxCg== | base64 -d)";
     const String wapi_key = wapi_Key;

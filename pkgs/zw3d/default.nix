@@ -3,7 +3,7 @@
   stdenv,
   autoPatchelfHook,
   dpkg,
-  makeWrapper,
+  makeBinaryWrapper,
   requireFile,
   qt5,
   wayland,
@@ -43,7 +43,7 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     autoPatchelfHook
     dpkg
-    makeWrapper
+    makeBinaryWrapper
   ];
 
   buildInputs = [
@@ -105,7 +105,7 @@ stdenv.mkDerivation (finalAttrs: {
       --set QT_XKB_CONFIG_ROOT ${xkeyboard_config}/share/X11/xkb
       --set XKB_CONFIG_ROOT ${xkeyboard_config}/share/X11/xkb
     )
-    makeWrapper "$bin" "$out/bin/zw3d" "''${wrapperArgs[@]}"
+    makeBinaryWrapper "$bin" "$out/bin/zw3d" "''${wrapperArgs[@]}"
 
     runHook postInstall
   '';

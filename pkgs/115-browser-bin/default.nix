@@ -4,7 +4,7 @@
   autoPatchelfHook,
   dpkg,
   fetchurl,
-  makeWrapper,
+  makeBinaryWrapper,
   patchelf,
   addDriverRunpath,
   dbus,
@@ -53,7 +53,7 @@ stdenv.mkDerivation (finalAttrs: {
   nativeBuildInputs = [
     autoPatchelfHook
     dpkg
-    makeWrapper
+    makeBinaryWrapper
     patchelf
   ];
 

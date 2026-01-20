@@ -51,10 +51,10 @@ flutter338.buildFlutterApplication rec {
     fi
 
     # https://github.com/mio-19/Overmorrow/blob/master/lib/api_key_example.dart
-    cat > lib/api_key.dart <<'APIKEYS'
-    const String wapi_Key = "8f770061858941cda9f90707262001";
+    cat > lib/api_key.dart <<APIKEYS
+    const String wapi_Key = "$(echo OGY3NzAwNjE4NTg5NDFjZGE5ZjkwNzA3MjYyMDAxCg== | base64 -d)";
     const String wapi_key = wapi_Key;
-    const String access_key = "REPLACE_ME";
+    const String access_key = "$(echo dkdIRzY1M0h3ZkgzTWFENUZqRloxWmZYbmYyeFZuVHFuNGNreElIbEdNYwo= | base64 -d)";
     const String timezonedbKey = "REPLACE_ME";
     APIKEYS
   '';

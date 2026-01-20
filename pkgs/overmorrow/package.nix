@@ -45,6 +45,9 @@ flutter338.buildFlutterApplication rec {
       linux/flutter/generated_plugin_registrant.h \
       linux/flutter/generated_plugins.cmake
 
+    # Delete the checked-in localization file to force regeneration during build.
+    rm -f lib/l10n/app_localizations.dart
+
     # Ensure the Linux geolocator implementation is listed as a dependency.
     if ! grep -q "^  geolocator_linux:" pubspec.yaml; then
       sed -i "/^  geolocator:/a\\  geolocator_linux: ^0.2.3" pubspec.yaml

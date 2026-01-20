@@ -1,55 +1,5 @@
-diff --git a/lib/daily.dart b/lib/daily.dart
-index f2a2714..c5d9eb0 100644
---- a/lib/daily.dart
-+++ b/lib/daily.dart
-@@ -110,7 +110,7 @@ class _BuildDaysState extends State<BuildDays> with AutomaticKeepAliveClientMixi
-         children: [
-           Padding(
-             padding: const EdgeInsets.only(left: 1, bottom: 14),
--            child: Text(AppLocalizations.of(context)!.dailyLowercase, style: const TextStyle(fontSize: 17),)
-+            child: Text(AppLocalizations.of(context)?.dailyLowercase ?? "daily", style: const TextStyle(fontSize: 17),)
-           ),
- 
-           AnimatedSize(
-@@ -175,7 +175,7 @@ class _BuildDaysState extends State<BuildDays> with AutomaticKeepAliveClientMixi
-                 mainAxisAlignment: MainAxisAlignment.center,
-                 children: [
-                   Text(
--                    isExpanded ? AppLocalizations.of(context)!.showLess : AppLocalizations.of(context)!.showMore,
-+                    isExpanded ? (AppLocalizations.of(context)?.showLess ?? "show less") : (AppLocalizations.of(context)?.showMore ?? "show more"),
-                     style: TextStyle(color: Theme.of(context).colorScheme.onTertiaryContainer, fontSize: 16),
-                   ),
-                   const SizedBox(width: 4,),
-@@ -363,7 +363,7 @@ class DailyExpanded extends StatelessWidget {
-                   child: Padding(
-                     padding: const EdgeInsets.only(left: 15),
-                     child: Text(
--                      conditionTranslation(day.condition, AppLocalizations.of(context)!) ?? "Translation Err",
-+                      (AppLocalizations.of(context) != null ? conditionTranslation(day.condition, AppLocalizations.of(context)!) : day.condition) ?? "Translation Err",
-                       style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 22),
-                     )
-                   ),
-diff --git a/lib/hourly.dart b/lib/hourly.dart
-index ea313a0..e0fc115 100644
---- a/lib/hourly.dart
-+++ b/lib/hourly.dart
-@@ -78,10 +78,10 @@ class _NewHourlyState extends State<NewHourly> with AutomaticKeepAliveClientMixi
-                       : Theme.of(context).colorScheme.surface,
-                     label: Text(
-                       [
--                      AppLocalizations.of(context)!.sumLowercase,
--                      AppLocalizations.of(context)!.precipLowercase,
--                      AppLocalizations.of(context)!.windLowercase,
--                      AppLocalizations.of(context)!.uvLowercase,
-+                      AppLocalizations.of(context)?.sumLowercase ?? "sum",
-+                      AppLocalizations.of(context)?.precipLowercase ?? "precip",
-+                      AppLocalizations.of(context)?.windLowercase ?? "wind",
-+                      AppLocalizations.of(context)?.uvLowercase ?? "uv",
-                       ][index],
-                     ),
-                     selected: _value == index,
 diff --git a/lib/main.dart b/lib/main.dart
-index 912287b..8b51be7 100644
+index 912287b..0101655 100644
 --- a/lib/main.dart
 +++ b/lib/main.dart
 @@ -41,7 +41,7 @@ Future<void> main() async {
@@ -61,182 +11,17 @@ index 912287b..8b51be7 100644
      initializeWidgetServices();
    }
  
-@@ -238,24 +238,22 @@ class MyHomePageState extends State<MyHomePage> {
+@@ -238,7 +238,7 @@ class MyHomePageState extends State<MyHomePage> {
      String latLon = context.read<SettingsProvider>().getLatLon;
      String location = context.read<SettingsProvider>().getLocation;
  
 -    if (!kIsWeb) {
--      if (Platform.isAndroid) {
--        Uri? appLaunchUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
-+    if (!kIsWeb && Platform.isAndroid) {
-+      Uri? appLaunchUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
++    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+       if (Platform.isAndroid) {
+         Uri? appLaunchUri = await HomeWidget.initiallyLaunchedFromHomeWidget();
  
--        if (appLaunchUri != null) {
--          if (appLaunchUri.host == "opened" && appLaunchUri.queryParameters.containsKey("location")
--              && appLaunchUri.queryParameters.containsKey("latlon")) {
-+      if (appLaunchUri != null) {
-+        if (appLaunchUri.host == "opened" && appLaunchUri.queryParameters.containsKey("location")
-+            && appLaunchUri.queryParameters.containsKey("latlon")) {
- 
--            if (appLaunchUri.queryParameters["location"] != null && appLaunchUri.queryParameters["latlon"] != null) {
-+          if (appLaunchUri.queryParameters["location"] != null && appLaunchUri.queryParameters["latlon"] != null) {
- 
--              if (appLaunchUri.queryParameters["location"] == "CurrentLocation") {
--                location = PreferenceUtils.getString('LastKnownPositionName', 'unknown');
--                latLon = PreferenceUtils.getString('LastKnownPositionCord', 'unknown');
--              }
--              else {
--                location = appLaunchUri.queryParameters["location"]!;
--                latLon = appLaunchUri.queryParameters["latlon"]!;
--              }
-+            if (appLaunchUri.queryParameters["location"] == "CurrentLocation") {
-+              location = PreferenceUtils.getString('LastKnownPositionName', 'unknown');
-+              latLon = PreferenceUtils.getString('LastKnownPositionCord', 'unknown');
-+            }
-+            else {
-+              location = appLaunchUri.queryParameters["location"]!;
-+              latLon = appLaunchUri.queryParameters["latlon"]!;
-             }
-           }
-         }
-@@ -275,8 +273,9 @@ class MyHomePageState extends State<MyHomePage> {
-     } on TimeoutException {
-       await Future.delayed(const Duration(milliseconds: 600));
-       setState(() {
-+        var localizations = AppLocalizations.of(context);
-         weatherError = WeatherError(
--          errorTitle: AppLocalizations.of(context)!.weakOrNoWifiConnection,
-+          errorTitle: localizations?.weakOrNoWifiConnection ?? "Weak or no wifi connection",
-           errorIcon: Icons.signal_wifi_0_bar,
-           location: location,
-           latLon: latLon,
-@@ -300,8 +299,9 @@ class MyHomePageState extends State<MyHomePage> {
-     } on SocketException {
-       await Future.delayed(const Duration(milliseconds: 600));
-       setState(() {
-+        var localizations = AppLocalizations.of(context);
-         weatherError = WeatherError(
--          errorTitle: AppLocalizations.of(context)!.notConnectedToTheInternet,
-+          errorTitle: localizations?.notConnectedToTheInternet ?? "Not connected to the internet",
-           errorIcon: Icons.wifi_off_rounded,
-           location: location,
-           latLon: latLon,
-@@ -310,6 +310,8 @@ class MyHomePageState extends State<MyHomePage> {
-       });
-     }
-     catch (e, stacktrace) {
-+      print("General Error catch: $e");
-+      print(stacktrace);
-       await Future.delayed(const Duration(milliseconds: 600));
-       if (kDebugMode) {
-         debugPrint('Stack trace: $stacktrace');
-diff --git a/lib/main_ui.dart b/lib/main_ui.dart
-index 3e01ed2..c396a3a 100644
---- a/lib/main_ui.dart
-+++ b/lib/main_ui.dart
-@@ -175,8 +175,8 @@ class _TempAndConditionTextState extends State<TempAndConditionText> {
-           fontSize: 77,
-         ),
-         Text(
--          translateCondition(widget.data.current.condition,
--              AppLocalizations.of(context)!),
-+          (AppLocalizations.of(context) != null) ? translateCondition(widget.data.current.condition,
-+              AppLocalizations.of(context)!) ?? widget.data.current.condition : widget.data.current.condition,
-           style: GoogleFonts.outfit(
-             color: colorsOnImage?.descColor ?? Theme.of(context).colorScheme.surface,
-             fontSize: 32,
-@@ -250,26 +250,26 @@ class Circles extends StatelessWidget {
-               DescriptionCircle(
-                 text: '${unitConversion(data.current.feelsLikeC,
-                     context.select((SettingsProvider p) => p.getTempUnit), decimals: 0)}°',
--                undercaption: AppLocalizations.of(context)!.feelsLike,
-+                undercaption: AppLocalizations.of(context)?.feelsLike ?? "Feels like",
-                 extra: '',
-                 dir: -1,
-               ),
-               DescriptionCircle(
-                 text: '${data.current.humidity}',
--                undercaption: AppLocalizations.of(context)!.humidity,
-+                undercaption: AppLocalizations.of(context)?.humidity ?? "Humidity",
-                 extra: '%',
-                 dir: -1,
-               ),
-               DescriptionCircle(
-                 text: '${unitConversion(data.current.precipMm ,context.select((SettingsProvider p) => p.getPrecipUnit))}',
--                undercaption: AppLocalizations.of(context)!.precipCapital,
-+                undercaption: AppLocalizations.of(context)?.precipCapital ?? "Precip.",
-                 extra: context.select((SettingsProvider p) => p.getPrecipUnit),
-                 dir: -1,
-               ),
-               DescriptionCircle(
-                 text: '${unitConversion(data.current.windKph,
-                     context.select((SettingsProvider p) => p.getWindUnit), decimals: 0)}',
--                undercaption: AppLocalizations.of(context)!.windCapital,
-+                undercaption: AppLocalizations.of(context)?.windCapital ?? "Wind",
-                 extra: context.select((SettingsProvider p) => p.getWindUnit),
-                 dir: data.current.windDirA + 180,
-               ),
-@@ -439,18 +439,18 @@ class _FadingWidgetState extends State<FadingWidget> with AutomaticKeepAliveClie
-     if (widget.imageService != null) {
-       final dif = widget.time.difference(widget.data.fetchDatetime).inMinutes;
- 
--      String text = AppLocalizations.of(context)!.updatedJustNow;
-+      String text = AppLocalizations.of(context)?.updatedJustNow ?? "updated, just now";
- 
-       if (dif > 0 && dif < 45) {
--        text = AppLocalizations.of(context)!.updatedXMinutesAgo(dif);
-+        text = AppLocalizations.of(context)?.updatedXMinutesAgo(dif) ?? "updated $dif minutes ago";
-       }
-       else if (dif >= 45 && dif < 1440) {
-         int hour = (dif + 30) ~/ 60;
--        text = AppLocalizations.of(context)!.updatedXHoursAgo(hour);
-+        text = AppLocalizations.of(context)?.updatedXHoursAgo(hour) ?? "updated $hour hours ago";
-       }
-       else if (dif >= 1440) { //number of minutes in a day
-         int day = (dif + 720) ~/ 1440;
--        text = AppLocalizations.of(context)!.updatedXDaysAgo(day);
-+        text = AppLocalizations.of(context)?.updatedXDaysAgo(day) ?? "updated $day days ago";
-       }
- 
-       List<String> split = text.split(',');
-@@ -517,7 +517,7 @@ class SinceLastUpdate extends StatelessWidget {
-             ),
-             if (!data.isOnline) Padding(
-               padding: const EdgeInsets.only(right: 7),
--              child: Text(AppLocalizations.of(context)!.offline, style: TextStyle(color: text, fontSize: 13),)
-+              child: Text(AppLocalizations.of(context)?.offline ?? "offline", style: TextStyle(color: text, fontSize: 13),)
-             ),
-             if (data.isOnline) Padding(
-               padding: const EdgeInsets.only(right: 3, top: 1),
-@@ -531,7 +531,7 @@ class SinceLastUpdate extends StatelessWidget {
-         ),
-       );
-     } else{
--      List<String> split = AppLocalizations.of(context)!.photoByXOnUnsplash.split(",");
-+      List<String> split = (AppLocalizations.of(context)?.photoByXOnUnsplash ?? "Photo, by ,x, on ,Unsplash").split(",");
-       return Padding(
-         padding: const EdgeInsets.symmetric(horizontal: 31),
-         child: Row(
-@@ -543,7 +543,7 @@ class SinceLastUpdate extends StatelessWidget {
-             ),
-             if (!data.isOnline) Padding(
-               padding: const EdgeInsets.only(right: 7),
--                child: Text(AppLocalizations.of(context)!.offline, style: TextStyle(color: text, fontSize: 14),)
-+                child: Text(AppLocalizations.of(context)?.offline ?? "offline", style: TextStyle(color: text, fontSize: 14),)
-             ),
-             TextButton(
-               onPressed: () async {
-@@ -598,7 +598,7 @@ class ProviderSelector extends StatelessWidget {
-       child: Column(
-         crossAxisAlignment: CrossAxisAlignment.start,
-         children: [
--          Text(AppLocalizations.of(context)!.weatherProvderLowercase, style: const TextStyle(fontSize: 17),),
-+          Text(AppLocalizations.of(context)?.weatherProvderLowercase ?? "weather provider", style: const TextStyle(fontSize: 17),),
-           Padding(
-             padding: const EdgeInsets.only(top: 12),
-             child: Row(
 diff --git a/lib/search_screens.dart b/lib/search_screens.dart
-index c829dab..b4b2005 100644
+index c829dab..b88fd84 100644
 --- a/lib/search_screens.dart
 +++ b/lib/search_screens.dart
 @@ -18,6 +18,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -247,19 +32,18 @@ index c829dab..b4b2005 100644
  
  import 'package:flutter/foundation.dart';
  import 'package:flutter/material.dart';
-@@ -94,7 +95,10 @@ class _MySearchWidgetState extends State<MySearchWidget> {
+@@ -94,7 +95,9 @@ class _MySearchWidgetState extends State<MySearchWidget> {
  
      //Save the favorites so the widgets can access them when selecting location
      String jsonString = jsonEncode(fav);
 -    WidgetService.saveData('widget.favorites', jsonString);
-+
 +    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
 +      WidgetService.saveData('widget.favorites', jsonString);
 +    }
  
      setState(() {
        favorites.value = fav;
-@@ -323,7 +327,9 @@ class _HeroSearchPageState extends State<HeroSearchPage> {
+@@ -323,7 +326,9 @@ class _HeroSearchPageState extends State<HeroSearchPage> {
    saveCurrentLocationToWidget(Position position) async {
      await PreferenceUtils.setString('LastKnownPositionName', placeName);
      await PreferenceUtils.setString('LastKnownPositionCord', "${position.latitude.toStringAsFixed(2)}, ${position.longitude.toStringAsFixed(2)}");
@@ -270,97 +54,3 @@ index c829dab..b4b2005 100644
    }
  
    findCurrentPosition() async {
-@@ -366,20 +372,20 @@ class _HeroSearchPageState extends State<HeroSearchPage> {
-     } on Error {
-       setState(() {
-         locationState = "disabled";
--        locationMessage = AppLocalizations.of(context)!.unableToLocateDevice;
-+        locationMessage = AppLocalizations.of(context)?.unableToLocateDevice ?? "Unable to locate device";
-       });
-       return "disabled";
-     } on LocationServiceDisabledException {
-       setState(() {
-         locationState = "disabled";
--        locationMessage = AppLocalizations.of(context)!.locationServicesAreDisabled;
-+        locationMessage = AppLocalizations.of(context)?.locationServicesAreDisabled ?? "Location services are disabled";
-       });
-       return "disabled";
-     } on TimeoutException {
-       if (locationState != "enabled") {
-         setState(() {
-           locationState = "disabled";
--          locationMessage = AppLocalizations.of(context)!.unableToLocateDevice;
-+          locationMessage = AppLocalizations.of(context)?.unableToLocateDevice ?? "Unable to locate device";
-         });
-         return "disabled";
-       }
-@@ -423,7 +429,7 @@ class _HeroSearchPageState extends State<HeroSearchPage> {
-     if (permission == LocationPermission.deniedForever) {
-       setState(() {
-         locationState = "deniedForever";
--        locationMessage = AppLocalizations.of(context)!.locationPermissionDeniedForever;
-+        locationMessage = AppLocalizations.of(context)?.locationPermissionDeniedForever ?? "Location permission denied forever";
-       });
-       return "disabled";
-     }
-@@ -454,7 +460,7 @@ class _HeroSearchPageState extends State<HeroSearchPage> {
-     if (permission == LocationPermission.denied) {
-       setState(() {
-         locationState = "denied";
--        locationMessage = AppLocalizations.of(context)!.locationPermissionIsDenied;
-+        locationMessage = AppLocalizations.of(context)?.locationPermissionIsDenied ?? "Location permission is denied";
-       });
-       return "disabled";
-     }
-@@ -467,7 +473,7 @@ class _HeroSearchPageState extends State<HeroSearchPage> {
-     }
-     setState(() {
-       locationState = "disabled";
--      locationMessage = AppLocalizations.of(context)!.unableToLocateDevice;
-+      locationMessage = AppLocalizations.of(context)?.unableToLocateDevice ?? "Unable to locate device";
-     });
-     return "disabled";
-   }
-@@ -656,7 +662,7 @@ Widget buildRecommend(String text, ValueListenable<List<String>> favoritesListen
-                         child: Icon(
-                           Icons.gps_fixed, color: Theme.of(context).colorScheme.outline, size: 17,),
-                       ),
--                      Text(AppLocalizations.of(context)!.currentLocation,
-+                      Text(AppLocalizations.of(context)?.currentLocation ?? "Current location",
-                         style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 18, height: 1.2),)
-                     ],
-                   ),
-@@ -680,7 +686,7 @@ Widget buildRecommend(String text, ValueListenable<List<String>> favoritesListen
-                           child: Icon(
-                             Icons.star_outline, color: Theme.of(context).colorScheme.outline, size: 18,),
-                         ),
--                        Text(AppLocalizations.of(context)!.favoritesLowercase,
-+                        Text(AppLocalizations.of(context)?.favoritesLowercase ?? "favorites",
-                           style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 18, height: 1.2),)
-                       ],
-                     ),
-diff --git a/lib/services/weather_service.dart b/lib/services/weather_service.dart
-index 99c21c0..b89b1da 100644
---- a/lib/services/weather_service.dart
-+++ b/lib/services/weather_service.dart
-@@ -100,13 +100,13 @@ DateTime? safeParseDate(String date) {
- 
- String getWeekName(int index, context) {
-   List<String> weeks = [
--    AppLocalizations.of(context)!.mon,
--    AppLocalizations.of(context)!.tue,
--    AppLocalizations.of(context)!.wed,
--    AppLocalizations.of(context)!.thu,
--    AppLocalizations.of(context)!.fri,
--    AppLocalizations.of(context)!.sat,
--    AppLocalizations.of(context)!.sun
-+    AppLocalizations.of(context)?.mon ?? "Mon",
-+    AppLocalizations.of(context)?.tue ?? "Tue",
-+    AppLocalizations.of(context)?.wed ?? "Wed",
-+    AppLocalizations.of(context)?.thu ?? "Thu",
-+    AppLocalizations.of(context)?.fri ?? "Fri",
-+    AppLocalizations.of(context)?.sat ?? "Sat",
-+    AppLocalizations.of(context)?.sun ?? "Sun"
-   ];
-   return weeks[index];
- }

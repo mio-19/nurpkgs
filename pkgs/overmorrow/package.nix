@@ -23,6 +23,7 @@ flutter338.buildFlutterApplication rec {
   patches = [
     ./no-workmanager-on-linux.patch
     ./no-null-cache-fallback.patch
+    ./no-null-l10n-errors.patch
   ];
 
   nativeBuildInputs = [

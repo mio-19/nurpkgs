@@ -22,6 +22,7 @@ flutter338.buildFlutterApplication rec {
 
   patches = [
     ./no-workmanager-on-linux.patch
+    ./no-null-cache-fallback.patch
   ];
 
   nativeBuildInputs = [
@@ -44,9 +45,6 @@ flutter338.buildFlutterApplication rec {
     rm -f linux/flutter/generated_plugin_registrant.cc \
       linux/flutter/generated_plugin_registrant.h \
       linux/flutter/generated_plugins.cmake
-
-    # Delete the checked-in localization file to force regeneration during build.
-    rm -f lib/l10n/app_localizations.dart
 
     # Ensure the Linux geolocator implementation is listed as a dependency.
     if ! grep -q "^  geolocator_linux:" pubspec.yaml; then

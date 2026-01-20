@@ -132,7 +132,12 @@ stdenv.mkDerivation (finalAttrs: {
       --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath finalAttrs.buildInputs}${lib.optionalString (stdenv.hostPlatform.is64bit) (":" + lib.makeSearchPathOutput "lib" "lib64" finalAttrs.buildInputs)}" \
       --prefix XDG_DATA_DIRS : "${addDriverRunpath.driverLink}/share" \
       --add-flags "--disable-breakpad" \
-      --add-flags "--disable-crashpad"
+      --add-flags "--disable-crashpad" \
+      --add-flags "--disable-crash-reporter" \
+      --add-flags "--disable-features=Crashpad" \
+      --add-flags "--no-sandbox" \
+      --add-flags "--disable-setuid-sandbox" \
+      --add-flags "--disable-seccomp-filter-sandbox"
 
     install -Dm644 "$privacy" "$out/share/licenses/${finalAttrs.pname}/privacy.html"
     install -Dm644 "$copyright" "$out/share/licenses/${finalAttrs.pname}/copyright.html"

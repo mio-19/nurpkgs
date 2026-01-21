@@ -306,6 +306,16 @@ rec {
 
   systemd257 = (pkgs.callPackage ./pkgs/systemd257 { });
 
+  davinci-resolve_20_0_1 = pkgs.callPackage ./pkgs/davinci-resolve/package.nix { };
+  davinci-resolve-studio_20_0_1 = pkgs.callPackage ./pkgs/davinci-resolve/package.nix {
+    studioVariant = true;
+  };
+  # https://github.com/NixOS/nixpkgs/commit/49a636772fd8ea6f25b9c9ff9c5a04434e90b96f
+  davinci-resolve_20_1_1 = pkgs.callPackage ./pkgs/davinci-resolve-201/package.nix { };
+  davinci-resolve-studio_20_1_1 = pkgs.callPackage ./pkgs/davinci-resolve-201/package.nix {
+    studioVariant = true;
+  };
+  # deprecated names:
   davinci-resolve2001 = pkgs.callPackage ./pkgs/davinci-resolve/package.nix { };
   davinci-resolve-studio2001 = pkgs.callPackage ./pkgs/davinci-resolve/package.nix {
     studioVariant = true;

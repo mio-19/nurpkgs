@@ -185,6 +185,7 @@ rec {
   rain = pkgs.callPackage ./pkgs/rain/package.nix { };
   overmorrow = pkgs.callPackage ./pkgs/overmorrow/package.nix { };
   ccleste = pkgs.callPackage ./pkgs/ccleste/package.nix { };
+  pixelle-video = pkgs.callPackage ./pkgs/pixelle-video/package.nix { };
 
   firefox_nightly-unwrapped = v3override (
     v3overrideAttrs (

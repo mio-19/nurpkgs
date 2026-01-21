@@ -286,7 +286,10 @@ stdenv.mkDerivation (finalAttrs: {
     '';
     homepage = "https://github.com/helge17/tuxguitar";
     license = lib.licenses.lgpl2Plus;
-    maintainers = with lib.maintainers; [ ardumont ];
+    maintainers = with lib.maintainers; [
+      ardumont
+      mio
+    ];
     platforms = builtins.attrNames finalAttrs.finalPackage.passthru.mavenDepsHashes;
     mainProgram = "tuxguitar";
   };

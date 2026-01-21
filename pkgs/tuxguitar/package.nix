@@ -27,22 +27,17 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "tuxguitar";
-  version = "2.0.0";
+  version = "2.0.1";
 
   src = fetchFromGitHub {
     owner = "helge17";
     repo = "tuxguitar";
     tag = finalAttrs.version;
-    hash = "sha256-Kk6TQ2t4exVeRyxrCqpdddJE7BfZRlW+B/lUJ+SPPd8=";
+    hash = "sha256-USdYj8ebosXkiZpDqyN5J+g1kjyWm225iQlx/szXmLA=";
   };
 
   patches = [
     ./fix-include.patch
-    # https://github.com/helge17/tuxguitar/pull/937
-    (fetchpatch {
-      url = "https://github.com/helge17/tuxguitar/pull/937/commits/6d4df91518ee46340fa473b80eb5d4638d282fae.patch";
-      hash = "sha256-Iek02qK0xxrZcTmcYVpC8hv3r8/5jzdPLvY7OasukJg=";
-    })
   ];
 
   nativeBuildInputs = [

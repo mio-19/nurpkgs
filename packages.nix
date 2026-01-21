@@ -316,7 +316,6 @@ rec {
     studioVariant = true;
   };
   # deprecated names:
-  davinci-resolve2001 = pkgs.callPackage ./pkgs/davinci-resolve/package.nix { };
   davinci-resolve-studio2001 = pkgs.callPackage ./pkgs/davinci-resolve/package.nix {
     studioVariant = true;
   };

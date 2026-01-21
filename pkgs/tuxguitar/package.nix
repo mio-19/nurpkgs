@@ -274,12 +274,7 @@ stdenv.mkDerivation (finalAttrs: {
 
       outputHashMode = "recursive";
       outputHashAlgo = "sha256";
-      outputHash = finalAttrs.finalPackage.passthru.mavenDepsHashes.${stdenv.hostPlatform.system};
-    };
-    mavenDepsHashes = {
-      x86_64-linux = "sha256-3KKwaHYDxEN3m2obuijzYrWEPGcbjI6z+eTmtiIl0Ic=";
-      aarch64-linux = "";
-      aarch64-darwin = "";
+      outputHash = "sha256-3KKwaHYDxEN3m2obuijzYrWEPGcbjI6z+eTmtiIl0Ic=";
     };
   };
 

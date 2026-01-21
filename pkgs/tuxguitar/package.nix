@@ -290,7 +290,7 @@ stdenv.mkDerivation (finalAttrs: {
       ardumont
       mio
     ];
-    platforms = builtins.attrNames finalAttrs.finalPackage.passthru.mavenDepsHashes;
+    platforms = builtins.attrNames swt.passthru.srcMetadataByPlatform;
     mainProgram = "tuxguitar";
   };
 })

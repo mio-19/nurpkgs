@@ -315,10 +315,6 @@ rec {
   davinci-resolve-studio_20_1_1 = pkgs.callPackage ./pkgs/davinci-resolve-201/package.nix {
     studioVariant = true;
   };
-  # deprecated names:
-  davinci-resolve-studio2001 = pkgs.callPackage ./pkgs/davinci-resolve/package.nix {
-    studioVariant = true;
-  };
 
   firejail-profiles = pkgs.callPackage ./pkgs/firejail-profiles { };
 

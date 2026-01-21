@@ -7,7 +7,7 @@
   swt,
   jdk,
   jre,
-  makeWrapper,
+  makeBinaryWrapper,
   pkg-config,
   alsa-lib,
   jack2,
@@ -46,7 +46,7 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   nativeBuildInputs = [
-    makeWrapper
+    makeBinaryWrapper
     maven
     jdk
     pkg-config

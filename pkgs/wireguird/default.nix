@@ -12,7 +12,7 @@
   xorg,
   systemd,
   pkg-config,
-  makeWrapper,
+  makeBinaryWrapper,
   wireguard-tools,
 }:
 let

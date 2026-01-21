@@ -26,25 +26,25 @@ let
         ];
         doCheck = false;
       };
-      
+
       # Overriding to match 7.2.1 requirement from pyproject
       edge-tts-7 = self.buildPythonPackage rec {
-         pname = "edge-tts";
-         version = "7.2.1";
-         pyproject = true;
-         src = fetchFromGitHub {
-           owner = "rany2";
-           repo = "edge-tts";
-           rev = "${version}"; 
-           hash = "sha256-Q1mtdvX79yRhpmTXU398kw6dM4M3D1tQE78Bh7+p/uY=";
-         };
-         build-system = [ self.setuptools ];
-         dependencies = [
-           self.aiohttp
-           self.certifi
-           self.tabulate
-           self.typing-extensions
-         ];
+        pname = "edge-tts";
+        version = "7.2.1";
+        pyproject = true;
+        src = fetchFromGitHub {
+          owner = "rany2";
+          repo = "edge-tts";
+          rev = "${version}";
+          hash = "sha256-Q1mtdvX79yRhpmTXU398kw6dM4M3D1tQE78Bh7+p/uY=";
+        };
+        build-system = [ self.setuptools ];
+        dependencies = [
+          self.aiohttp
+          self.certifi
+          self.tabulate
+          self.typing-extensions
+        ];
       };
 
       html2image = self.buildPythonPackage rec {
@@ -70,7 +70,10 @@ let
           inherit pname version;
           hash = "sha256-VjEDYevwNk4tQ45bRfdmjLsSThWLs1gzPNBuSeg6aAI=";
         };
-        build-system = [ self.hatchling self.uv-dynamic-versioning ];
+        build-system = [
+          self.hatchling
+          self.uv-dynamic-versioning
+        ];
         dependencies = [
           self.httpx
           self.pydantic
@@ -107,7 +110,10 @@ let
           inherit pname version;
           hash = "sha256-+hDj20wXfRD0UvmNVGoKsAHK1pi8jp1XgkcGwZCwa1U=";
         };
-        build-system = [ self.hatchling self.uv-dynamic-versioning ];
+        build-system = [
+          self.hatchling
+          self.uv-dynamic-versioning
+        ];
         postPatch = ''
           sed -i '/dotenv/d' pyproject.toml
         '';
@@ -170,7 +176,10 @@ python.pkgs.buildPythonApplication rec {
   '';
 
   nativeBuildInputs = [ python.pkgs.pythonRelaxDepsHook ];
-  pythonRelaxDeps = [ "certifi" "pillow" ];
+  pythonRelaxDeps = [
+    "certifi"
+    "pillow"
+  ];
 
   dependencies = with python.pkgs; [
     fastmcp

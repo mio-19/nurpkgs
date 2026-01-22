@@ -93,7 +93,7 @@ mkWindowsAppNoCC rec {
     ${wget}/bin/wget -q "$vkd3d_url" -O "$vkd3d_archive"
     ${zstd}/bin/zstd -d "$vkd3d_archive" -o "$work/vkd3d-proton.tar"
     tar -xf "$work/vkd3d-proton.tar" -C "$work"
-    
+
     vkd3d_dir=$(find "$work" -type d -name "vkd3d-proton-*" | head -1)
     if [ -n "$vkd3d_dir" ]; then
       wine_lib_dir="$WINEPREFIX/drive_c/windows/system32"

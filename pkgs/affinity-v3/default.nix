@@ -37,7 +37,7 @@ mkWindowsAppNoCC rec {
   persistRuntimeLayer = true;
   enableMonoBootPrompt = false;
   graphicsDriver = "auto";
-  enableVulkan = false; # Using vkd3d-proton instead for better compatibility
+  #enableVulkan = false; # Using vkd3d-proton instead for better compatibility
 
   nativeBuildInputs = [
     copyDesktopItems

@@ -156,7 +156,7 @@ mkWindowsAppNoCC rec {
     src = fetchurl {
       # Official Affinity v3 icon from the repository
       url = "https://github.com/seapear/AffinityOnLinux/raw/main/Assets/Icons/Affinity-Canva.svg";
-      hash = "sha256-07d2shzv23c34h4xxd11zdwazqn1xqfm9479c3hibxx053rqw2hs";
+      hash = "sha256-GgqO8yig9xXhYOmQVB3uweKvePshtN4JJIMNsT/Uoh0=";
     };
   };
 

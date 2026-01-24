@@ -51,7 +51,7 @@ buildDotnetModule (finalAttrs: {
     aria2
     ffmpeg
   ]
-  ++ lib.optionals stdenv.isLinux [
+  ++ lib.optionals stdenv.hostPlatform.isLinux [
     fontconfig
     freetype
     icu
@@ -62,7 +62,7 @@ buildDotnetModule (finalAttrs: {
     (lib.getLib stdenv.cc.cc)
   ];
 
-  runtimeDeps = lib.optionals stdenv.isLinux (
+  runtimeDeps = lib.optionals stdenv.hostPlatform.isLinux (
     with xorg;
     [
       libX11
@@ -99,14 +99,14 @@ buildDotnetModule (finalAttrs: {
     printf 'See https://ffmpeg.org/legal.html for FFmpeg licensing information.\n' > $out/lib/downkyicore/FFmpeg_LICENSE.txt
 
   ''
-  + lib.optionalString stdenv.isLinux ''
+  + lib.optionalString stdenv.hostPlatform.isLinux ''
     cp DownKyi/Resources/favicon.ico downkyicore.ico
     icotool -x downkyicore.ico
     install -Dm444 \
       downkyicore_*_128x128x32.png \
       $out/share/icons/hicolor/128x128/apps/downkyicore.png
   ''
-  + lib.optionalString stdenv.isDarwin ''
+  + lib.optionalString stdenv.hostPlatform.isDarwin ''
     app="$out/Applications/DownKyi.app"
     mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 
@@ -141,7 +141,7 @@ buildDotnetModule (finalAttrs: {
     cp DownKyi/Resources/favicon.ico "$app/Contents/Resources/downkyicore.ico"
   '';
 
-  desktopItems = lib.optionals stdenv.isLinux [
+  desktopItems = lib.optionals stdenv.hostPlatform.isLinux [
     (makeDesktopItem {
       name = "downkyicore";
       desktopName = "DownKyi";

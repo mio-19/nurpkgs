@@ -360,7 +360,7 @@ rec {
 
   citron-emu = v3overrideAttrs (pkgs.callPackage ./pkgs/citron-emu/package.nix { });
 
-  polkit126 = v3overrideAttrs (pkgs.callPackage ./pkgs/polkit/package.nix { });
+  polkit126 = pkgs.callPackage ./pkgs/polkit/package.nix { };
 
 }
 // (lib.optionalAttrs (!nurbot) rec {

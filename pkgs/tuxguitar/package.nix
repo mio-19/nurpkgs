@@ -72,7 +72,7 @@ maven.buildMavenPackage rec {
 
   patches = [
     ./fix-include.patch
-    # https://github.com/helge17/tuxguitar/commit/3dc828a9b92e932952c2b33d8ee41db734f2fcc0
+    # Helps a little bit with https://github.com/helge17/tuxguitar/issues/961
     (fetchpatch {
       name = "create-new-file";
       url = "https://github.com/helge17/tuxguitar/commit/3dc828a9b92e932952c2b33d8ee41db734f2fcc0.patch";
@@ -135,7 +135,6 @@ maven.buildMavenPackage rec {
     jack2
     libpulseaudio
     suil
-    qt5.qtbase
   ]
   ++ lib.optionals stdenv.hostPlatform.isDarwin [
     stdenv.cc

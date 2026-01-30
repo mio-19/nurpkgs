@@ -217,10 +217,6 @@ rec {
 }
 // (lib.optionalAttrs (!nurbot) rec {
 
-  howdy = nodarwin (pkgs.callPackage ./pkgs/howdy/package.nix { });
-  linux-enable-ir-emitter = nodarwin (
-    pkgs.callPackage ./pkgs/linux-enable-ir-emitter/package.nix { }
-  );
   layan-sddm = nodarwin (pkgs.callPackage ./pkgs/layan-sddm { });
   needy-girl-overdose-theme = pkgs.callPackage ./pkgs/needy-girl-overdose-theme { };
   zw3d = pkgs.callPackage ./pkgs/zw3d {

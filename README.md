@@ -25,7 +25,7 @@ Use without nur: add to flake.nix inputs
 
 Some packages are only available without nur as they failed to evaluate under nur constraints:
 
-Update: more packages are not available on nur right now because of a hard to debug evaluation time out issue that only occur on nur's github actions but not this repo's github actions
+Update: more packages are not available or outdated on nur right now because of a hard to debug evaluation time out issue that only occur on nur's github actions but not this repo's github actions - https://github.com/nix-community/NUR/issues/1076
 
 + gifcurry
 + prospect-mail

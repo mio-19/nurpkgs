@@ -214,6 +214,9 @@ rec {
 
   eden = nodarwin (v3overrideAttrs (pkgs.callPackage ./pkgs/eden/package.nix { }));
 
+}
+// (lib.optionalAttrs (!nurbot) rec {
+
   howdy = nodarwin (pkgs.callPackage ./pkgs/howdy/package.nix { });
   linux-enable-ir-emitter = nodarwin (
     pkgs.callPackage ./pkgs/linux-enable-ir-emitter/package.nix { }
@@ -247,9 +250,6 @@ rec {
   #systemd257 = (pkgs.callPackage ./pkgs/systemd257 { });
 
   musescore-evolution = v3overrideAttrs (pkgs.callPackage ./pkgs/musescore-evolution/package.nix { });
-
-}
-// (lib.optionalAttrs (!nurbot) rec {
 
   proton-cachyos = pkgs.callPackage ./pkgs/proton-bin {
     toolTitle = "Proton-CachyOS";

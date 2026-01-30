@@ -192,8 +192,8 @@ maven.buildMavenPackage rec {
     ln -s $out/lib/tuxguitar/share/{applications,man,metainfo,mime,pixmaps} -t $out/share/
 
     # See https://github.com/helge17/tuxguitar/issues/961
-    mkdir -p $out/share/templates
-    ln -s $out/lib/tuxguitar/share/templates/ $out/share/templates/.source
+    mkdir -p $out/share/templates/.source
+    ln -s $out/lib/tuxguitar/share/templates/ $out/share/templates/.source/tuxguitar
     cp /build/source/desktop/build-scripts/common-resources/common-linux/share/templates/tuxguitar.desktop $out/share/templates/
   ''
   + ''

@@ -38,183 +38,185 @@ let
       else
         minipkgs0.prismlauncher-unwrapped;
   };
-in
-rec {
-  wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
-  lmms = pkgs.callPackage ./pkgs/lmms/package.nix {
-    withOptionals = true;
-    stdenv = v3Optimizations pkgs.clangStdenv;
-    perl540 = pkgs.perl540 or pkgs.perl5;
-    perl540Packages = pkgs.perl540Packages or pkgs.perl5Packages;
-  };
-  minetest591 = pkgs.callPackage ./pkgs/minetest591 {
-    stdenv = v3Optimizations pkgs.clangStdenv;
-  };
-  minetest591client = minetest591.override { buildServer = false; };
-  minetest591server = minetest591.override { buildClient = false; };
-  minetest580 = pkgs.callPackage ./pkgs/minetest580 {
-    irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
+  packages = rec {
+    wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
+    lmms = pkgs.callPackage ./pkgs/lmms/package.nix {
+      withOptionals = true;
+      stdenv = v3Optimizations pkgs.clangStdenv;
+      perl540 = pkgs.perl540 or pkgs.perl5;
+      perl540Packages = pkgs.perl540Packages or pkgs.perl5Packages;
+    };
+    minetest591 = pkgs.callPackage ./pkgs/minetest591 {
       stdenv = v3Optimizations pkgs.clangStdenv;
     };
-    stdenv = v3Optimizations pkgs.clangStdenv;
-  };
-  minetest580client = minetest580.override { buildServer = false; };
-  minetest580-touch = minetest580.override {
-    buildServer = false;
-    withTouchSupport = true;
-  };
-  minetest580server = minetest580.override { buildClient = false; };
-  musescore3 =
-    if pkgs.stdenv.isDarwin then
-      pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
-    else
-      v3overrideAttrs (pkgs.libsForQt5.callPackage ./pkgs/musescore3 { });
-  /*
-    # https://github.com/musescore/MuseScore/pull/21874
-    # https://github.com/adazem009/MuseScore/tree/piano_keyboard_playing_notes
-    # broken on nixpkgs between a98f368960a921d4fdc048e3a2401d12739bc1f9 and 7fd9583d8c174ecc7ac0094bed29bde80135c876
-    # broken by qt 6.10.0 -> 6.10.1 update
-    # https://github.com/NixOS/nixpkgs/compare/a98f368960a921d4fdc048e3a2401d12739bc1f9%E2%80%A67fd9583d8c174ecc7ac0094bed29bde80135c876
-    musescore-adazem009 = v3override (
+    minetest591client = minetest591.override { buildServer = false; };
+    minetest591server = minetest591.override { buildClient = false; };
+    minetest580 = pkgs.callPackage ./pkgs/minetest580 {
+      irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
+        stdenv = v3Optimizations pkgs.clangStdenv;
+      };
+      stdenv = v3Optimizations pkgs.clangStdenv;
+    };
+    minetest580client = minetest580.override { buildServer = false; };
+    minetest580-touch = minetest580.override {
+      buildServer = false;
+      withTouchSupport = true;
+    };
+    minetest580server = minetest580.override { buildClient = false; };
+    musescore3 =
+      if pkgs.stdenv.isDarwin then
+        pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
+      else
+        v3overrideAttrs (pkgs.libsForQt5.callPackage ./pkgs/musescore3 { });
+    /*
+      # https://github.com/musescore/MuseScore/pull/21874
+      # https://github.com/adazem009/MuseScore/tree/piano_keyboard_playing_notes
+      # broken on nixpkgs between a98f368960a921d4fdc048e3a2401d12739bc1f9 and 7fd9583d8c174ecc7ac0094bed29bde80135c876
+      # broken by qt 6.10.0 -> 6.10.1 update
+      # https://github.com/NixOS/nixpkgs/compare/a98f368960a921d4fdc048e3a2401d12739bc1f9%E2%80%A67fd9583d8c174ecc7ac0094bed29bde80135c876
+      musescore-adazem009 = v3override (
+        pkgs.musescore.overrideAttrs (old: {
+          version = "4.4.0-piano_keyboard_playing_notes";
+          src = pkgs.fetchFromGitHub {
+            owner = "adazem009";
+            repo = "MuseScore";
+            rev = "e3de9347f6078f170ddbfa6dcb922f72bb7fef88";
+            hash = "sha256-1HvwkolmKa317ozprLEpo6v/aNX75sEdaXHlt5Cj6NA=";
+          };
+          patches = [ ./patches/piano_keyboard_playing_notes.patch ];
+        })
+      );
+    */
+    # https://github.com/musescore/MuseScore/pull/28073
+    # https://github.com/githubwbp1988/MuseScore/tree/alex
+    # audit: https://github.com/musescore/MuseScore/compare/master...githubwbp1988:MuseScore:alex
+    musescore-alex = v3override (
       pkgs.musescore.overrideAttrs (old: {
-        version = "4.4.0-piano_keyboard_playing_notes";
+        version = "4.6.3-alex-unstable-20251228";
         src = pkgs.fetchFromGitHub {
-          owner = "adazem009";
+          owner = "githubwbp1988";
           repo = "MuseScore";
-          rev = "e3de9347f6078f170ddbfa6dcb922f72bb7fef88";
-          hash = "sha256-1HvwkolmKa317ozprLEpo6v/aNX75sEdaXHlt5Cj6NA=";
+          rev = "399388be12cf369619befae3de3ec852c4d2b07c";
+          hash = "sha256-1NFhA2xgBuml9wzTpTz2Xrn0uPEVXX4zn3mJBh37hMI=";
         };
-        patches = [ ./patches/piano_keyboard_playing_notes.patch ];
+        patches = [ ];
       })
     );
-  */
-  # https://github.com/musescore/MuseScore/pull/28073
-  # https://github.com/githubwbp1988/MuseScore/tree/alex
-  # audit: https://github.com/musescore/MuseScore/compare/master...githubwbp1988:MuseScore:alex
-  musescore-alex = v3override (
-    pkgs.musescore.overrideAttrs (old: {
-      version = "4.6.3-alex-unstable-20251228";
+    tuxguitar = v3overrideAttrs (
+      pkgs.callPackage ./pkgs/tuxguitar/package.nix {
+        swt = (pkgs.callPackage ./pkgs/swt/package.nix { });
+      }
+    );
+    mioplays = tuxguitar.overrideAttrs (old: {
       src = pkgs.fetchFromGitHub {
-        owner = "githubwbp1988";
-        repo = "MuseScore";
-        rev = "399388be12cf369619befae3de3ec852c4d2b07c";
-        hash = "sha256-1NFhA2xgBuml9wzTpTz2Xrn0uPEVXX4zn3mJBh37hMI=";
+        owner = "mio-19";
+        repo = "tuxguitar";
+        rev = "0212c160ad3176d3bc96b3003fe03fc7738cebf8";
+        hash = "sha256-Vl15Ydj5sFNtaAhRxuiZwVcuVavD6TVRtZbpthra3tU=";
       };
-      patches = [ ];
-    })
-  );
-  tuxguitar = v3overrideAttrs (
-    pkgs.callPackage ./pkgs/tuxguitar/package.nix {
-      swt = (pkgs.callPackage ./pkgs/swt/package.nix { });
-    }
-  );
-  mioplays = tuxguitar.overrideAttrs (old: {
-    src = pkgs.fetchFromGitHub {
-      owner = "mio-19";
-      repo = "tuxguitar";
-      rev = "0212c160ad3176d3bc96b3003fe03fc7738cebf8";
-      hash = "sha256-Vl15Ydj5sFNtaAhRxuiZwVcuVavD6TVRtZbpthra3tU=";
+
+      patches = [
+        ./pkgs/tuxguitar/fix-include.patch
+      ];
+    });
+    nss_git = callOverride ./pkgs/nss-git { };
+    #aria2-wrapped = pkgs.writeShellScriptBin "aria2" ''
+    #  ${pkgs.aria2}/bin/aria2c -s65536 -j65536 -x16 -k1M "$@"
+    #'';
+    # audacity4 = nodarwin (pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { });
+    cb = pkgs.callPackage ./pkgs/cb { };
+    electron_castlabs_38 = pkgs.callPackage ./pkgs/electron-castlabs-38 { };
+    cider = pkgs.callPackage ./pkgs/cider {
+      electron = electron_castlabs_38;
+    };
+    local-ai = pkgs.callPackage ./pkgs/local-ai/package.nix { };
+    local-ai-cuda = local-ai.override { with_cublas = true; };
+    mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });
+    miscutil = pkgs.callPackage ./pkgs/miscutil { };
+    gifcurry = nonurbot (pkgs.callPackage ./pkgs/gifcurry { });
+    rocksmith2tab = pkgs.callPackage ./pkgs/rocksmith2tab {
+      rocksmith-custom-song-toolkit = rocksmith-custom-song-toolkit;
+    };
+    browser-115-bin = pkgs.callPackage ./pkgs/115-browser-bin { };
+    browseros = pkgs.callPackage ./pkgs/browseros { };
+    bionic-translation = pkgs.callPackage ./pkgs/bionic-translation/package.nix { };
+    art-standalone = pkgs.callPackage ./pkgs/art-standalone/package.nix {
+      bionic-translation = bionic-translation;
+    };
+    android-translation-layer = pkgs.callPackage ./pkgs/android-translation-layer/package.nix {
+      art-standalone = art-standalone;
+      bionic-translation = bionic-translation;
+    };
+    beammp-launcher = pkgs.callPackage ./pkgs/beammp-launcher/package.nix {
+      cacert_3108 = pkgs.callPackage ./pkgs/cacert_3108 { };
+    };
+    beammp-server = pkgs.callPackage ./pkgs/beammp-server/package.nix { };
+    chatall = pkgs.callPackage ./pkgs/chatall/package.nix { };
+    dl-librescore = pkgs.callPackage ./pkgs/dl-librescore/package.nix { };
+    superTux = pkgs.callPackage ./pkgs/superTux/package.nix { };
+    ogre-1_11 = v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-1_11/package.nix { });
+    angelscript_2_35_1 = v3overrideAttrs (
+      pkgs.angelscript.overrideAttrs (
+        old:
+        let
+          version = "2.35.1";
+        in
+        {
+          inherit version;
+          src = pkgs.fetchzip {
+            url = "https://www.angelcode.com/angelscript/sdk/files/angelscript_${version}.zip";
+            hash = "sha256-ncs3pPsJErx3el8/Lsj+NSu7LQ1hPRlBmcTSvLGWL1s=";
+          };
+        }
+      )
+    );
+    socketw = v3overrideAttrs (pkgs.callPackage ./pkgs/socketw/package.nix { });
+    mygui-ogre = v3overrideAttrs (
+      pkgs.mygui.override {
+        withOgre = true;
+        ogre = ogre-1_11;
+      }
+    );
+    rigs-of-rods = pkgs.callPackage ./pkgs/rigs-of-rods/package.nix {
+      ogre = ogre-1_11;
+      mygui = mygui-ogre;
+      socketw = socketw;
+      angelscript = angelscript_2_35_1;
+    };
+    rain = pkgs.callPackage ./pkgs/rain/package.nix { };
+    overmorrow = pkgs.callPackage ./pkgs/overmorrow/package.nix { };
+    ccleste = pkgs.callPackage ./pkgs/ccleste/package.nix { };
+    pixelle-video = pkgs.callPackage ./pkgs/pixelle-video/package.nix { };
+
+    firefox_nightly-unwrapped = v3override (
+      v3overrideAttrs (
+        pkgs.callPackage ./pkgs/firefox-nightly {
+          nss_git = nss_git;
+          nyxUtils = nyxUtils;
+          icu78 = pkgs.icu78 or icu.icu78;
+        }
+      )
+    );
+
+    firefox_nightly = pkgs.wrapFirefox firefox_nightly-unwrapped { };
+    betterbird-unwrapped = v3overrideAttrs (pkgs.callPackage ./pkgs/betterbird { });
+    betterbird = pkgs.wrapThunderbird betterbird-unwrapped {
+      applicationName = "betterbird";
+      libName = "betterbird";
     };
 
-    patches = [
-      ./pkgs/tuxguitar/fix-include.patch
-    ];
-  });
-  nss_git = callOverride ./pkgs/nss-git { };
-  #aria2-wrapped = pkgs.writeShellScriptBin "aria2" ''
-  #  ${pkgs.aria2}/bin/aria2c -s65536 -j65536 -x16 -k1M "$@"
-  #'';
-  # audacity4 = nodarwin (pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { });
-  cb = pkgs.callPackage ./pkgs/cb { };
-  electron_castlabs_38 = pkgs.callPackage ./pkgs/electron-castlabs-38 { };
-  cider = pkgs.callPackage ./pkgs/cider {
-    electron = electron_castlabs_38;
-  };
-  local-ai = pkgs.callPackage ./pkgs/local-ai/package.nix { };
-  local-ai-cuda = local-ai.override { with_cublas = true; };
-  mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });
-  miscutil = pkgs.callPackage ./pkgs/miscutil { };
-  gifcurry = nonurbot (pkgs.callPackage ./pkgs/gifcurry { });
-  rocksmith2tab = pkgs.callPackage ./pkgs/rocksmith2tab {
-    rocksmith-custom-song-toolkit = rocksmith-custom-song-toolkit;
-  };
-  browser-115-bin = pkgs.callPackage ./pkgs/115-browser-bin { };
-  browseros = pkgs.callPackage ./pkgs/browseros { };
-  bionic-translation = pkgs.callPackage ./pkgs/bionic-translation/package.nix { };
-  art-standalone = pkgs.callPackage ./pkgs/art-standalone/package.nix {
-    bionic-translation = bionic-translation;
-  };
-  android-translation-layer = pkgs.callPackage ./pkgs/android-translation-layer/package.nix {
-    art-standalone = art-standalone;
-    bionic-translation = bionic-translation;
-  };
-  beammp-launcher = pkgs.callPackage ./pkgs/beammp-launcher/package.nix {
-    cacert_3108 = pkgs.callPackage ./pkgs/cacert_3108 { };
-  };
-  beammp-server = pkgs.callPackage ./pkgs/beammp-server/package.nix { };
-  chatall = pkgs.callPackage ./pkgs/chatall/package.nix { };
-  dl-librescore = pkgs.callPackage ./pkgs/dl-librescore/package.nix { };
-  superTux = pkgs.callPackage ./pkgs/superTux/package.nix { };
-  ogre-1_11 = v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-1_11/package.nix { });
-  angelscript_2_35_1 = v3overrideAttrs (
-    pkgs.angelscript.overrideAttrs (
-      old:
-      let
-        version = "2.35.1";
-      in
-      {
-        inherit version;
-        src = pkgs.fetchzip {
-          url = "https://www.angelcode.com/angelscript/sdk/files/angelscript_${version}.zip";
-          hash = "sha256-ncs3pPsJErx3el8/Lsj+NSu7LQ1hPRlBmcTSvLGWL1s=";
-        };
-      }
-    )
-  );
-  socketw = v3overrideAttrs (pkgs.callPackage ./pkgs/socketw/package.nix { });
-  mygui-ogre = v3overrideAttrs (
-    pkgs.mygui.override {
-      withOgre = true;
-      ogre = ogre-1_11;
-    }
-  );
-  rigs-of-rods = pkgs.callPackage ./pkgs/rigs-of-rods/package.nix {
-    ogre = ogre-1_11;
-    mygui = mygui-ogre;
-    socketw = socketw;
-    angelscript = angelscript_2_35_1;
-  };
-  rain = pkgs.callPackage ./pkgs/rain/package.nix { };
-  overmorrow = pkgs.callPackage ./pkgs/overmorrow/package.nix { };
-  ccleste = pkgs.callPackage ./pkgs/ccleste/package.nix { };
-  pixelle-video = pkgs.callPackage ./pkgs/pixelle-video/package.nix { };
+    plezy = nodarwin (pkgs.callPackage ./pkgs/by-name/pl/plezy/package.nix { });
 
-  firefox_nightly-unwrapped = v3override (
-    v3overrideAttrs (
-      pkgs.callPackage ./pkgs/firefox-nightly {
-        nss_git = nss_git;
-        nyxUtils = nyxUtils;
-        icu78 = pkgs.icu78 or icu.icu78;
-      }
-    )
-  );
+    downkyicore = pkgs.callPackage ./pkgs/downkyicore/package.nix { };
+    bifrost = pkgs.callPackage ./pkgs/bifrost/package.nix { };
+    bifrost-unwrapped = bifrost.unwrapped;
 
-  firefox_nightly = pkgs.wrapFirefox firefox_nightly-unwrapped { };
-  betterbird-unwrapped = v3overrideAttrs (pkgs.callPackage ./pkgs/betterbird { });
-  betterbird = pkgs.wrapThunderbird betterbird-unwrapped {
-    applicationName = "betterbird";
-    libName = "betterbird";
+    eden = nodarwin (v3overrideAttrs (pkgs.callPackage ./pkgs/eden/package.nix { }));
+
   };
-
-  plezy = nodarwin (pkgs.callPackage ./pkgs/by-name/pl/plezy/package.nix { });
-
-  downkyicore = pkgs.callPackage ./pkgs/downkyicore/package.nix { };
-  bifrost = pkgs.callPackage ./pkgs/bifrost/package.nix { };
-  bifrost-unwrapped = bifrost.unwrapped;
-
-  eden = nodarwin (v3overrideAttrs (pkgs.callPackage ./pkgs/eden/package.nix { }));
-
-}
+in
+with packages;
+packages
 // (lib.optionalAttrs (!nurbot) rec {
 
   layan-sddm = nodarwin (pkgs.callPackage ./pkgs/layan-sddm { });

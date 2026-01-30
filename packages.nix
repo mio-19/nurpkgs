@@ -358,14 +358,14 @@ rec {
 
   musescore-evolution = v3overrideAttrs (pkgs.callPackage ./pkgs/musescore-evolution/package.nix { });
 
-  citron-emu = v3overrideAttrs (pkgs.callPackage ./pkgs/citron-emu/package.nix { });
-
   polkit126 = pkgs.callPackage ./pkgs/polkit/package.nix { };
-
-  openscreen = pkgs.callPackage ./pkgs/openscreen/package.nix { };
 
 }
 // (lib.optionalAttrs (!nurbot) rec {
+
+  citron-emu = v3overrideAttrs (pkgs.callPackage ./pkgs/citron-emu/package.nix { });
+
+  openscreen = pkgs.callPackage ./pkgs/openscreen/package.nix { };
 
   mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
 

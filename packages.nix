@@ -311,6 +311,13 @@ rec {
 
   #systemd257 = (pkgs.callPackage ./pkgs/systemd257 { });
 
+  musescore-evolution = v3overrideAttrs (pkgs.callPackage ./pkgs/musescore-evolution/package.nix { });
+
+  polkit126 = pkgs.callPackage ./pkgs/polkit/package.nix { };
+
+}
+// (lib.optionalAttrs (!nurbot) rec {
+
   #davinci-resolve_20_0_1 = pkgs.callPackage ./pkgs/davinci-resolve/package.nix { };
   davinci-resolve-studio_20_0_1 = pkgs.callPackage ./pkgs/davinci-resolve/package.nix {
     studioVariant = true;
@@ -355,13 +362,6 @@ rec {
   rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
 
   stuntrally2 = pkgs.callPackage ./pkgs/stuntrally { };
-
-  musescore-evolution = v3overrideAttrs (pkgs.callPackage ./pkgs/musescore-evolution/package.nix { });
-
-  polkit126 = pkgs.callPackage ./pkgs/polkit/package.nix { };
-
-}
-// (lib.optionalAttrs (!nurbot) rec {
 
   citron-emu = v3overrideAttrs (pkgs.callPackage ./pkgs/citron-emu/package.nix { });
 

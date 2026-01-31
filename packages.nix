@@ -355,12 +355,12 @@ rec {
 
   openscreen = pkgs.callPackage ./pkgs/openscreen/package.nix { };
 
+}
+// (lib.optionalAttrs (!nurbot) rec {
+
   supertuxkart-evolution = v3override (
     pkgs.callPackage ./pkgs/supertuxkart-evolution/default.nix { }
   );
-
-}
-// (lib.optionalAttrs (!nurbot) rec {
 
   rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
 

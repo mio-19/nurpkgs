@@ -135,9 +135,6 @@ rec {
   mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });
   miscutil = pkgs.callPackage ./pkgs/miscutil { };
   gifcurry = nonurbot (pkgs.callPackage ./pkgs/gifcurry { });
-  rocksmith2tab = pkgs.callPackage ./pkgs/rocksmith2tab {
-    rocksmith-custom-song-toolkit = rocksmith-custom-song-toolkit;
-  };
   browser-115-bin = pkgs.callPackage ./pkgs/115-browser-bin { };
   browseros = pkgs.callPackage ./pkgs/browseros { };
   bionic-translation = pkgs.callPackage ./pkgs/bionic-translation/package.nix { };
@@ -352,8 +349,6 @@ rec {
       ];
     });
 
-  rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
-
   stuntrally2 = pkgs.callPackage ./pkgs/stuntrally { };
 
   citron-emu = v3overrideAttrs (pkgs.callPackage ./pkgs/citron-emu/package.nix { });
@@ -366,6 +361,12 @@ rec {
 
 }
 // (lib.optionalAttrs (!nurbot) rec {
+
+  rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
+
+  rocksmith2tab = pkgs.callPackage ./pkgs/rocksmith2tab {
+    rocksmith-custom-song-toolkit = rocksmith-custom-song-toolkit;
+  };
 
   mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
 

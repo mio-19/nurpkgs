@@ -213,12 +213,6 @@ let
 
     eden = nodarwin (v3overrideAttrs (pkgs.callPackage ./pkgs/eden/package.nix { }));
 
-  };
-in
-with packages;
-packages
-// (lib.optionalAttrs (!nurbot) rec {
-
   layan-sddm = nodarwin (pkgs.callPackage ./pkgs/layan-sddm { });
   needy-girl-overdose-theme = pkgs.callPackage ./pkgs/needy-girl-overdose-theme { };
   zw3d = pkgs.callPackage ./pkgs/zw3d {
@@ -364,6 +358,12 @@ packages
   citron-emu = v3overrideAttrs (pkgs.callPackage ./pkgs/citron-emu/package.nix { });
 
   openscreen = pkgs.callPackage ./pkgs/openscreen/package.nix { };
+
+  };
+in
+with packages;
+packages
+// (lib.optionalAttrs (!nurbot) rec {
 
   mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
 

@@ -33,7 +33,6 @@ Some packages are only available without nur as they failed to evaluate under nu
 + insta360-studio
 + rclone-browser (qt6)
 + supertuxkart-evolution
-+ rocksmith-custom-song-toolkit & rocksmith2tab
 
 ```
 inputs.mio.packages.${pkgs.stdenv.hostPlatform.system}.downkyicore

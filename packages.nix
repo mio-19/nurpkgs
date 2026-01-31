@@ -355,18 +355,18 @@ rec {
 
   openscreen = pkgs.callPackage ./pkgs/openscreen/package.nix { };
 
+  rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
+
+  rocksmith2tab = pkgs.callPackage ./pkgs/rocksmith2tab {
+    rocksmith-custom-song-toolkit = rocksmith-custom-song-toolkit;
+  };
+
 }
 // (lib.optionalAttrs (!nurbot) rec {
 
   supertuxkart-evolution = v3override (
     pkgs.callPackage ./pkgs/supertuxkart-evolution/default.nix { }
   );
-
-  rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
-
-  rocksmith2tab = pkgs.callPackage ./pkgs/rocksmith2tab {
-    rocksmith-custom-song-toolkit = rocksmith-custom-song-toolkit;
-  };
 
   mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
 

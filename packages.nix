@@ -39,6 +39,35 @@ let
         minipkgs0.prismlauncher-unwrapped;
   };
   packages = rec {
+    wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
+    lmms = pkgs.callPackage ./pkgs/lmms/package.nix {
+      withOptionals = true;
+      stdenv = v3Optimizations pkgs.clangStdenv;
+      perl540 = pkgs.perl540 or pkgs.perl5;
+      perl540Packages = pkgs.perl540Packages or pkgs.perl5Packages;
+    };
+    minetest591 = pkgs.callPackage ./pkgs/minetest591 {
+      stdenv = v3Optimizations pkgs.clangStdenv;
+    };
+    minetest591client = minetest591.override { buildServer = false; };
+    minetest591server = minetest591.override { buildClient = false; };
+    minetest580 = pkgs.callPackage ./pkgs/minetest580 {
+      irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
+        stdenv = v3Optimizations pkgs.clangStdenv;
+      };
+      stdenv = v3Optimizations pkgs.clangStdenv;
+    };
+    minetest580client = minetest580.override { buildServer = false; };
+    minetest580-touch = minetest580.override {
+      buildServer = false;
+      withTouchSupport = true;
+    };
+    minetest580server = minetest580.override { buildClient = false; };
+    musescore3 =
+      if pkgs.stdenv.isDarwin then
+        pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
+      else
+        v3overrideAttrs (pkgs.libsForQt5.callPackage ./pkgs/musescore3 { });
     /*
       # https://github.com/musescore/MuseScore/pull/21874
       # https://github.com/adazem009/MuseScore/tree/piano_keyboard_playing_notes
@@ -189,35 +218,6 @@ in
 with packages;
 packages
 // (lib.optionalAttrs (!nurbot) rec {
-    wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
-    lmms = pkgs.callPackage ./pkgs/lmms/package.nix {
-      withOptionals = true;
-      stdenv = v3Optimizations pkgs.clangStdenv;
-      perl540 = pkgs.perl540 or pkgs.perl5;
-      perl540Packages = pkgs.perl540Packages or pkgs.perl5Packages;
-    };
-    minetest591 = pkgs.callPackage ./pkgs/minetest591 {
-      stdenv = v3Optimizations pkgs.clangStdenv;
-    };
-    minetest591client = minetest591.override { buildServer = false; };
-    minetest591server = minetest591.override { buildClient = false; };
-    minetest580 = pkgs.callPackage ./pkgs/minetest580 {
-      irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
-        stdenv = v3Optimizations pkgs.clangStdenv;
-      };
-      stdenv = v3Optimizations pkgs.clangStdenv;
-    };
-    minetest580client = minetest580.override { buildServer = false; };
-    minetest580-touch = minetest580.override {
-      buildServer = false;
-      withTouchSupport = true;
-    };
-    minetest580server = minetest580.override { buildClient = false; };
-    musescore3 =
-      if pkgs.stdenv.isDarwin then
-        pkgs.callPackage ./pkgs/musescore3/darwin.nix { }
-      else
-        v3overrideAttrs (pkgs.libsForQt5.callPackage ./pkgs/musescore3 { });
 
   layan-sddm = nodarwin (pkgs.callPackage ./pkgs/layan-sddm { });
   needy-girl-overdose-theme = pkgs.callPackage ./pkgs/needy-girl-overdose-theme { };

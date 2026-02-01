@@ -44,21 +44,21 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   postPatch = ''
-    python3 - <<'PY'
-import json
-from pathlib import Path
+        python3 - <<'PY'
+    import json
+    from pathlib import Path
 
-path = Path("package.json")
-data = json.loads(path.read_text())
-dev = data.get("devDependencies", {})
-if "electron-builder" in dev:
-    dev.pop("electron-builder", None)
-    if dev:
-        data["devDependencies"] = dev
-    else:
-        data.pop("devDependencies", None)
-    path.write_text(json.dumps(data, indent=2) + "\n")
-PY
+    path = Path("package.json")
+    data = json.loads(path.read_text())
+    dev = data.get("devDependencies", {})
+    if "electron-builder" in dev:
+        dev.pop("electron-builder", None)
+        if dev:
+            data["devDependencies"] = dev
+        else:
+            data.pop("devDependencies", None)
+        path.write_text(json.dumps(data, indent=2) + "\n")
+    PY
   '';
 
   installPhase = ''

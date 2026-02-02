@@ -39,7 +39,7 @@
   zstd,
   callPackage,
   withDiscordPresence ? true,
-  withOptimisation ? false,
+  withOptimisation ? true,
 }@args:
 let
   nx_tzdbVersion = "221202";
@@ -184,10 +184,6 @@ stdenv.mkDerivation (finalAttrs: {
   postInstall = ''
     install -Dm444 $src/dist/72-citron-input.rules $out/lib/udev/rules.d/72-citron-input.rules
   '';
-
-  passthru = {
-    withOptimsation = callPackage ./package.nix (args // { withOptitmization = true; });
-  };
 
   meta = {
     homepage = "https://citron-emu.org";

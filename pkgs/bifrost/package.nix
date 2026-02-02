@@ -24,6 +24,7 @@
   makeDesktopItem,
   copyDesktopItems,
   autoPatchelfHook,
+  writeScript,
 }:
 
 let
@@ -54,6 +55,15 @@ let
 
     gradleBuildTask = ":desktop:createReleaseDistributable";
     gradleUpdateTask = finalAttrs.gradleBuildTask;
+
+    gradleUpdateScript = ''
+      runHook preBuild
+
+      gradle nixDownloadDeps -Dos.family=linux -Dos.arch=amd64
+      gradle nixDownloadDeps -Dos.family=linux -Dos.arch=aarch64
+      gradle nixDownloadDeps -Dos.name='mac os x' -Dos.arch=amd64
+      gradle nixDownloadDeps -Dos.name='mac os x' -Dos.arch=aarch64
+    '';
 
     mitmCache = gradle_8.fetchDeps {
       inherit (finalAttrs) pname;
@@ -247,6 +257,13 @@ stdenv.mkDerivation {
       '';
 
   passthru.unwrapped = bifrost-unwrapped;
+  passthru.updateScript = writeScript "update-bifrost" ''
+    #!/usr/bin/env nix-shell
+    #!nix-shell -i bash -p nix-update
+
+    nix-update bifrost
+    nix-build --no-out-link -A bifrost-unwrapped.mitmCache.updateScript
+  '';
 
   meta = bifrost-unwrapped.meta;
 }

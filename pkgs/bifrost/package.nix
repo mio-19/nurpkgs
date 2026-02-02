@@ -138,7 +138,7 @@ let
         binaryBytecode
       ];
       platforms = lib.platforms.linux ++ lib.platforms.darwin;
-      maintainers = with lib.maintainers; [ onny ];
+      maintainers = with lib.maintainers; [ ];
     };
   });
 

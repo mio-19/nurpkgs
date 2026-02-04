@@ -173,7 +173,6 @@ let
         lmms
         minetest591client
         minetest580client
-        musescore3
         musescore-alex
         cb
         beammp-launcher

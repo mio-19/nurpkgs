@@ -175,7 +175,6 @@ let
         minetest580client
         musescore3
         musescore-alex
-        tuxguitar
         cb
         beammp-launcher
         mdbook-generate-summary

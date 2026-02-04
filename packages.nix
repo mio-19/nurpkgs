@@ -103,12 +103,7 @@ rec {
       patches = [ ];
     })
   );
-  tuxguitar = v3overrideAttrs (
-    pkgs.callPackage ./pkgs/tuxguitar/package.nix {
-      swt = (pkgs.callPackage ./pkgs/swt/package.nix { });
-    }
-  );
-  mioplays = tuxguitar.overrideAttrs (old: {
+  mioplays = pkgs.tuxguitar.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "mio-19";
       repo = "tuxguitar";

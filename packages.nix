@@ -201,8 +201,6 @@ rec {
     libName = "betterbird";
   };
 
-  plezy = nodarwin (pkgs.callPackage ./pkgs/by-name/pl/plezy/package.nix { });
-
   downkyicore = pkgs.callPackage ./pkgs/downkyicore/package.nix { };
   bifrost = pkgs.callPackage ./pkgs/bifrost/package.nix { };
   bifrost-unwrapped = bifrost.unwrapped;

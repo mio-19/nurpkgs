@@ -180,7 +180,6 @@ let
         mdbook-generate-summary
         #betterbird
         eden
-        plezy
         downkyicore
         ego
         lix

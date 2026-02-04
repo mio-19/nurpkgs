@@ -195,7 +195,6 @@ let
         nix-output-monitor
         musescore-evolution
         citron-emu
-        zotero
         ;
     };
   };

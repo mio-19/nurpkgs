@@ -26,13 +26,13 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "musescore-evolution";
-  version = "0-unstable-2026-02-03";
+  version = "3.7.0-unstable-2026-01-12";
 
   src = fetchFromGitHub {
     owner = "Jojo-Schmitz";
     repo = "MuseScore";
-    rev = "5f8a09dd53dc506a569647bda875a74af7d3d302";
-    hash = "sha256-i7k2+Sz0OaZHDb4zhWR0i3pW5LGACSPnxIIbcJ33eCg=";
+    rev = "0b4543baca9b1b70d54cecb33cbf846dabc073d1";
+    hash = "sha256-piOXHKlnfCO1n0kAgeszqa6JVoHgF8B2OF7agpadGKQ=";
   };
 
   patches = [
@@ -148,7 +148,7 @@ stdenv.mkDerivation (finalAttrs: {
       --replace "Exec=mscore" "Exec=mscore-evo" \
       --replace "Name=MuseScore 3.7" "Name=MuseScore 3.7 (Evolution)" \
       --replace "Icon=mscore" "Icon=mscore-evo"
-    rm "$desktop"
+    rm $desktop
 
     # 3) Rename app icons (apps/)
     for sizeDir in "$out"/share/icons/hicolor/*/apps/; do

@@ -42,7 +42,7 @@ in
 # https://github.com/nix-community/nur-combined/blob/af619b147352e88b4105fbfab03f9395e68e5ee5/repos/dtomvan/default.nix#L6
 lib.filesystem.packagesFromDirectoryRecursive {
   inherit (pkgs) callPackage newScope;
-  directory = ./packages;
+  directory = ./by-name;
 }
 // rec {
   wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });

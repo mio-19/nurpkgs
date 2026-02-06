@@ -18,6 +18,7 @@
 with (import ./private.nix { inherit pkgs; });
 let
   inherit (pkgs) callPackage;
+  inherit (lib) recurseIntoAttrs;
   stdenv = pkgs.stdenv;
   llvmPackages_19 = pkgs.llvmPackages_19;
   minipkgs0 = rec {
@@ -145,7 +146,7 @@ let
     );
     bees = nodarwin (v3overridegcc pkgs.bees);
     netdata = (v3override (goV3OverrideAttrs pkgs.netdata)).override { withCloudUi = true; };
-    lix = v3override pkgs.lixPackageSets.latest.lix;
+    lix_v3 = v3override pkgs.lixPackageSets.latest.lix;
     # https://gist.github.com/nstarke/baa031e0cab64a608c9bd77d73c50fc6
     ghidra = v3override (
       pkgs.ghidra.overrideAttrs (old: {
@@ -153,6 +154,15 @@ let
       })
     );
     nix-output-monitor = callPackage ./pkgs/nix-output-monitor/package.nix { };
+
+    lixPackageSets = recurseIntoAttrs (
+      callPackage ./pkgs/lix {
+        storeDir = pkgs.config.nix.storeDir or "/nix/store";
+        stateDir = pkgs.config.nix.stateDir or "/nix/var";
+      }
+    );
+
+    lix = lixPackageSets.stable.lix;
 
     cached = {
       pkgscache = (

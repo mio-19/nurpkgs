@@ -4,7 +4,6 @@
   runCommandWith,
   writeShellScript,
   fetchFromGitHub,
-  fetchpatch,
   nixosTests,
 
   freetype,
@@ -113,14 +112,14 @@ let
 in
 stdenv.mkDerivation {
   pname = "darling";
-  version = "unstable-2024-02-03";
+  version = "0.1.20251023";
 
   src = fetchFromGitHub {
     owner = "darlinghq";
     repo = "darling";
-    rev = "25afbc76428c39c3909e9efcf5caef1140425211";
+    rev = "c431326ef3060a0e9814394ed919263d9c8f3f10";
     fetchSubmodules = true;
-    hash = "sha256-z9IMgc5hH2Upn8wHl1OgP42q9HTSkeHnxB3N812A+Kc=";
+    hash = "sha256-hEOhf5dQMnROjY/hAQK9LIS640plUEI1ueDmekPb9oY=";
     # Remove 500MB of dependency test files to get under Hydra output limit
     postFetch = ''
       rm -r $out/src/external/openjdk/test
@@ -132,24 +131,6 @@ stdenv.mkDerivation {
   outputs = [
     "out"
     "sdk"
-  ];
-
-  patches = [
-    # Fix 'clang: error: no such file or directory: .../signal/mach_excUser.c'
-    # https://github.com/darlinghq/darling/issues/1511
-    # https://github.com/darlinghq/darling/commit/f46eb721c11d32addd807f092f4b3a6ea515bb6d
-    (fetchpatch {
-      url = "https://github.com/darlinghq/darling/commit/f46eb721c11d32addd807f092f4b3a6ea515bb6d.patch?full_index=1";
-      hash = "sha256-FnLcHnK4cNto+E3OQSxE3iK+FHSU8y459FcpMvrzd6o=";
-    })
-
-    # Fix compatibility with ffmpeg_7
-    # https://github.com/darlinghq/darling/pull/1537
-    # https://github.com/darlinghq/darling/commit/9655d5598c87dcb22c54a83cc7741b77cb47a1b0
-    (fetchpatch {
-      url = "https://github.com/darlinghq/darling/commit/9655d5598c87dcb22c54a83cc7741b77cb47a1b0.patch?full_index=1";
-      hash = "sha256-ogMo4SRRwiOhaVJ+OS8BVolGDa7vGKyR9bdGiOiCuRc=";
-    })
   ];
 
   postPatch = ''

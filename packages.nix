@@ -345,8 +345,6 @@ lib.filesystem.packagesFromDirectoryRecursive {
 
   citron-emu = v3overrideAttrs (pkgs.callPackage ./pkgs/citron-emu/package.nix { });
 
-  openscreen = pkgs.callPackage ./pkgs/openscreen/package.nix { };
-
   rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
 
   rocksmith2tab = pkgs.callPackage ./pkgs/rocksmith2tab {

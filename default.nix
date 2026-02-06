@@ -162,7 +162,7 @@ let
       }
     );
 
-    lix = lixPackageSets.stable.lix;
+    lix_2_93 = lixPackageSets.stable.lix;
 
     cached = {
       pkgscache = (
@@ -191,7 +191,7 @@ let
         eden
         downkyicore
         ego
-        lix
+        lix_2_93
         ghidra
         prismlauncher-diegiwg
         android-translation-layer

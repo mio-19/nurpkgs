@@ -183,6 +183,7 @@ stdenv.mkDerivation {
 
   # Breaks shebangs of Darwin scripts
   dontPatchShebangs = true;
+  dontCheckForBrokenSymlinks = true;
 
   postInstall = ''
     # Install the SDK as a separate output

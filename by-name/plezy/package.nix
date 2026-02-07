@@ -156,7 +156,6 @@ flutter338.buildFlutterApplication rec {
     license = lib.licenses.gpl3Only;
     maintainers = with lib.maintainers; [
       mio
-      miniharinn
     ];
     platforms = lib.platforms.linux;
   };

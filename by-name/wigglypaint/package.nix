@@ -34,7 +34,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     homepage = "https://internet-janitor.itch.io/wigglypaint";
     downloadPage = "https://internet-janitor.itch.io/wigglypaint";
     license = lib.licenses.unfree;
-    platforms = lib.platforms.linux;
+    inherit (decker.meta) platforms;
     mainProgram = "wigglypaint";
     maintainers = [ ];
     sourceProvenance = with lib.sourceTypes; [ binaryBytecode ];

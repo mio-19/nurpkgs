@@ -203,6 +203,7 @@ let
         musescore-evolution
         citron-emu
         zotero
+        darling
         ;
     };
   };

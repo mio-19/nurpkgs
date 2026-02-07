@@ -17,6 +17,11 @@
 }:
 with (import ./private.nix { inherit pkgs; });
 let
+  pkgs-cuda = import <nixpkgs> {
+    config.allowUnfree = true;
+    config.cudaSupport = true;
+  };
+  self-cuda = import ./default.nix { pkgs = pkgs-cuda; };
   inherit (pkgs) callPackage;
   inherit (lib) recurseIntoAttrs;
   stdenv = pkgs.stdenv;
@@ -164,7 +169,7 @@ let
 
     lix_2_93 = lixPackageSets.stable.lix;
 
-    cached = {
+    cached_ = self: {
       pkgscache = (
         pkgs.symlinkJoin {
           name = "pkgscache";
@@ -206,6 +211,8 @@ let
         darling
         ;
     };
+    cached = cached_ self;
+    cached-cuda = cached_ self-cuda;
   };
 in
 self

@@ -374,7 +374,6 @@ lib.filesystem.packagesFromDirectoryRecursive {
       p7zip
       gawk
       ;
-    inherit (pkgs) xorg;
     wine = pkgs.wineWow64Packages.full;
   };
   adobe-acrobat-reader_virtualDesktop = adobe-acrobat-reader.override {

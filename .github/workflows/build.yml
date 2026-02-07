@@ -86,16 +86,6 @@ jobs:
         name: ${{ matrix.cachixName }}
         signingKey: '${{ secrets.CACHIX_SIGNING_KEY }}'
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - name: Check evaluation
-      continue-on-error: true
-      run: |
-        nix-env -f . -qa \* --meta --xml \
-          --allowed-uris https://static.rust-lang.org \
-          --option restrict-eval true \
-          --option allow-import-from-derivation true \
-          --drv-path --show-trace \
-          -I nixpkgs=$(nix-instantiate --find-file nixpkgs) \
-          -I $PWD
     - name: Determine system architecture
       run: |
         if [[ "${{ runner.os }}" == "macOS" ]]; then
@@ -129,3 +119,12 @@ jobs:
         nice -n 20 nix run nixpkgs#nix-fast-build -- --max-jobs 1 --option max-jobs 1 \
           --no-nom \
           -f .#cached.${{ env.SYSTEM }} ${{ matrix.nixpkgs-override }}
+    - name: Check evaluation
+      run: |
+        nix-env -f . -qa \* --meta --xml \
+          --allowed-uris https://static.rust-lang.org \
+          --option restrict-eval true \
+          --option allow-import-from-derivation true \
+          --drv-path --show-trace \
+          -I nixpkgs=$(nix-instantiate --find-file nixpkgs) \
+          -I $PWD

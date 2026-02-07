@@ -22,8 +22,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     mkdir -p "$out/bin"
     install -Dm0644 "$src" "$out/share/wigglypaint/WigglyPaint.deck"
-    ln -s ${decker}/bin/decker "$out/bin/wigglypaint"
-    wrapProgram "$out/bin/wigglypaint" \
+    makeWrapper ${decker}/bin/decker "$out/bin/wigglypaint" \
       --add-flags "$out/share/wigglypaint/WigglyPaint.deck"
 
     runHook postInstall

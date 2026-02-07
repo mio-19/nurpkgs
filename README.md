@@ -100,4 +100,4 @@ files are copied from following locations. some are modified in this repo and so
 + polkit nixpkgs 88d3861acdd3d2f0e361767018218e51810df8a1
 + zotero <https://github.com/NixOS/nixpkgs/pull/483099/changes>
 + lix nixpkgs commit bfc1b8a4574108ceef22f02bafcf6611380c100d
-+ darling nixpkgs commit 01b6610eb0c98ee6d840e0d060cb41e334879f65^
++ darling nixpkgs commit 01b6610eb0c98ee6d840e0d060cb41e334879f65^ 31bdcff5843e30d33eb758334435298a571bd2af^ <https://github.com/NixOS/nixpkgs/commit/31bdcff5843e30d33eb758334435298a571bd2af>

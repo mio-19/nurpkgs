@@ -3,6 +3,7 @@
   stdenvNoCC,
   fetchurl,
   decker,
+  makeWrapper,
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "wigglypaint";
@@ -14,17 +15,16 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   };
 
   dontUnpack = true;
+  nativeBuildInputs = [ makeWrapper ];
 
   installPhase = ''
     runHook preInstall
 
     mkdir -p "$out/bin"
     install -Dm0644 "$src" "$out/share/wigglypaint/WigglyPaint.deck"
-    cat > "$out/bin/wigglypaint" <<EOF
-    #!${stdenvNoCC.shell}
-    exec ${decker}/bin/decker "$out/share/wigglypaint/WigglyPaint.deck" "\$@"
-    EOF
-    chmod +x "$out/bin/wigglypaint"
+    ln -s ${decker}/bin/decker "$out/bin/wigglypaint"
+    wrapProgram "$out/bin/wigglypaint" \
+      --add-flags "$out/share/wigglypaint/WigglyPaint.deck"
 
     runHook postInstall
   '';

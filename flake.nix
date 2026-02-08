@@ -30,15 +30,13 @@
       cached-cuda = forAllSystems (
         system:
         let
-          ppp = (
-            import ./default.nix {
-              pkgs = import nixpkgs {
-                config.allowUnfree = true;
-                config.cudaSupport = true;
-                system = system;
-              };
-            }
-          );
+          ppp = import ./default.nix {
+            pkgs = import nixpkgs {
+              config.allowUnfree = true;
+              config.cudaSupport = true;
+              system = system;
+            };
+          };
         in
         ppp.cached
       );

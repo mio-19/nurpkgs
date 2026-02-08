@@ -17,11 +17,6 @@
 }:
 with (import ./private.nix { inherit pkgs; });
 let
-  pkgs-cuda = import <nixpkgs> {
-    config.allowUnfree = true;
-    config.cudaSupport = true;
-  };
-  self-cuda = import ./default.nix { pkgs = pkgs-cuda; };
   inherit (pkgs) callPackage;
   inherit (lib) recurseIntoAttrs;
   stdenv = pkgs.stdenv;
@@ -181,7 +176,17 @@ let
         ;
     };
     cached = cached_ self;
-    cached-cuda = cached_ self-cuda;
+    cached-cuda =
+      system: nixpkgs:
+      cached_ (
+        import ./default.nix {
+          pkgs = import nixpkgs {
+            config.allowUnfree = true;
+            config.cudaSupport = true;
+            system = system;
+          };
+        }
+      );
   };
 in
 self

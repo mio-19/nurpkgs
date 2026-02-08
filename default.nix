@@ -133,7 +133,7 @@ let
     );
     nix-output-monitor = callPackage ./pkgs/nix-output-monitor/package.nix { };
 
-    cached_ = self: {
+    cached = {
       pkgscache = (
         pkgs.symlinkJoin {
           name = "pkgscache";
@@ -175,18 +175,6 @@ let
         darling
         ;
     };
-    cached = cached_ self;
-    cached-cuda =
-      system: nixpkgs:
-      cached_ (
-        import ./default.nix {
-          pkgs = import nixpkgs {
-            config.allowUnfree = true;
-            config.cudaSupport = true;
-            system = system;
-          };
-        }
-      );
   };
 in
 self

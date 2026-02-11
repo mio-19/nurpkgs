@@ -11,7 +11,5 @@ stdenv.mkDerivation {
     ln -s "${widevine-cdm}/share/google/chrome/WidevineCdm/_platform_specific/linux_arm64/libwidevinecdm.so" $out/gmp-widevinecdm/system-installed/libwidevinecdm.so
   '';
 
-  meta = widevine-cdm.meta // {
-    platforms = [ "aarch64-linux" ];
-  };
+  inherit (widevine-cdm) meta;
 }

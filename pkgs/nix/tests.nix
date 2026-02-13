@@ -36,12 +36,9 @@
               fi
             ''
           else
-            # Match base version, ignoring +suffix (which comes from patches)
+            # exact match
             ''
-              stripSuffix() {
-                echo "$1" | sed 's/+.*//'
-              }
-              if [ "$(stripSuffix "$version")" != "$(stripSuffix "$srcVersion")" ]; then
+              if [ "$version" != "$srcVersion" ]; then
                 echo "Version mismatch!"
                 exit 1
               fi

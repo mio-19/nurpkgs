@@ -26,11 +26,14 @@ mkMesonExecutable (finalAttrs: {
 
   workDir = ./.;
 
-  buildInputs = [
+  # Hack for sake of the dev shell
+  passthru.externalBuildInputs = [
     sqlite
     rapidcheck
     gtest
+  ];
 
+  buildInputs = finalAttrs.passthru.externalBuildInputs ++ [
     nix-store
     nix-store-c
     nix-store-test-support

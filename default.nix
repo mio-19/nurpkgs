@@ -144,57 +144,60 @@ in
         nurbot = false;
       };
     in
-    {
-      pkgscachelinux = (
-        pkgs.symlinkJoin {
-          name = "pkgscachelinux";
-          paths = with self; [
-            rain
-            wireguird
-          ];
-        }
-      );
-      pkgscachecommon = (
-        pkgs.symlinkJoin {
-          name = "pkgscachecommon";
-          paths = with self; [
-            aria2-wrapped
-            openssh_hpn
-            caddy
-            minetest591client
-            minetest580client
-            musescore-alex
-            musescore-evolution
-            downkyicore
-            lix_2_93
-            nix_2_31_2
-          ];
-        }
-      );
-      pkgscachex86linux = (
-        pkgs.symlinkJoin {
-          name = "pkgscache";
-          paths = with self; [
-            self.materialgram
-            self.telegram-desktop
-            lmms
-            cb
-            beammp-launcher
-            mdbook-generate-summary
-            #betterbird
-            eden
-            ghidra
-            prismlauncher-diegiwg
-            android-translation-layer
-            pake
-            cider
-            rocksmith2tab
-            superTux
-            #nix-output-monitor
-            darling
-            supertuxkart-evolution
-          ];
-        }
-      );
-    };
+    if nurbot then
+      { }
+    else
+      {
+        pkgscachelinux = (
+          pkgs.symlinkJoin {
+            name = "pkgscachelinux";
+            paths = with self; [
+              rain
+              wireguird
+            ];
+          }
+        );
+        pkgscachecommon = (
+          pkgs.symlinkJoin {
+            name = "pkgscachecommon";
+            paths = with self; [
+              aria2-wrapped
+              openssh_hpn
+              caddy
+              minetest591client
+              minetest580client
+              musescore-alex
+              musescore-evolution
+              downkyicore
+              lix_2_93
+              nix_2_31_2
+            ];
+          }
+        );
+        pkgscachex86linux = (
+          pkgs.symlinkJoin {
+            name = "pkgscache";
+            paths = with self; [
+              self.materialgram
+              self.telegram-desktop
+              lmms
+              cb
+              beammp-launcher
+              mdbook-generate-summary
+              #betterbird
+              eden
+              ghidra
+              prismlauncher-diegiwg
+              android-translation-layer
+              pake
+              cider
+              rocksmith2tab
+              superTux
+              #nix-output-monitor
+              darling
+              supertuxkart-evolution
+            ];
+          }
+        );
+      };
 }

@@ -137,7 +137,7 @@ in
   );
   nix-output-monitor = callPackage ./pkgs/nix-output-monitor/package.nix { };
 
-  cached =
+  cached-set =
     let
       self = import ./default.nix {
         inherit pkgs;

@@ -142,6 +142,7 @@ let
           name = "pkgscachelinux";
           paths = with self; [
             (self.rain or pkgs.hello)
+            wireguird
           ];
         }
       );
@@ -156,6 +157,9 @@ let
             minetest580client
             musescore-alex
             musescore-evolution
+            downkyicore
+            lix_2_93
+            nix_2_31_2
           ];
         }
       );
@@ -171,9 +175,6 @@ let
             mdbook-generate-summary
             #betterbird
             eden
-            downkyicore
-            lix_2_93
-            nix_2_31_2
             ghidra
             prismlauncher-diegiwg
             android-translation-layer
@@ -183,7 +184,6 @@ let
             superTux
             #nix-output-monitor
             darling
-            wireguird
             supertuxkart-evolution
           ];
         }

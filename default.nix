@@ -184,7 +184,7 @@ let
             superTux
             #nix-output-monitor
             darling
-            supertuxkart-evolution
+            (self.supertuxkart-evolution or pkgs.hello)
           ];
         }
       );

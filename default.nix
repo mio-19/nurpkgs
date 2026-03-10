@@ -18,9 +18,6 @@
 with (import ./private.nix { inherit pkgs; });
 let
   inherit (pkgs) callPackage;
-  inherit (lib) recurseIntoAttrs;
-  stdenv = pkgs.stdenv;
-  llvmPackages_19 = pkgs.llvmPackages_19;
 in
 {
   # note: some packages might be commented out to reduce package numbers. garnix has hardcoded limit of 100.

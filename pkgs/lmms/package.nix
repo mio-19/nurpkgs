@@ -40,13 +40,13 @@ let
 in
 stdenv.mkDerivation {
   pname = "lmms";
-  version = "1.2.2-unstable-2026-03-09";
+  version = "1.2.2-unstable-2026-03-12";
 
   src = fetchFromGitHub {
     owner = "LMMS";
     repo = "lmms";
-    rev = "5916a0b4772721590b9f22ab94bdc12958b33b4e";
-    hash = "sha256-jT2XI5ZOES77FLRi3ZuJ1ZocqyANW8YC9nEDfrubURg=";
+    rev = "83313e737d3137f7939f3daa9063a94a1ac01f7c";
+    hash = "sha256-ycCx70CHJqnBpVBio8lucshto+v1ws4WCC7ZnRMh99Y=";
     fetchSubmodules = true;
   };
 

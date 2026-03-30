@@ -1,4 +1,8 @@
-{ stdenv, fetchurl, lib }:
+{
+  stdenv,
+  fetchurl,
+  lib,
+}:
 
 let
   version = "1.0.5";
@@ -22,10 +26,12 @@ stdenv.mkDerivation rec {
   inherit pname version;
   src = fetchurl {
     url = "https://registry.npmjs.org/${platform.pkg}/-/${platform.pkg}-${version}.tgz";
-    hash = {
-      "x86_64-linux" = "sha256-IO3LKnPnAKxs5A7/yQ7sGAnz0R9yOVs0RAPykAAzRKo=";
-      "aarch64-darwin" = lib.fakeHash;
-    }.${stdenv.hostPlatform.system} or (throw "Unsupported platform: ${stdenv.hostPlatform.system}");
+    hash =
+      {
+        "x86_64-linux" = "sha256-IO3LKnPnAKxs5A7/yQ7sGAnz0R9yOVs0RAPykAAzRKo=";
+        "aarch64-darwin" = lib.fakeHash;
+      }
+      .${stdenv.hostPlatform.system} or (throw "Unsupported platform: ${stdenv.hostPlatform.system}");
   };
   dontUnpack = true;
   installPhase = ''

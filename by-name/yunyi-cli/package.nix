@@ -29,7 +29,7 @@ stdenv.mkDerivation rec {
     hash =
       {
         "x86_64-linux" = "sha256-IO3LKnPnAKxs5A7/yQ7sGAnz0R9yOVs0RAPykAAzRKo=";
-        "aarch64-darwin" = lib.fakeHash;
+        "aarch64-darwin" = "sha256-ScH8TKhEvmcdiWys/f09G8ip7e2xYduPRwxxilRYCiA=";
       }
       .${stdenv.hostPlatform.system} or (throw "Unsupported platform: ${stdenv.hostPlatform.system}");
   };

@@ -82,7 +82,7 @@ in
       srcHash = pkgs.caddy.src.outputHash;
       goVersion = pkgs.caddy.passthru.go.version;
       lookupKey = "${srcHash}:${goVersion}";
-      lookupKeyNew = "${pkgs.lib.version}:${pkgs.caddy.src.version}:${goVersion}";
+      lookupKeyNew = "${pkgs.lib.version}:${pkgs.caddy.version}:${goVersion}";
       pluginsHash =
         caddyPluginsHashTable.${lookupKeyNew} or caddyPluginsHashTable.${lookupKey}
           or (throw "Unknown caddy source hash + Go version: ${lookupKeyNew} or ${lookupKey}. Please update caddyPluginsHashTable in default.nix");

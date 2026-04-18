@@ -6,6 +6,7 @@
     <HEAD_NODE_IP> \
     --head \
     /path/to/the/huggingface/home/in/this/node \
+    --cap-add=CAP_SYS_ADMIN \
     -e VLLM_HOST_IP=<HEAD_NODE_IP>
 
   Head node:
@@ -15,6 +16,7 @@
     <HEAD_NODE_IP> \
     --head \
     /path/to/the/huggingface/home/in/this/node \
+    --cap-add=CAP_SYS_ADMIN \
     -e VLLM_HOST_IP=<HEAD_NODE_IP>
 
   Worker node:
@@ -24,6 +26,7 @@
     <HEAD_NODE_IP> \
     --worker \
     /path/to/the/huggingface/home/in/this/node \
+    --cap-add=CAP_SYS_ADMIN \
     -e VLLM_HOST_IP=<WORKER_NODE_IP>
 
   Reference:

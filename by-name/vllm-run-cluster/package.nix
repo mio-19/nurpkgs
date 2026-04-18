@@ -1,14 +1,6 @@
 /*
   Usage:
 
-  nix run git+https://github.com/mio-19/nurpkgs.git#vllm-run-cluster -- \
-    vllm/vllm-openai \
-    <HEAD_NODE_IP> \
-    --head \
-    /path/to/the/huggingface/home/in/this/node \
-    --cap-add=CAP_SYS_ADMIN \
-    -e VLLM_HOST_IP=<HEAD_NODE_IP>
-
   Head node:
 
   nix run git+https://github.com/mio-19/nurpkgs.git#vllm-run-cluster -- \

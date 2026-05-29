@@ -195,8 +195,6 @@ lib.filesystem.packagesFromDirectoryRecursive {
     libName = "betterbird";
   };
 
-  bifrost-unwrapped = bifrost.unwrapped;
-
   eden = nodarwin (v3overrideAttrs (pkgs.callPackage ./pkgs/eden/package.nix { }));
 
   layan-sddm = nodarwin (pkgs.callPackage ./pkgs/layan-sddm { });

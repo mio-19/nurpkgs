@@ -29,12 +29,12 @@
   libayatana-appindicator,
 }:
 let
-  version = "0.32.0";
+  version = "0.11.0";
   src = fetchFromGitHub {
     owner = "storytold";
     repo = "artcraft";
     tag = "artcraft-v${version}";
-    hash = "sha256-xtKgGbHopP4BYqbdmcAhiJu+E0cME+NLqriRIEQo308=";
+    hash = "sha256-ZNw2hbT1lDoOJtQpp7L26S+oCCdcp5bwVMg5OBfUbGk=";
   };
   frontendSrc = runCommand "artcraft-frontend-src-${version}" { } ''
     cp -r ${src}/frontend $out
@@ -71,7 +71,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
   ];
 
   buildAndTestSubdir = "crates/desktop/artcraft";
-  cargoHash = "sha256-ZJSgBpgPqeoRriFldE2IemAk0pnXFJZe/38fDTxOL9g=";
+  cargoHash = "sha256-Q/+zJJypBoUfWqsE9l0bKIX7FAAHjgdCCA4Wo8CHeIo=";
 
   nativeBuildInputs = [
     cargo-tauri.hook

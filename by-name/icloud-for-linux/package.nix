@@ -12,7 +12,7 @@
 
 stdenv.mkDerivation rec {
   pname = "icloud-for-linux";
-  version = "0.26";
+  version = "0.11";
 
   src = fetchgit {
     url = "https://github.com/cross-platform/icloud-for-linux.git";

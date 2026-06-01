@@ -7,7 +7,7 @@
 
 stdenv.mkDerivation rec {
   pname = "stltostp";
-  version = "unstable-2022-09-03";
+  version = "unstable-2025-11-27";
 
   src = fetchFromGitHub {
     owner = "slugdev";

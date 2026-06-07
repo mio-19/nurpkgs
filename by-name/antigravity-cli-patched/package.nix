@@ -6,37 +6,36 @@
 antigravity-cli.overrideAttrs (oldAttrs: {
   pname = "antigravity-cli-patched";
 
-  nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ python3 ];
+  nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [
+    (python3.withPackages (ps: [ ps.pwntools ]))
+  ];
 
   postInstall = (oldAttrs.postInstall or "") + ''
     python3 -c '
-    import os, sys
+    from pwn import ELF, context
+    import sys
+
+    # Set architecture context for pwntools
+    context.arch = "amd64"
+
     path = "'$out'/bin/agy"
-    with open(path, "rb") as f:
-        data = bytearray(f.read())
+    elf = ELF(path, checksec=False)
+
+    def patch(name, pattern, new):
+        matches = list(elf.search(pattern))
+        if len(matches) != 1:
+            print(f"Error: {name} found {len(matches)} times, expected 1", file=sys.stderr)
+            sys.exit(1)
+        elf.write(matches[0], new)
+        print(f"Successfully patched {name} at {hex(matches[0])}")
 
     # Patch 1: "\n  %s\n\n" -> "\n%s\n\n\n\n"
-    # Removes leading spaces from the "visit the URL to log in" block
-    pattern1 = b"\x0a  %s\x0a\x0a"
-    new1 = b"\x0a%s\x0a\x0a\x0a\x0a"
-    c1 = data.count(pattern1)
-    if c1 != 1:
-        print(f"Error: Pattern 1 found {c1} times, expected 1", file=sys.stderr)
-        sys.exit(1)
-    data = data.replace(pattern1, new1, 1)
+    patch("Pattern 1", b"\x0a  %s\x0a\x0a", b"\x0a%s\x0a\x0a\x0a\x0a")
 
     # Patch 2: "  %s  " -> "%s    "
-    # Removes spaces around the URL in the "click on the link below" block
-    pattern2 = b"  %s  "
-    new2 = b"%s    "
-    c2 = data.count(pattern2)
-    if c2 != 1:
-        print(f"Error: Pattern 2 found {c2} times, expected 1", file=sys.stderr)
-        sys.exit(1)
-    data = data.replace(pattern2, new2, 1)
+    patch("Pattern 2", b"  %s  ", b"%s    ")
 
-    with open(path, "wb") as f:
-        f.write(data)
+    elf.save(path)
     '
   '';
 

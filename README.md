@@ -103,6 +103,7 @@ files are copied from following locations. some are modified in this repo and so
 + systemd258 nixpkgs commit 3ca49aa290e92b6a885e8c0045033fe2538a4977
 
 + antigravity-cli <https://github.com/numtide/llm-agents.nix/tree/main/packages/antigravity-cli> commit 04df876de28f0684a0d7110444d7f64da5c14d17
++ antigravity-cli-patched: same as above, but with a binary patch to remove extra spaces around login URLs.
 + versionCheckHomeHook <https://github.com/numtide/llm-agents.nix/tree/main/packages/versionCheckHomeHook> commit 04df876de28f0684a0d7110444d7f64da5c14d17
 
 ## todo - reading

@@ -9,7 +9,7 @@
 }:
 
 rustPlatform.buildRustPackage rec {
-  pname = "sem";
+  pname = "sem-cli";
   version = "0.7.0";
 
   src = fetchFromGitHub {

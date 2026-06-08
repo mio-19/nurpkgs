@@ -38,14 +38,14 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "eden";
-  version = "0.2.0-rc2";
+  version = "0.2.1";
 
   src = fetchFromGitea {
     domain = "git.eden-emu.dev";
     owner = "eden-emu";
     repo = "eden";
     tag = "v${finalAttrs.version}";
-    hash = "sha256-keLkB5qeQch+tM2J6zVh9oQGhP5TuxItqrZRN24apJw=";
+    hash = "sha256-79/JmIRWysoc3psJqMFyiNc2gjTY4VhJfdNaiTvisMk=";
   };
 
   deps = stdenv.mkDerivation {

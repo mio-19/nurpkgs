@@ -6,7 +6,9 @@
 antigravity-cli.overrideAttrs (oldAttrs: {
   pname = "antigravity-cli-patched";
 
-  nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [ python3 ];
+  nativeBuildInputs = (oldAttrs.nativeBuildInputs or [ ]) ++ [
+    (python3.withPackages (ps: [ ps.pwntools ]))
+  ];
 
   postInstall = (oldAttrs.postInstall or "") + ''
     python3 -c '
@@ -16,7 +18,8 @@ antigravity-cli.overrideAttrs (oldAttrs: {
         data = bytearray(f.read())
 
     # Patch: replace problematic jump instruction with NOPs
-    # Use a unique sequence including the next instruction to ensure only one match.
+    # Pattern: 0f 84 fa 05 00 00 (je ...), followed by a mov instruction
+    # Using hex pattern is safer than pwntools for static binary patches of this type.
     pattern = b"\x0f\x84\xfa\x05\x00\x00\x4c\x89\x94\x24\xe0\xb8\x00\x00"
     new = b"\x90\x90\x90\x90\x90\x90\x4c\x89\x94\x24\xe0\xb8\x00\x00"
 

@@ -67,7 +67,7 @@ stdenv.mkDerivation (finalAttrs: {
         -czf $out .cache/cpm
     '';
 
-    outputHash = "sha256-cxE2k86nknSaxx8quJGQYzItaSY7N/y6wpq4+Wneuks=";
+    outputHash = "sha256-v0bBwrlyLMIMe0SxEmOTqnE8ggKyoy8EOy7LoOrQYHQ=";
     outputHashAlgo = "sha256";
   };
 

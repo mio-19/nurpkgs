@@ -67,6 +67,9 @@ buildNpmPackage rec {
     find node_modules/@node-llama-cpp -mindepth 1 -maxdepth 1 ! -name "linux-x64*" -exec rm -rf {} +
 
     mkdir -p $out/share/gemini-desktop
+    ${lib.optionalString useNewIcon ''
+      cp ${newIcon} build/icon.png
+    ''}
     asar pack . $out/share/gemini-desktop/app.asar
 
     install -Dm644 ${

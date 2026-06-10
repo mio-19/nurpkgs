@@ -18,16 +18,16 @@ let
 in
 buildNpmPackage rec {
   pname = "gemini-desktop";
-  version = "0.11.2";
+  version = "0.12.1";
 
   src = fetchFromGitHub {
     owner = "bwendell";
     repo = "gemini-desktop";
     rev = "v${version}";
-    hash = "sha256-m2kPb3rEAtgN4zpNrilVUjBWGhVLgc8bXW8eAxsDcXU=";
+    hash = "sha256-/JY6ylqf2jvsDAZjnZRmV1/nlA28YlVGzD24xdgSMs8=";
   };
 
-  npmDepsHash = "sha256-CZ6ThtIRfJix1F/LcgGd37nxNJBmmmQuyCcuSODvh8E=";
+  npmDepsHash = "sha256-dOgkqID35J6wznqgb86AE7RzPRgRfDxFFFUoLvNXakw=";
 
   env.ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
 

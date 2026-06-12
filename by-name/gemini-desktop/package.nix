@@ -78,6 +78,8 @@ buildNpmPackage rec {
       if useNewIcon then newIcon else "build/icon.png"
     } $out/share/pixmaps/gemini-desktop.png
 
+    cp ${if useNewIcon then newIcon else "build/icon.png"} $out/share/gemini-desktop/icon.png
+
     makeBinaryWrapper ${lib.getExe electron} $out/bin/gemini-desktop \
       --add-flags $out/share/gemini-desktop/app.asar \
       --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations}}" \

@@ -33,6 +33,12 @@ buildNpmPackage rec {
     ./disable-hotkey-notice.patch
   ];
 
+  postPatch = lib.optionalString useNewIcon ''
+    cp ${newIcon} build/icon.png
+    cp ${newIcon} public/icon.png
+    cp ${newIcon} src/renderer/assets/icon.png
+  '';
+
   npmDepsHash = "sha256-dOgkqID35J6wznqgb86AE7RzPRgRfDxFFFUoLvNXakw=";
 
   env.ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
@@ -72,9 +78,6 @@ buildNpmPackage rec {
     find node_modules/@node-llama-cpp -mindepth 1 -maxdepth 1 ! -name "linux-x64*" -exec rm -rf {} +
 
     mkdir -p $out/share/gemini-desktop
-    ${lib.optionalString useNewIcon ''
-      cp ${newIcon} build/icon.png
-    ''}
     asar pack . $out/share/gemini-desktop/app.asar
 
     install -Dm644 ${

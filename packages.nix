@@ -427,11 +427,8 @@ lib.filesystem.packagesFromDirectoryRecursive {
     wine = pkgs.wineWow64Packages.full;
   };
 
-  chatgpt-desktop-client = pkgs.callPackage ./pkgs/chatgpt-desktop-client/default.nix { };
 
-  prospect-mail = pkgs.callPackage ./pkgs/prospect-mail/package.nix { };
 
-  rclone-browser = pkgs.callPackage ./pkgs/rclone-browser/package.nix { };
 
   forku-chatgpt = v3overrideAttrs (pkgs.callPackage ./pkgs/forku-chatgpt/package.nix { });
 })

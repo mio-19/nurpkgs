@@ -202,7 +202,6 @@ lib.filesystem.packagesFromDirectoryRecursive {
     electron = electron_castlabs_38;
   };
 
-  #systemd257 = (pkgs.callPackage ./pkgs/systemd257 { });
 
   proton-cachyos = pkgs.callPackage ./pkgs/proton-bin {
     toolTitle = "Proton-CachyOS";

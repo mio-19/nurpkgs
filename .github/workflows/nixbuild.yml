@@ -39,13 +39,7 @@ jobs:
           name: mio
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
           
-      - name: Build nix packages Cuda
-        continue-on-error: true
-        if: matrix.system == 'x86_64-linux'
-        run: |
-          nix run nixpkgs#nix-fast-build -- --no-nom -f .#cached-cuda.${{ matrix.system }}
-          
-      - name: Build nix packages
+      - name: Build all nix packages
         continue-on-error: true
         run: |
-          nix run nixpkgs#nix-fast-build -- --no-nom -f .#cached.${{ matrix.system }}
+          nix run nixpkgs#nix-fast-build -- --no-nom -f .#packages.${{ matrix.system }}

@@ -146,11 +146,6 @@
   },
   {
     "pname": "Microsoft.NETCore.Platforms",
-    "version": "1.1.0",
-    "hash": "sha256-FeM40ktcObQJk4nMYShB61H/E8B7tIKfl9ObJ0IOcCM="
-  },
-  {
-    "pname": "Microsoft.NETCore.Platforms",
     "version": "3.1.0",
     "hash": "sha256-cnygditsEaU86bnYtIthNMymAHqaT/sf9Gjykhzqgb0="
   },
@@ -258,11 +253,6 @@
     "pname": "SQLitePCLRaw.bundle_e_sqlcipher",
     "version": "2.1.11",
     "hash": "sha256-wHveswfPGD1t70PcHOvB9o4devEiGRJfnA/f0GC9wHg="
-  },
-  {
-    "pname": "SQLitePCLRaw.core",
-    "version": "2.1.10",
-    "hash": "sha256-gpZcYwiJVCVwCyJu0R6hYxyMB39VhJDmYh9LxcIVAA8="
   },
   {
     "pname": "SQLitePCLRaw.core",

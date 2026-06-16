@@ -142,9 +142,6 @@ byName
     art-standalone = art-standalone;
     bionic-translation = bionic-translation;
   };
-  beammp-launcher = pkgs.callPackage ./pkgs/beammp-launcher/package.nix {
-    cacert_3108 = pkgs.callPackage ./pkgs/cacert_3108 { };
-  };
   ogre-1_11 = v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-1_11/package.nix { });
   angelscript_2_35_1 = v3overrideAttrs (
     pkgs.angelscript.overrideAttrs (

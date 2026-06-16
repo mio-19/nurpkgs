@@ -38,13 +38,14 @@ let
       else
         minipkgs0.prismlauncher-unwrapped;
   };
+  byName = lib.filesystem.packagesFromDirectoryRecursive {
+    inherit (pkgs) callPackage newScope;
+    directory = ./by-name;
+  };
 in
 # https://github.com/nix-community/nur-combined/blob/af619b147352e88b4105fbfab03f9395e68e5ee5/repos/dtomvan/default.nix#L6
-lib.filesystem.packagesFromDirectoryRecursive {
-  inherit (pkgs) callPackage newScope;
-  directory = ./by-name;
-}
-// rec {
+byName
+// (with byName; rec {
   wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
   lmms = pkgs.callPackage ./pkgs/lmms/package.nix {
     withOptionals = true;
@@ -123,17 +124,12 @@ lib.filesystem.packagesFromDirectoryRecursive {
   #  ${pkgs.aria2}/bin/aria2c -s65536 -j65536 -x16 -k1M "$@"
   #'';
   # audacity4 = nodarwin (pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { });
-  electron_castlabs_38 = pkgs.callPackage ./pkgs/electron-castlabs-38 { };
   cider = pkgs.callPackage ./pkgs/cider {
     electron = electron_castlabs_38;
   };
-  local-ai = pkgs.callPackage ./pkgs/local-ai/package.nix { };
   local-ai-cuda = local-ai.override { with_cublas = true; };
   mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });
   gifcurry = nonurbot (pkgs.callPackage ./pkgs/gifcurry { });
-  browser-115-bin = pkgs.callPackage ./pkgs/115-browser-bin { };
-  youku-bin = pkgs.callPackage ./pkgs/youku-bin/package.nix { };
-  dtv = pkgs.callPackage ./pkgs/dtv/package.nix { };
   # currently no changes so just use nixpkgs version of bionic-translation and art-standalone
   bionic-translation = pkgs.bionic-translation; # pkgs.callPackage ./pkgs/bionic-translation/package.nix { };
   art-standalone = pkgs.art-standalone;
@@ -149,8 +145,6 @@ lib.filesystem.packagesFromDirectoryRecursive {
   beammp-launcher = pkgs.callPackage ./pkgs/beammp-launcher/package.nix {
     cacert_3108 = pkgs.callPackage ./pkgs/cacert_3108 { };
   };
-  beammp-server = pkgs.callPackage ./pkgs/beammp-server/package.nix { };
-  chatall = pkgs.callPackage ./pkgs/chatall/package.nix { };
   ogre-1_11 = v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-1_11/package.nix { });
   angelscript_2_35_1 = v3overrideAttrs (
     pkgs.angelscript.overrideAttrs (
@@ -187,8 +181,6 @@ lib.filesystem.packagesFromDirectoryRecursive {
   zw3d = pkgs.callPackage ./pkgs/zw3d {
     notoFontsCjk = pkgs.noto-fonts-cjk-sans;
   };
-  ultimate-vocal-remover = pkgs.callPackage ./pkgs/ultimate-vocal-remover { };
-  pake = pkgs.callPackage ./pkgs/pake { };
   makePakeApp = pkgs.callPackage ./pkgs/makePakeApp {
     inherit pake;
   };
@@ -272,8 +264,6 @@ lib.filesystem.packagesFromDirectoryRecursive {
     doCheck = false; # something wrong with check pharse after last staging-next merge. checking not terminate. 20260225
   });
 
-  firejail-profiles = pkgs.callPackage ./pkgs/firejail-profiles { };
-
   prismlauncher-diegiwg =
     let
       # https://github.com/NixOS/nixpkgs/blob/ab0821a8289da5bd2cde49ae89cbf6db1e5931ae/pkgs/by-name/pr/prismlauncher/package.nix#L41
@@ -303,15 +293,11 @@ lib.filesystem.packagesFromDirectoryRecursive {
       ];
     });
 
-  stuntrally2 = pkgs.callPackage ./pkgs/stuntrally { };
-
-  rocksmith-custom-song-toolkit = pkgs.callPackage ./pkgs/rocksmith-custom-song-toolkit { };
-
   rocksmith2tab = pkgs.callPackage ./pkgs/rocksmith2tab {
     rocksmith-custom-song-toolkit = rocksmith-custom-song-toolkit;
   };
-}
-// (lib.optionalAttrs (!nurbot) rec {
+})
+// (lib.optionalAttrs (!nurbot) (with byName; rec {
 
   supertuxkart-evolution = v3override (
     pkgs.callPackage ./pkgs/supertuxkart-evolution/default.nix { }
@@ -430,4 +416,4 @@ lib.filesystem.packagesFromDirectoryRecursive {
 
 
   forku-chatgpt = v3overrideAttrs (pkgs.callPackage ./pkgs/forku-chatgpt/package.nix { });
-})
+}))

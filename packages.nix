@@ -38,12 +38,12 @@ let
       else
         minipkgs0.prismlauncher-unwrapped;
   };
+  # https://github.com/nix-community/nur-combined/blob/af619b147352e88b4105fbfab03f9395e68e5ee5/repos/dtomvan/default.nix#L6
   byName = lib.filesystem.packagesFromDirectoryRecursive {
     inherit (pkgs) callPackage newScope;
     directory = ./by-name;
   };
 in
-# https://github.com/nix-community/nur-combined/blob/af619b147352e88b4105fbfab03f9395e68e5ee5/repos/dtomvan/default.nix#L6
 byName
 // (with byName; rec {
   wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });

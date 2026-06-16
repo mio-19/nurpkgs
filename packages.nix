@@ -292,6 +292,17 @@ byName
   rocksmith2tab = pkgs.callPackage ./pkgs/rocksmith2tab {
     rocksmith-custom-song-toolkit = rocksmith-custom-song-toolkit;
   };
+
+  # copied from nixpkgs; librewolf-bin-unwrapped lives in by-name and is wrapped here
+  librewolf-bin = pkgs.wrapFirefox librewolf-bin-unwrapped {
+    pname = "librewolf-bin";
+    extraPrefsFiles = [
+      "${librewolf-bin-unwrapped}/lib/librewolf-bin-${librewolf-bin-unwrapped.version}/librewolf.cfg"
+    ];
+    extraPoliciesFiles = [
+      "${librewolf-bin-unwrapped}/lib/librewolf-bin-${librewolf-bin-unwrapped.version}/distribution/extra-policies.json"
+    ];
+  };
 })
 // (lib.optionalAttrs (!nurbot) (
   with byName;

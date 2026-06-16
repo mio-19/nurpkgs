@@ -1,22 +1,26 @@
 {
   lib,
   stdenv,
+  callPackage,
   fetchFromGitHub,
-  buildGoModule,
-  buildNpmPackage,
   fetchNpmDeps,
   runCommand,
+  buildNpmPackage,
+  nix-update-script,
   nodejs_22,
   electron_41,
-  makeWrapper,
+  makeShellWrapper,
   copyDesktopItems,
   makeDesktopItem,
+  wrapGAppsHook3,
+  gtk3,
+  libxkbcommon,
+  libx11,
+  libxcb,
+  libxtst,
 }:
 
 let
-  pname = "waveterm";
-  version = "0.14.5";
-
   electron = electron_41;
   nodejs = nodejs_22;
 
@@ -27,96 +31,31 @@ let
     hash = "sha256-SUcvIpM+++qfyAlwUPSGVz2OUJXPe0bsefcjUKYUF/g=";
   };
 
-  # waveterm uses a fixed build time string baked into the binaries; pin it for reproducibility.
-  buildTime = "0";
+  version = "0.14.5";
 
-  hostGoArch =
-    {
-      x86_64-linux = "amd64";
-      aarch64-linux = "arm64";
-    }
-    .${stdenv.hostPlatform.system}
-      or (throw "waveterm: unsupported system ${stdenv.hostPlatform.system}");
-  hostNormArch = if hostGoArch == "amd64" then "x64" else hostGoArch;
-
-  # The Go backend: the wavesrv server (CGO + sqlite) and the wsh helper
-  # (cross-compiled, pure Go, for every platform Wave can connect to).
-  backend = buildGoModule {
-    pname = "${pname}-backend";
-    inherit version src;
-
-    vendorHash = "sha256-EyDS/AB56+yE54XhwnQhalNPZwMM/Hp2kWQN824yq0k=";
-
-    # wshrpc/typescript bindings and schema are committed in the tree, so the
-    # codegen step can be skipped and we only compile the binaries.
-    buildPhase = ''
-      runHook preBuild
-
-      mkdir -p dist/bin
-
-      echo "building wavesrv (${hostNormArch})"
-      CGO_ENABLED=1 go build \
-        -tags "osusergo,sqlite_omit_load_extension" \
-        -ldflags "-X main.BuildTime=${buildTime} -X main.WaveVersion=${version}" \
-        -o dist/bin/wavesrv.${hostNormArch} \
-        cmd/server/main-server.go
-
-      buildWsh() {
-        local goos="$1" goarch="$2" ext="$3"
-        local narch="$goarch"
-        [ "$goarch" = "amd64" ] && narch="x64"
-        echo "building wsh ($goos/$narch)"
-        CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build \
-          -ldflags "-s -w -X main.BuildTime=${buildTime} -X main.WaveVersion=${version}" \
-          -o "dist/bin/wsh-${version}-$goos.$narch$ext" \
-          cmd/wsh/main-wsh.go
-      }
-
-      buildWsh darwin arm64 ""
-      buildWsh darwin amd64 ""
-      buildWsh linux arm64 ""
-      buildWsh linux amd64 ""
-      buildWsh linux mips ""
-      buildWsh linux mips64 ""
-      buildWsh windows amd64 ".exe"
-      buildWsh windows arm64 ".exe"
-
-      runHook postBuild
-    '';
-
-    installPhase = ''
-      runHook preInstall
-      mkdir -p $out
-      cp -r dist/bin $out/bin
-      runHook postInstall
-    '';
-
-    doCheck = false;
-  };
+  # The Go backend (wavesrv + wsh) is a separate derivation with its own vendorHash.
+  backend = callPackage ./backend.nix { inherit version src; };
 
   # The tsunami "scaffold" ships a small node_modules (tailwind CLI) that Wave
   # uses at runtime to build user widgets. It is installed from its own
   # package.json (no lockfile upstream), so we vendor a generated one.
-  scaffoldSrc = runCommand "${pname}-scaffold-src" { } ''
+  scaffoldSrc = runCommand "waveterm-scaffold-src" { } ''
     mkdir -p $out
     cp ${./tsunami-scaffold-package.json} $out/package.json
     cp ${./tsunami-scaffold-package-lock.json} $out/package-lock.json
   '';
 
   scaffoldNpmDeps = fetchNpmDeps {
-    name = "${pname}-tsunami-scaffold-npm-deps";
+    name = "waveterm-tsunami-scaffold-npm-deps";
     src = scaffoldSrc;
     hash = "sha256-PU6pKf+IlULH1JDjfCfeM2M+tEwPirr7zLlo9lTEtMU=";
   };
 in
-buildNpmPackage {
-  inherit pname version src;
+buildNpmPackage (finalAttrs: {
+  pname = "waveterm";
+  inherit version src;
 
-  npmDeps = fetchNpmDeps {
-    inherit src;
-    name = "${pname}-npm-deps";
-    hash = "sha256-YkRfTZwjIet6CWTtqG8X9LjoCOjHO+L2uHHtBlr7tao=";
-  };
+  npmDepsHash = "sha256-YkRfTZwjIet6CWTtqG8X9LjoCOjHO+L2uHHtBlr7tao=";
 
   inherit nodejs;
   makeCacheWritable = true;
@@ -126,8 +65,18 @@ buildNpmPackage {
   npmRebuildFlags = [ "--ignore-scripts" ];
 
   nativeBuildInputs = [
-    makeWrapper
+    nodejs
+    makeShellWrapper
     copyDesktopItems
+    wrapGAppsHook3
+  ];
+
+  buildInputs = [
+    gtk3
+    libxkbcommon
+    libx11
+    libxcb
+    libxtst
   ];
 
   env = {
@@ -137,6 +86,9 @@ buildNpmPackage {
   };
 
   dontNpmBuild = true;
+
+  # Let the installPhase set up the electron wrapper itself.
+  dontWrapGApps = true;
 
   # Running a shared electron against an app.asar leaves `app.isPackaged` false,
   # which would put Wave in "dev" mode (wrong data dir, dev features). This is a
@@ -197,7 +149,7 @@ buildNpmPackage {
     cp -r ${electron.dist} electron-dist
     chmod -R u+w electron-dist
 
-    ${nodejs}/bin/node node_modules/electron-builder/out/cli/cli.js \
+    node node_modules/electron-builder/out/cli/cli.js \
       --dir \
       -c electron-builder.config.cjs \
       -p never \
@@ -214,9 +166,20 @@ buildNpmPackage {
     mkdir -p $out/share/waveterm
     cp -r make/*-unpacked/resources $out/share/waveterm/resources
 
-    makeWrapper ${lib.getExe electron} $out/bin/waveterm \
-      --add-flags $out/share/waveterm/resources/app.asar \
-      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=UseOzonePlatform,WaylandWindowDecorations}}" \
+    # use makeShellWrapper (instead of makeBinaryWrapper) for proper shell variable
+    # expansion of the NIXOS_OZONE_WL flags, see https://github.com/NixOS/nixpkgs/issues/172583
+    makeShellWrapper "${lib.getExe electron}" "$out/bin/waveterm" \
+      --add-flags "$out/share/waveterm/resources/app.asar" \
+      "''${gappsWrapperArgs[@]}" \
+      --prefix LD_LIBRARY_PATH : "${
+        lib.makeLibraryPath [
+          libxkbcommon
+          libx11
+          libxcb
+          libxtst
+        ]
+      }" \
+      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=UseOzonePlatform,WaylandWindowDecorations,WebRTCPipeWireCapturer --enable-wayland-ime=true}}" \
       --set-default ELECTRON_IS_DEV 0 \
       --inherit-argv0
 
@@ -235,7 +198,7 @@ buildNpmPackage {
       icon = "waveterm";
       desktopName = "Wave";
       genericName = "Terminal";
-      comment = "Open-source, cross-platform terminal for seamless workflows";
+      comment = finalAttrs.meta.description;
       categories = [
         "Development"
         "Utility"
@@ -247,14 +210,24 @@ buildNpmPackage {
         "emulator"
       ];
       startupWMClass = "waveterm";
+      terminal = false;
     })
   ];
 
+  passthru = {
+    inherit backend;
+    # NOTE: a version bump also requires refreshing backend.nix's vendorHash and
+    # regenerating tsunami-scaffold-package-lock.json from the new template.
+    updateScript = nix-update-script { };
+  };
+
   meta = {
-    description = "Open-source, cross-platform terminal for seamless workflows (built from source)";
+    description = "Open-source, cross-platform terminal for seamless workflows";
     homepage = "https://www.waveterm.dev";
-    changelog = "https://github.com/wavetermdev/waveterm/releases/tag/v${version}";
+    downloadPage = "https://github.com/wavetermdev/waveterm/releases";
+    changelog = "https://github.com/wavetermdev/waveterm/releases/tag/v${finalAttrs.version}";
     license = lib.licenses.asl20;
+    sourceProvenance = with lib.sourceTypes; [ fromSource ];
     mainProgram = "waveterm";
     maintainers = [ ];
     platforms = [
@@ -262,4 +235,4 @@ buildNpmPackage {
       "aarch64-linux"
     ];
   };
-}
+})

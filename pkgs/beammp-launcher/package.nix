@@ -19,16 +19,16 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "beammp-launcher";
-  version = if stdenv.isDarwin then "2.4.0-unstable-20250211" else "2.8.0";
+  version = if stdenv.isDarwin then "2.7.0-unstable-20260111" else "2.8.0";
 
   src = fetchFromGitHub (
     if stdenv.isDarwin then
       {
-        # Darwin support from https://github.com/BeamMP/BeamMP-Launcher/pull/147
+        # Darwin support from https://github.com/BeamMP/BeamMP-Launcher/pull/221
         owner = "enzofrnt";
         repo = "BeamMP-Launcher";
-        rev = "c927ded1f701ecf1e3039970237e401334b12f9c";
-        hash = "sha256-9ysJ0g3Akjjs4W6RQSAZVdzjQBlfZnNj2cZmll2I534=";
+        rev = "76da51872e2cc53912c3763890b2ea8585c51813";
+        hash = "sha256-YfwhIiQqxSU63ZAbupUgv+7WeZlyJAPwkv3O3bM1Hyk=";
         fetchSubmodules = true;
       }
     else

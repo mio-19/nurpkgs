@@ -5,16 +5,17 @@
   copyDesktopItems,
   installShellFiles,
   makeDesktopItem,
-  makeBinaryWrapper,
 
   cmake,
   curl,
   httplib,
   nlohmann_json,
   openssl,
+
   # https://gist.github.com/CMCDragonkai/1ae4f4b5edeb021ca7bb1d271caca999
   # https://github.com/BeamMP/BeamMP-Launcher/issues/186
   cacert_3108,
+  makeBinaryWrapper,
 }:
 
 stdenv.mkDerivation (finalAttrs: {

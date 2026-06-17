@@ -303,6 +303,12 @@ byName
       "${librewolf-bin-unwrapped}/lib/librewolf-bin-${librewolf-bin-unwrapped.version}/distribution/extra-policies.json"
     ];
   };
+
+  # copied from nixpkgs; librewolf-unwrapped (built from source) lives in by-name
+  librewolf = pkgs.wrapFirefox librewolf-unwrapped {
+    inherit (librewolf-unwrapped) extraPrefsFiles extraPoliciesFiles;
+    libName = "librewolf";
+  };
 })
 // (lib.optionalAttrs (!nurbot) (
   with byName;

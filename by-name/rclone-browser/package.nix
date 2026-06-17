@@ -32,7 +32,7 @@ stdenv.mkDerivation rec {
   buildInputs = [ qt6.qtbase ];
 
   meta = {
-    changelog = "https://github.com/kapitainsky/RcloneBrowser/blob/${src.tag}/CHANGELOG.md";
+    changelog = "https://github.com/kapitainsky/RcloneBrowser/blob/${src.rev}/CHANGELOG.md";
     homepage = "https://github.com/kapitainsky/RcloneBrowser";
     description = "Graphical Frontend to Rclone written in Qt";
     mainProgram = "rclone-browser";

@@ -53,7 +53,7 @@
   libxkbcommon,
   util-linux,
   wavpack,
-  wxGTK32,
+  wxwidgets_3_2,
   gtk2,
   gtk3,
   qt6,
@@ -395,7 +395,7 @@ stdenv.mkDerivation (finalAttrs: {
     twolame
     portaudio
     wavpack
-    wxGTK32
+    wxwidgets_3_2
   ]
   ++ lib.optionals stdenv.hostPlatform.isLinux [
     alsa-lib # for portaudio
@@ -455,8 +455,8 @@ stdenv.mkDerivation (finalAttrs: {
     "-DMUSE_USE_SYSTEM_FREETYPE=ON"
 
     # Try to use system wxWidgets
-    "-DwxWidgets_CONFIG_EXECUTABLE=${wxGTK32}/bin/wx-config"
-    "-DwxWidgets_wxrc_EXECUTABLE=${wxGTK32}/bin/wxrc"
+    "-DwxWidgets_CONFIG_EXECUTABLE=${wxwidgets_3_2}/bin/wx-config"
+    "-DwxWidgets_wxrc_EXECUTABLE=${wxwidgets_3_2}/bin/wxrc"
 
     # RPATH of binary /nix/store/.../bin/... contains a forbidden reference to /build/
     "-DCMAKE_SKIP_BUILD_RPATH=ON"

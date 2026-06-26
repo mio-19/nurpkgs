@@ -113,5 +113,3 @@ files are copied from following locations. some are modified in this repo and so
 ## llm policy
 
 headache. use LLM for boring no brain task
-
-Note: gnutar_patched is copied from nixpkgs rev 09eb77e94fa25202af8f3e81ddc7353d9970ac1b and includes a fix for CVE-2026-5704.

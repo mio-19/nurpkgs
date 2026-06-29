@@ -1,5 +1,6 @@
 {
   lib,
+  stdenv,
   buildNpmPackage,
   fetchFromGitHub,
   fetchurl,
@@ -7,6 +8,7 @@
   makeBinaryWrapper,
   makeDesktopItem,
   copyDesktopItems,
+  desktopToDarwinBundle,
   electron,
   useNewIcon ? true,
 }:
@@ -47,7 +49,8 @@ buildNpmPackage rec {
     asar
     makeBinaryWrapper
     copyDesktopItems
-  ];
+  ]
+  ++ lib.optional stdenv.hostPlatform.isDarwin desktopToDarwinBundle;
 
   desktopItems = [
     (makeDesktopItem {

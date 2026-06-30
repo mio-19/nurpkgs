@@ -10,7 +10,7 @@ private.nodarwin (
   private.v3overridegcc (
     grub2.overrideAttrs (old: {
       pname = "grub2-patched";
-      patches = (old.patches or [ ]) ++ [ ./grub-os-prober-title.patch ];
+      patches = (old.patches or [ ]) ++ [ ../../patches/grub-os-prober-title.patch ];
     })
   )
 )

@@ -1,4 +1,5 @@
 # mio patch: DPI
+# mio patch: pick wine64/wine at runtime (bash) instead of builtins.pathExists, to avoid IFD forcing a wine build during eval
 # Based on code from: https://raw.githubusercontent.com/lucasew/nixcfg/fd523e15ccd7ec2fd86a3c9bc4611b78f4e51608/packages/wrapWine.nix
 {
   stdenv,

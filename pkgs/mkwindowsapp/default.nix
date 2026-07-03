@@ -251,9 +251,13 @@ let
     MY_PATH="@MY_PATH@"
     OUT_PATH="@out@"
     ARGS="$@"
-    WINE=${
-      if (builtins.pathExists "${wine}/bin/wine64") then "${wine}/bin/wine64" else "${wine}/bin/wine"
-    }
+    # Pick wine64 if present, else wine. Done at runtime (bash) instead of with
+    # builtins.pathExists to avoid IFD: pathExists on "${wine}/bin/wine64" would
+    # force realizing (building) the wine derivation during evaluation.
+    WINE="${wine}/bin/wine64"
+    if [ ! -e "$WINE" ]; then
+      WINE="${wine}/bin/wine"
+    fi
     ${inputHashScript}
     RUN_LAYER_HASH=@RUN_LAYER_HASH@
     BUILD_HASH=$(printf "%s %s" $RUN_LAYER_HASH $USER | sha256sum | sed -r 's/(.{64}).*/\1/')

@@ -33,7 +33,6 @@ buildNpmPackage rec {
   patches = [
     ./disable-updates.patch
     ./disable-hotkey-notice.patch
-    ./fix-theme-update.patch
   ];
 
   postPatch = lib.optionalString useNewIcon ''

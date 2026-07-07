@@ -31,18 +31,7 @@ stdenv.mkDerivation rec {
 
 
 
-  postPatch = ''
-    substituteInPlace files/setup/autodesk_fusion_installer_x86-64.sh \
-      --replace-fail 'sh "$SELECTED_DIRECTORY/bin/winetricks"' 'winetricks' \
-      --replace-fail 'curl -L "$WINETRICKS_URL" -o "$SELECTED_DIRECTORY/bin/winetricks"' 'echo "Skipping winetricks download"' \
-      --replace-fail 'chmod +x "$SELECTED_DIRECTORY/bin/winetricks"' 'echo "Skipping winetricks chmod"'
-
-    sed -i \
-      -e 's/^[[:space:]]*install_required_packages$/            : # skipped install_required_packages/' \
-      -e 's/^[[:space:]]*check_and_install_wine$/            : # skipped check_and_install_wine/' \
-      -e 's/^[[:space:]]*autodesk_fusion_shortcuts_load$/            : # skipped autodesk_fusion_shortcuts_load/' \
-      files/setup/autodesk_fusion_installer_x86-64.sh
-  '';
+  patches = [ ./nix-env.patch ];
 
   nativeBuildInputs = [ makeWrapper copyDesktopItems ];
 

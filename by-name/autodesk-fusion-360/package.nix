@@ -25,7 +25,7 @@ stdenv.mkDerivation rec {
     domain = "codeberg.org";
     owner = "cryinkfly";
     repo = "Autodesk-Fusion-360-on-Linux";
-    rev = "0fcbc4a3c18b60331006e885c34e2621cbaf5287";
+    rev = "v${version}";
     hash = "sha256-f9BvoDKZePn0uRdUEppfzyuO+xW2EW1PLvHN9PAo3QI=";
   };
 

@@ -84,6 +84,6 @@ EOF
     homepage = "https://codeberg.org/cryinkfly/Autodesk-Fusion-360-on-Linux";
     license = licenses.mit;
     platforms = [ "x86_64-linux" ];
-    mainProgram = "autodesk-fusion-installer";
+    mainProgram = "autodesk-fusion-360";
   };
 }

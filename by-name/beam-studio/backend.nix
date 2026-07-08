@@ -85,11 +85,11 @@ pkgs.stdenv.mkDerivation {
     cp -r flux_api_blob_extracted/PYZ-00.pyz_extracted/fluxsvg $out/lib/python3.8/site-packages/
     
     # 3. Copy our open-source fluxghost source into site-packages
-    cp -r . $out/lib/python3.8/site-packages/fluxghost
+    cp -r * $out/lib/python3.8/site-packages/
     
     # 4. Create the flux_api executable wrapper using our custom Python environment
     makeWrapper ${pythonEnv}/bin/python $out/bin/flux_api \
       --set PYTHONPATH "$out/lib/python3.8/site-packages" \
-      --add-flags "-m fluxghost.main"
+      --add-flags "-m ghost"
   '';
 }

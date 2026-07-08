@@ -8,11 +8,16 @@
 }:
 let
   # We use NixOS 23.05 to access Python 3.8 and pre-compiled numpy/scipy versions.
+  # We are firmly anchored to 23.05 because the proprietary Beam Studio AppImage (2.6.8)
+  # is packaged with Python 3.8. The extraction script (pyinstxtractor.py) and the 
+  # decompiled .pyc files require Python 3.8 to run. Newer nixpkgs dropped Python 3.8 
+  # support for critical packages like numpy, meaning we cannot easily upgrade nixpkgs 
+  # until Beam Studio releases a newer AppImage packaged with a more modern Python version.
   oldPkgs =
     import
       (builtins.fetchTarball {
-        url = "https://github.com/NixOS/nixpkgs/archive/nixos-23.05.tar.gz";
-        sha256 = "sha256-LWvKHp7kGxk/GEtlrGYV68qIvPHkU9iToomNFGagixU=";
+        url = "https://github.com/NixOS/nixpkgs/archive/nixos-23.11.tar.gz";
+        hash = "sha256-zwVvxrdIzralnSbcpghA92tWu2DV2lwv89xZc8MTrbg=";
       })
       {
         inherit (pkgs) system;

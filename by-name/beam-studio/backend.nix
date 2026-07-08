@@ -33,7 +33,7 @@ let
   # Complete Python 3.8 environment for fluxghost
   pythonEnv = oldPkgs.python38.withPackages (p: [
     p.numpy p.scipy p.pillow p.pyusb p.cffi p.cairocffi p.lxml p.msgpack
-    p.pyserial p.pycryptodome p.ecdsa p.cssselect2 p.defusedxml p.pyasn1 p.tinycss2
+    p.pyserial p.pycryptodome p.ecdsa p.cssselect2 p.defusedxml p.pyasn1 p.tinycss2 p.setuptools
     opencv-python-wheel
   ]);
   
@@ -68,7 +68,8 @@ pkgs.stdenv.mkDerivation {
   
   src = fluxghost-src;
   
-  nativeBuildInputs = [ oldPkgs.python38 pkgs.makeWrapper ];
+  nativeBuildInputs = [ oldPkgs.python38 pkgs.makeWrapper oldPkgs.autoPatchelfHook ];
+  buildInputs = [ oldPkgs.stdenv.cc.cc.lib pkgs.zlib ];
   
   installPhase = ''
     mkdir -p $out/lib/python3.8/site-packages
@@ -92,6 +93,7 @@ pkgs.stdenv.mkDerivation {
     
     # 3. Copy our open-source fluxghost source into site-packages
     cp -r * $out/lib/python3.8/site-packages/
+    rm -rf $out/lib/python3.8/site-packages/flux_api_blob*
     
     # 4. Create the flux_api executable wrapper using our custom Python environment
     makeWrapper ${pythonEnv}/bin/python $out/bin/flux_api \

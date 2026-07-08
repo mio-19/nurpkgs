@@ -13,9 +13,9 @@ let
   # Upgrading to 23.11 fails because its numpy version dropped Python 3.8 support.
   oldPkgs =
     import
-      (builtins.fetchTarball {
+      (pkgs.fetchzip {
         url = "https://github.com/NixOS/nixpkgs/archive/nixos-23.05.tar.gz";
-        sha256 = "sha256-LWvKHp7kGxk/GEtlrGYV68qIvPHkU9iToomNFGagixU=";
+        hash = "sha256-LWvKHp7kGxk/GEtlrGYV68qIvPHkU9iToomNFGagixU=";
       })
       {
         inherit (pkgs) system;

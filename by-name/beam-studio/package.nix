@@ -154,7 +154,10 @@ stdenv.mkDerivation (finalAttrs: {
   meta = {
     description = "Beam Studio";
     homepage = "https://github.com/flux3dp/beam-studio";
-    license = lib.licenses.agpl3Only;
+    license = with lib.licenses; [
+      agpl3Only
+      unfree
+    ];
     maintainers = [ ];
     mainProgram = "beam-studio";
     platforms = lib.platforms.linux;

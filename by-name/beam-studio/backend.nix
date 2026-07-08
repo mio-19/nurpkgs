@@ -19,11 +19,12 @@ let
     version = "4.10.0.84";
     format = "wheel";
     src = pkgs.fetchurl {
-      url = "https://files.pythonhosted.org/packages/fb/76/8dfd27a13470ff4e5c5453086eb071cae795c73229b9f71cba8868dae0e7/opencv_python-4.10.0.84-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
-      hash = "sha256-aXyC7r5JvU0qT0zT/M/uP/lC12z58B06tU+VfQk+5y8=";
+      url = "https://files.pythonhosted.org/packages/3f/a4/d2537f47fd7fcfba966bd806e3ec18e7ee1681056d4b0a9c8d983983e4d5/opencv_python-4.10.0.84-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl";
+      hash = "sha256-ms4UD8bWR/vhxpK8sqvOdolzSRIiwGfBMdgJV8WVtx8=";
     };
     buildInputs = with oldPkgs; [ zlib libGL glib xorg.libSM xorg.libICE xorg.libX11 xorg.libXext ];
     nativeBuildInputs = [ oldPkgs.autoPatchelfHook ];
+    pipInstallFlags = [ "--no-deps" ];
   };
 
   # Complete Python 3.8 environment for fluxghost
@@ -36,17 +37,24 @@ let
   fluxghost-src = fetchFromGitHub {
     owner = "flux3dp";
     repo = "fluxghost";
-    rev = "31bf4e96395b211d17d5e6834b6e51cc9ab4fb4b"; # latest commit as of writing
-    hash = "sha256-eT7s3yT/Kefz4z3XhVbB9x4H+H9fT8x2aHl0T/G4c5I="; 
+    rev = "4c13e0d7371c79c19db45826786b71c9855b6c45"; 
+    hash = "sha256-KxkCFhB20O+2bPzzOZXPSb+HYfB16M9g1sR2OZPUMAM="; 
+  };
+  
+  # Script to extract .pyc from PyInstaller
+  pyinstxtractor = fetchurl {
+    url = "https://raw.githubusercontent.com/extremecoders-re/pyinstxtractor/master/pyinstxtractor.py";
+    hash = "sha256-lOC2ydUVG77vx+dFLpbiSzlsLb/LA0jl8SxMCGX+/lg=";
   };
   
   # The original AppImage to extract proprietary blobs from
   backendAppImage = fetchurl {
-    url = "https://s3-us-west-1.amazonaws.com/fluxstudio/beam-studio-2.6.8-stable-linux-x86_64.AppImage";
-    hash = "sha256-QxVd2R2Nn94E41h9P/e6NnK4O0lOQn4H6+rTjF8wTzE=";
+    url = "https://beamstudio.s3.amazonaws.com/linux-22.04/Beam%20Studio-2.6.8.AppImage";
+    hash = "sha256-+NNeAThprCd+1WE7aVqlkCEk4rLmKN0aD5RykRkHOa8=";
   };
   backendContents = appimageTools.extractType2 {
-    name = "beam-studio-backend-contents";
+    pname = "beam-studio-backend-contents";
+    version = "2.6.8";
     src = backendAppImage;
   };
 in
@@ -58,15 +66,23 @@ pkgs.stdenv.mkDerivation {
   
   nativeBuildInputs = [ oldPkgs.python38 pkgs.makeWrapper ];
   
-  # Extract PyInstaller .pyc blobs and compile fluxghost
   installPhase = ''
     mkdir -p $out/lib/python3.8/site-packages
     mkdir -p $out/bin
     
-    # 1. We would extract pyinstxtractor.py against backendContents/resources/backend/flux_api
+    # 1. Extract pyinstxtractor against backendContents/resources/backend/flux_api
+    cp ${backendContents}/resources/backend/flux_api/flux_api ./flux_api_blob
+    python ${pyinstxtractor} ./flux_api_blob
+    
     # 2. Extract beamify and fluxclient .pyc files into site-packages
+    # PyInstaller extracts to flux_api_blob_extracted
+    # PYZ-00.pyz_extracted contains the user modules
+    cp -r flux_api_blob_extracted/PYZ-00.pyz_extracted/beamify $out/lib/python3.8/site-packages/
+    cp -r flux_api_blob_extracted/PYZ-00.pyz_extracted/fluxclient $out/lib/python3.8/site-packages/
+    cp -r flux_api_blob_extracted/PYZ-00.pyz_extracted/fluxsvg $out/lib/python3.8/site-packages/
+    
     # 3. Copy our open-source fluxghost source into site-packages
-    cp -r fluxghost $out/lib/python3.8/site-packages/
+    cp -r . $out/lib/python3.8/site-packages/fluxghost
     
     # 4. Create the flux_api executable wrapper using our custom Python environment
     makeWrapper ${pythonEnv}/bin/python $out/bin/flux_api \

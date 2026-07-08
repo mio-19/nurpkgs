@@ -116,3 +116,7 @@ files are copied from following locations. some are modified in this repo and so
 ## llm policy
 
 headache. use LLM for boring no brain task
+
+## Python 3.8
+
+This repository includes a legacy `python38` package extracted from the **NixOS 23.11** release branch. Python 3.8 reached End-Of-Life in October 2024 and was removed in newer NixOS releases (like 24.05). We retain it here specifically to support reverse engineering and extraction of proprietary PyInstaller `.pyc` blobs (such as those found in `beam-studio`'s closed-source backend).

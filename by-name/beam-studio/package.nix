@@ -1,4 +1,5 @@
 {
+  pkgs,
   lib,
   stdenv,
   fetchFromGitHub,
@@ -31,6 +32,7 @@ let
     version = "2.6.8-stable";
     src = backendAppImage;
   };
+  customBackend = pkgs.callPackage ./backend.nix {};
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "beam-studio";
@@ -122,8 +124,13 @@ stdenv.mkDerivation (finalAttrs: {
     cp -r apps/app/dist/linux-unpacked/resources $out/share/beam-studio/
     cp apps/app/dist/linux-unpacked/*.pak $out/share/beam-studio/ || true
 
-    # Inject backend from official AppImage
+    # Inject backend from official AppImage (for swiftray/ghost-env)
     cp -r ${backendContents}/resources/backend $out/share/beam-studio/resources/
+    
+    # Replace flux_api binary with our compiled custom backend
+    rm -r $out/share/beam-studio/resources/backend/flux_api
+    mkdir -p $out/share/beam-studio/resources/backend/flux_api
+    ln -s ${customBackend}/bin/flux_api $out/share/beam-studio/resources/backend/flux_api/flux_api
 
     mkdir -p $out/bin
     makeWrapper ${electron}/bin/electron $out/bin/beam-studio \

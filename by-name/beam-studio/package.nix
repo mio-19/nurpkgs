@@ -23,15 +23,6 @@
   libGL,
 }:
 let
-  backendAppImage = fetchurl {
-    url = "https://beamstudio.s3.amazonaws.com/linux-22.04/Beam%20Studio-2.6.8.AppImage";
-    hash = "sha256-+NNeAThprCd+1WE7aVqlkCEk4rLmKN0aD5RykRkHOa8=";
-  };
-  backendContents = appimageTools.extractType2 {
-    pname = "beam-studio-backend";
-    version = "2.6.8-stable";
-    src = backendAppImage;
-  };
   customBackend = pkgs.callPackage ./backend.nix {};
 in
 stdenv.mkDerivation (finalAttrs: {
@@ -124,11 +115,7 @@ stdenv.mkDerivation (finalAttrs: {
     cp -r apps/app/dist/linux-unpacked/resources $out/share/beam-studio/
     cp apps/app/dist/linux-unpacked/*.pak $out/share/beam-studio/ || true
 
-    # Inject backend from official AppImage (for swiftray/ghost-env)
-    cp -r ${backendContents}/resources/backend $out/share/beam-studio/resources/
-    
-    # Replace flux_api binary with our compiled custom backend
-    rm -r $out/share/beam-studio/resources/backend/flux_api
+    # Setup our source-built custom backend (Linux AppImage does not use swiftray)
     mkdir -p $out/share/beam-studio/resources/backend/flux_api
     ln -s ${customBackend}/bin/flux_api $out/share/beam-studio/resources/backend/flux_api/flux_api
 

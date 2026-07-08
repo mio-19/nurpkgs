@@ -33,6 +33,7 @@ let
   # Complete Python 3.8 environment for fluxghost
   pythonEnv = oldPkgs.python38.withPackages (p: [
     p.numpy p.scipy p.pillow p.pyusb p.cffi p.cairocffi p.lxml p.msgpack
+    p.pyserial p.pycryptodome p.ecdsa p.cssselect2 p.defusedxml p.pyasn1 p.tinycss2
     opencv-python-wheel
   ]);
   
@@ -83,6 +84,11 @@ pkgs.stdenv.mkDerivation {
     cp -r flux_api_blob_extracted/PYZ-00.pyz_extracted/beamify $out/lib/python3.8/site-packages/
     cp -r flux_api_blob_extracted/PYZ-00.pyz_extracted/fluxclient $out/lib/python3.8/site-packages/
     cp -r flux_api_blob_extracted/PYZ-00.pyz_extracted/fluxsvg $out/lib/python3.8/site-packages/
+    
+    # Copy native C extensions and assets for proprietary blobs
+    cp -r ${backendContents}/resources/backend/flux_api/beamify/* $out/lib/python3.8/site-packages/beamify/ 2>/dev/null || true
+    cp -r ${backendContents}/resources/backend/flux_api/fluxclient/* $out/lib/python3.8/site-packages/fluxclient/ 2>/dev/null || true
+    cp -r ${backendContents}/resources/backend/flux_api/fluxsvg/* $out/lib/python3.8/site-packages/fluxsvg/ 2>/dev/null || true
     
     # 3. Copy our open-source fluxghost source into site-packages
     cp -r * $out/lib/python3.8/site-packages/

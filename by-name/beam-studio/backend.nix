@@ -8,7 +8,10 @@
 }:
 let
   # We use NixOS 23.05 to access Python 3.8 and pre-compiled numpy/scipy versions.
-  oldPkgs = import (builtins.fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-23.05.tar.gz") { 
+  oldPkgs = import (builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/nixos-23.05.tar.gz";
+    sha256 = "sha256-LWvKHp7kGxk/GEtlrGYV68qIvPHkU9iToomNFGagixU=";
+  }) { 
     inherit (pkgs) system; 
     config.allowUnfree = true; 
   };

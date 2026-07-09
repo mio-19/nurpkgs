@@ -172,8 +172,6 @@ byName
     angelscript = angelscript_2_35_1;
   };
 
-  eden = nodarwin (v3overrideAttrs (pkgs.callPackage ./pkgs/eden/package.nix { }));
-
   layan-sddm = nodarwin (pkgs.callPackage ./pkgs/layan-sddm { });
   zw3d = pkgs.callPackage ./pkgs/zw3d {
     notoFontsCjk = pkgs.noto-fonts-cjk-sans;

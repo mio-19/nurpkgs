@@ -34,16 +34,8 @@ let
       extraPassthru ? { },
     }:
     let
-      # versionNyxPath can be either a string relative to nyx or a path.
       versionLocalPath =
         if builtins.isPath versionNyxPath then versionNyxPath else "${nyx}/${versionNyxPath}";
-
-      # The update script wants a path relative to the repository root.
-      versionPathForScript =
-        if builtins.isPath versionNyxPath then
-          lib.strings.removePrefix "${toString nyx}/" (toString versionNyxPath)
-        else
-          versionNyxPath;
       current = importJSON versionLocalPath;
 
       fetchers = { inherit fetchFromGitHub fetchFromGitLab fetchFromGitea; };
@@ -77,7 +69,7 @@ let
               withBump
               ;
             hasSubmodules = fetcherData.fetchSubmodules or false;
-            versionPath = versionPathForScript;
+            versionPath = versionNyxPath;
             fetchLatestRev = fetchLatestRev ref fullFetcherData;
             gitUrl = src.gitRepoUrl;
             withExtraCommands = withExtraUpdateCommands;

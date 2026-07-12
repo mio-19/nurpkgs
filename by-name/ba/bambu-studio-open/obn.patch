@@ -41,8 +41,7 @@
      }
      else
          networking_module = dlopen( library.c_str(), RTLD_LAZY);
--    if (!networking_module) {
-+    if (false) {
+     if (!networking_module) {
          char* dll_error = dlerror();
          std::string err       = dll_error ? std::string(dll_error) : std::string("(null)");
          BOOST_LOG_TRIVIAL(warning) << __FUNCTION__ << boost::format(", error, dlerror is %1%") % err;

@@ -13,27 +13,14 @@
   zlib,
   curl,
   uthash,
-  client ? "bambu_studio",
+  mosquitto,
+  cjson,
+  client ? "bambu_studio", # or "orca_slicer"
   pluginVersion ? "02.05.00.99",
 }:
 
-let
-  mosquittoSrc = fetchFromGitHub {
-    owner = "eclipse";
-    repo = "mosquitto";
-    rev = "v2.1.2";
-    hash = "sha256-Zl55yjuzQY2fyaKs/zLaJ7a3OONKTDQPaT+DpPURdZI=";
-  };
-
-  cJsonSrc = fetchFromGitHub {
-    owner = "DaveGamble";
-    repo = "cJSON";
-    rev = "v1.7.18";
-    hash = "sha256-UgUWc/+Zie2QNijxKK5GFe4Ypk97EidG8nTiiHhn5Ys=";
-  };
-in
-stdenv.mkDerivation rec {
-  pname = "open-bamboo-networking-${client}";
+stdenv.mkDerivation (finalAttrs: {
+  pname = "open-bamboo-networking";
   version = "1.1.0";
 
   strictDeps = true;
@@ -42,7 +29,7 @@ stdenv.mkDerivation rec {
   src = fetchFromGitHub {
     owner = "ClusterM";
     repo = "open-bamboo-networking";
-    rev = "v${version}";
+    tag = "v${finalAttrs.version}";
     hash = "sha256-bxkOwCnlKu2fA3cEiTZq15anSwLkuJIyko19wqul6Fw=";
   };
 
@@ -59,18 +46,17 @@ stdenv.mkDerivation rec {
   ];
 
   cmakeFlags = [
-    "-DOBN_VERSION=${pluginVersion}"
-    "-DOBN_CLIENT_TYPE=${client}"
-    "-DOBN_PATCH_CLIENT_CONF=OFF"
-    "-DOBN_BUILD_TESTS=OFF"
-
+    (lib.cmakeFeature "OBN_VERSION" pluginVersion)
+    (lib.cmakeFeature "OBN_CLIENT_TYPE" client)
+    (lib.cmakeBool "OBN_PATCH_CLIENT_CONF" false)
+    (lib.cmakeBool "OBN_BUILD_TESTS" false)
     # Prefer a staged Nix install, not ~/.config/BambuStudio
-    "-DCMAKE_INSTALL_PREFIX=${placeholder "out"}"
-    "-DFETCHCONTENT_SOURCE_DIR_CJSON=${cJsonSrc}"
+    (lib.cmakeFeature "CMAKE_INSTALL_PREFIX" "${placeholder "out"}")
+    (lib.cmakeFeature "FETCHCONTENT_SOURCE_DIR_CJSON" "${cjson.src}")
   ];
 
   preConfigure = ''
-    cp -r ${mosquittoSrc} $TMPDIR/source/mosquitto-src
+    cp -r ${mosquitto.src} $TMPDIR/source/mosquitto-src
     chmod -R u+w $TMPDIR/source/mosquitto-src
 
     cmakeFlagsArray+=(
@@ -79,10 +65,11 @@ stdenv.mkDerivation rec {
   '';
 
   meta = {
+    changelog = "https://github.com/ClusterM/open-bamboo-networking/releases/tag/v${finalAttrs.version}";
     description = "Open-source Bambu/Orca network plugin replacement";
     homepage = "https://github.com/ClusterM/open-bamboo-networking";
     license = lib.licenses.agpl3Only;
     maintainers = with lib.maintainers; [ mio ];
     platforms = lib.platforms.linux;
   };
-}
+})

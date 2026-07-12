@@ -42,6 +42,6 @@ bambu-studio.overrideAttrs (oldAttrs: {
   meta = oldAttrs.meta // {
     description = "Bambu Studio with open-bamboo-networking (FOSS networking plugin)";
     license = lib.licenses.agpl3Plus;
-    maintainers = [ ];
+    maintainers = with lib.maintainers; [ mio ];
   };
 })

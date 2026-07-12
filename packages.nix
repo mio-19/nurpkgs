@@ -38,11 +38,37 @@ let
       else
         minipkgs0.prismlauncher-unwrapped;
   };
-  # https://github.com/nix-community/nur-combined/blob/af619b147352e88b4105fbfab03f9395e68e5ee5/repos/dtomvan/default.nix#L6
-  byName = lib.filesystem.packagesFromDirectoryRecursive {
-    inherit (pkgs) callPackage newScope;
-    directory = ./by-name;
-  };
+  byName = lib.makeScope pkgs.newScope (
+    self:
+    let
+      readDir = builtins.readDir ./by-name;
+      flattened = builtins.foldl' (
+        acc: dir:
+        if builtins.stringLength dir == 2 && readDir.${dir} == "directory" then
+          acc
+          // (
+            let
+              subdir = ./by-name + "/${dir}";
+            in
+            builtins.listToAttrs (
+              map
+                (name: {
+                  inherit name;
+                  value = self.callPackage (subdir + "/${name}/package.nix") { };
+                })
+                (
+                  builtins.filter (name: (builtins.readDir subdir).${name} == "directory") (
+                    builtins.attrNames (builtins.readDir subdir)
+                  )
+                )
+            )
+          )
+        else
+          acc
+      ) { } (builtins.attrNames readDir);
+    in
+    flattened
+  );
 in
 byName
 // (with byName; rec {

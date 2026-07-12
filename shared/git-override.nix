@@ -38,6 +38,11 @@ let
         if builtins.isPath versionNyxPath then versionNyxPath else "${nyx}/${versionNyxPath}";
       current = importJSON versionLocalPath;
 
+      versionNyxPath' =
+        if builtins.isPath versionNyxPath then
+          lib.strings.removePrefix "${toString nyx}/" (toString versionNyxPath)
+        else
+          versionNyxPath;
       fetchers = { inherit fetchFromGitHub fetchFromGitLab fetchFromGitea; };
       fullFetcherData = fetcherData // {
         inherit (current) rev hash;
@@ -69,7 +74,7 @@ let
               withBump
               ;
             hasSubmodules = fetcherData.fetchSubmodules or false;
-            versionPath = versionNyxPath;
+            versionPath = versionNyxPath';
             fetchLatestRev = fetchLatestRev ref fullFetcherData;
             gitUrl = src.gitRepoUrl;
             withExtraCommands = withExtraUpdateCommands;

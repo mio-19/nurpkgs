@@ -119,13 +119,18 @@ function TerminalSession({
         return;
       }
 
-      outputUnlisten = await listen<TerminalOutput>("terminal-output", (event) => {
+      const unlistenOutput = await listen<TerminalOutput>("terminal-output", (event) => {
         if (event.payload.session_id === sessionIdRef.current) {
           term.write(new Uint8Array(event.payload.data));
         }
       });
+      if (stopped) {
+        unlistenOutput();
+      } else {
+        outputUnlisten = unlistenOutput;
+      }
 
-      exitUnlisten = await listen<TerminalExit>("terminal-exit", (event) => {
+      const unlistenExit = await listen<TerminalExit>("terminal-exit", (event) => {
         if (event.payload.session_id !== sessionIdRef.current) return;
         const status = event.payload.status;
         setConnectionState("closed");
@@ -133,6 +138,11 @@ function TerminalSession({
         term.writeln(status === null ? "OmniMux: session closed" : `OmniMux: session exited with status ${status}`);
         sessionIdRef.current = null;
       });
+      if (stopped) {
+        unlistenExit();
+      } else {
+        exitUnlisten = unlistenExit;
+      }
 
       try {
         await invoke("start_session", {

@@ -10,6 +10,8 @@
   openssl,
   cargo-tauri,
   wrapGAppsHook3,
+  tmux,
+  openssh,
 }:
 
 let
@@ -62,6 +64,12 @@ rustPlatform.buildRustPackage {
     # We will copy the frontend output to the parent directory since tauri.conf.json says "../dist"
     mkdir -p ../dist
     cp -r ${frontend}/lib/node_modules/omnimux/dist/* ../dist/ || cp -r ${frontend}/dist/* ../dist/ || echo "Warning: Frontend copy failed"
+  '';
+
+  preFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
+    gappsWrapperArgs+=(
+      --prefix PATH : "${lib.makeBinPath [ tmux openssh ]}"
+    )
   '';
 
   passthru = {

@@ -68,7 +68,12 @@ rustPlatform.buildRustPackage {
 
   preFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
     gappsWrapperArgs+=(
-      --prefix PATH : "${lib.makeBinPath [ tmux openssh ]}"
+      --prefix PATH : "${
+        lib.makeBinPath [
+          tmux
+          openssh
+        ]
+      }"
     )
   '';
 

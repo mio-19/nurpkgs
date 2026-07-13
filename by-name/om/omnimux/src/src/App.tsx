@@ -7,7 +7,7 @@ import "xterm/css/xterm.css";
 
 type TerminalOutput = {
   session_id: number;
-  data: string;
+  data: number[];
 };
 
 type TerminalExit = {
@@ -92,7 +92,12 @@ function TerminalSession({
     term.writeln(`OmniMux: connecting to ${host}`);
 
     const resizeActiveSession = () => {
-      fitAddon.fit();
+      if (!terminalRef.current || terminalRef.current.clientWidth === 0) return;
+      try {
+        fitAddon.fit();
+      } catch (e) {
+        return;
+      }
       const sessionId = sessionIdRef.current;
       if (sessionId !== null) {
         invoke("resize_session", {
@@ -116,7 +121,7 @@ function TerminalSession({
 
       outputUnlisten = await listen<TerminalOutput>("terminal-output", (event) => {
         if (event.payload.session_id === sessionIdRef.current) {
-          term.write(event.payload.data);
+          term.write(new Uint8Array(event.payload.data));
         }
       });
 
@@ -194,9 +199,20 @@ function TerminalSession({
   
   // Refit when becoming active
   useEffect(() => {
-    if (isActive && fitAddonRef.current) {
+    if (isActive && fitAddonRef.current && termRef.current && sessionIdRef.current !== null) {
       setTimeout(() => {
-        fitAddonRef.current?.fit();
+        try {
+          fitAddonRef.current?.fit();
+        } catch (e) {
+          return;
+        }
+        if (sessionIdRef.current !== null && termRef.current) {
+          invoke("resize_session", {
+            sessionId: sessionIdRef.current,
+            cols: termRef.current.cols,
+            rows: termRef.current.rows,
+          }).catch(() => undefined);
+        }
       }, 10);
     }
   }, [isActive]);

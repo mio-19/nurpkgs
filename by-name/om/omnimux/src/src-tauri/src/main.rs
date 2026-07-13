@@ -29,7 +29,7 @@ struct AppState {
 #[derive(Clone, Serialize)]
 struct TerminalOutput {
     session_id: u64,
-    data: String,
+    data: Vec<u8>,
 }
 
 #[derive(Clone, Serialize)]
@@ -108,7 +108,7 @@ fn start_session(
             match reader.read(&mut buffer) {
                 Ok(0) => break,
                 Ok(read) => {
-                    let data = String::from_utf8_lossy(&buffer[..read]).into_owned();
+                    let data = buffer[..read].to_vec();
                     let _ = output_app.emit(
                         "terminal-output",
                         TerminalOutput {

@@ -6,17 +6,6 @@
     "main"
   ],
   "permissions": [
-    "core:default",
-    {
-      "identifier": "allow-custom-commands",
-      "allow": [
-        { "name": "create_session_id" },
-        { "name": "start_session" },
-        { "name": "write_session" },
-        { "name": "resize_session" },
-        { "name": "stop_session" },
-        { "name": "get_ssh_hosts" }
-      ]
-    }
+    "core:default"
   ]
 }

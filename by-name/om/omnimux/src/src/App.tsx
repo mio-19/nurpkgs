@@ -3,6 +3,7 @@ import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
+import { Unicode11Addon } from "xterm-addon-unicode11";
 import "xterm/css/xterm.css";
 
 type TerminalOutput = {
@@ -77,12 +78,34 @@ function TerminalSession({
       },
     });
     const fitAddon = new FitAddon();
+    const unicode11Addon = new Unicode11Addon();
 
     terminalRef.current.innerHTML = "";
     term.loadAddon(fitAddon);
+    term.loadAddon(unicode11Addon);
+    term.unicode.activeVersion = '11';
     term.open(terminalRef.current);
     fitAddon.fit();
     term.focus();
+
+    term.attachCustomKeyEventHandler((e) => {
+      if (e.type === 'keydown') {
+        if (e.ctrlKey && e.shiftKey && (e.code === 'KeyC' || e.key === 'c' || e.key === 'C')) {
+          const selection = term.getSelection();
+          if (selection) {
+            navigator.clipboard.writeText(selection);
+          }
+          return false;
+        }
+        if (e.ctrlKey && e.shiftKey && (e.code === 'KeyV' || e.key === 'v' || e.key === 'V')) {
+          navigator.clipboard.readText().then(text => {
+            term.paste(text);
+          });
+          return false;
+        }
+      }
+      return true;
+    });
 
     termRef.current = term;
     fitAddonRef.current = fitAddon;

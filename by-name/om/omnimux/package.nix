@@ -10,8 +10,6 @@
   openssl,
   cargo-tauri,
   wrapGAppsHook3,
-  tmux,
-  openssh,
 }:
 
 let
@@ -19,7 +17,7 @@ let
     pname = "omnimux-ui";
     version = "0.1.0";
     src = ./src;
-    npmDepsHash = "sha256-UoYIjFx35LIr/oPKrbZQFgvr2la5SRdHYQNdXIR2Heg=";
+    npmDepsHash = "sha256-N2CMOKjrkJWD5tAEgA2pVergl938OIIE/pUziMKbSNo=";
   };
 in
 rustPlatform.buildRustPackage {
@@ -64,17 +62,6 @@ rustPlatform.buildRustPackage {
     # We will copy the frontend output to the parent directory since tauri.conf.json says "../dist"
     mkdir -p ../dist
     cp -r ${frontend}/lib/node_modules/omnimux/dist/* ../dist/ || cp -r ${frontend}/dist/* ../dist/ || echo "Warning: Frontend copy failed"
-  '';
-
-  preFixup = lib.optionalString stdenv.hostPlatform.isLinux ''
-    gappsWrapperArgs+=(
-      --prefix PATH : "${
-        lib.makeBinPath [
-          tmux
-          openssh
-        ]
-      }"
-    )
   '';
 
   passthru = {

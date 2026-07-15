@@ -281,7 +281,7 @@ function App() {
 
   const [hosts, setHosts] = useState<string[]>(["localhost"]);
   const [tabs, setTabs] = useState<Tab[]>([{ id: 'qc', type: 'quick-connect' }]);
-  const [draggedTabIndex, setDraggedTabIndex] = useState<number | null>(null);
+  const draggedTabIndex = useRef<number | null>(null);
   const [activeTabId, setActiveTabId] = useState<string>('qc');
   const [newHost, setNewHost] = useState("");
 
@@ -373,27 +373,27 @@ function App() {
                 key={tab.id}
                 draggable
                 onDragStart={(e) => {
-                  setDraggedTabIndex(index);
+                  draggedTabIndex.current = index;
                   e.dataTransfer.setData('text/plain', index.toString());
-                  // Fix huge ghost image on Wayland WebKitGTK
-                  const img = new Image();
-                  img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-                  e.dataTransfer.setDragImage(img, 0, 0);
+                  const canvas = document.createElement('canvas');
+                  canvas.width = 1;
+                  canvas.height = 1;
+                  e.dataTransfer.setDragImage(canvas, 0, 0);
                 }}
                 onDragOver={(e) => {
                   e.preventDefault();
                 }}
                 onDrop={(e) => {
                   e.preventDefault();
-                  if (draggedTabIndex === null || draggedTabIndex === index) return;
+                  if (draggedTabIndex.current === null || draggedTabIndex.current === index) return;
                   
                   const newTabs = [...tabs];
-                  const [removed] = newTabs.splice(draggedTabIndex, 1);
+                  const [removed] = newTabs.splice(draggedTabIndex.current, 1);
                   newTabs.splice(index, 0, removed);
                   setTabs(newTabs);
-                  setDraggedTabIndex(null);
+                  draggedTabIndex.current = null;
                 }}
-                onDragEnd={() => setDraggedTabIndex(null)}
+                onDragEnd={() => { draggedTabIndex.current = null; }}
                 onClick={() => setActiveTabId(tab.id)}
                 style={{
                   background: isActive ? theme.background : theme.buttonBackground,

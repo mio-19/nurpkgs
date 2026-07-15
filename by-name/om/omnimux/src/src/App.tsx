@@ -351,6 +351,7 @@ function App() {
       minWidth: 0,
       fontFamily: "system-ui, -apple-system, sans-serif"
     }}>
+      <div id="drag-ghost-element" style={{ position: 'absolute', top: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: 'none', zIndex: -100 }} />
       <header style={{
         alignItems: "center",
         background: theme.toolbarBackground,
@@ -375,10 +376,10 @@ function App() {
                 onDragStart={(e) => {
                   draggedTabIndex.current = index;
                   e.dataTransfer.setData('text/plain', index.toString());
-                  const canvas = document.createElement('canvas');
-                  canvas.width = 1;
-                  canvas.height = 1;
-                  e.dataTransfer.setDragImage(canvas, 0, 0);
+                  const ghost = document.getElementById('drag-ghost-element');
+                  if (ghost) {
+                    e.dataTransfer.setDragImage(ghost, 0, 0);
+                  }
                 }}
                 onDragOver={(e) => {
                   e.preventDefault();

@@ -386,7 +386,7 @@ function App() {
                     setTabs(newTabs);
                     draggedTabIndex.current = index;
                   }
-                }}}
+                }}
                 onClick={() => setActiveTabId(tab.id)}
                 style={{
                   background: isActive ? theme.background : theme.buttonBackground,

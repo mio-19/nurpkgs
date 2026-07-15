@@ -115,8 +115,37 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            for (var i = 0; i < _sessions.length; i++)
-              _buildTab(i, _sessions[i]),
+            Expanded(
+              child: SizedBox(
+                height: 48,
+                child: ReorderableListView(
+                  scrollDirection: Axis.horizontal,
+                  buildDefaultDragHandles: false,
+                  onReorder: (int oldIndex, int newIndex) {
+                    setState(() {
+                      if (oldIndex < newIndex) {
+                        newIndex -= 1;
+                      }
+                      final TerminalSession item = _sessions.removeAt(oldIndex);
+                      _sessions.insert(newIndex, item);
+                      
+                      // Update active tab index if needed
+                      if (_activeTabIndex == oldIndex) {
+                        _activeTabIndex = newIndex;
+                      } else if (_activeTabIndex > oldIndex && _activeTabIndex <= newIndex) {
+                        _activeTabIndex--;
+                      } else if (_activeTabIndex < oldIndex && _activeTabIndex >= newIndex) {
+                        _activeTabIndex++;
+                      }
+                    });
+                  },
+                  children: [
+                    for (var i = 0; i < _sessions.length; i++)
+                      _buildTab(i, _sessions[i]),
+                  ],
+                ),
+              ),
+            ),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {
@@ -151,33 +180,38 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget _buildTab(int index, TerminalSession session) {
     final isActive = index == _activeTabIndex;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _activeTabIndex = index;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        color: isActive ? Theme.of(context).colorScheme.primaryContainer : Colors.transparent,
-        child: Row(
-          children: [
-            Text(session.host),
-            const SizedBox(width: 8),
-            InkWell(
-              onTap: () {
-                StopSession(sessionId: session.id).sendSignalToRust();
-                setState(() {
-                  _sessions.removeAt(index);
-                  if (_activeTabIndex >= _sessions.length) {
-                    _activeTabIndex = _sessions.length - 1;
-                  }
-                  if (_activeTabIndex < 0) _activeTabIndex = 0;
-                });
-              },
-              child: const Icon(Icons.close, size: 16),
-            ),
-          ],
+    return ReorderableDragStartListener(
+      key: ValueKey(session.id),
+      index: index,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _activeTabIndex = index;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: isActive ? Theme.of(context).colorScheme.primaryContainer : Colors.transparent,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(session.host),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: () {
+                  StopSession(sessionId: session.id).sendSignalToRust();
+                  setState(() {
+                    _sessions.removeAt(index);
+                    if (_activeTabIndex >= _sessions.length) {
+                      _activeTabIndex = _sessions.length - 1;
+                    }
+                    if (_activeTabIndex < 0) _activeTabIndex = 0;
+                  });
+                },
+                child: const Icon(Icons.close, size: 16),
+              ),
+            ],
+          ),
         ),
       ),
     );

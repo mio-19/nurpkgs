@@ -215,11 +215,10 @@
     "rinf": {
       "dependency": "direct main",
       "description": {
-        "name": "rinf",
-        "sha256": "c93a2a3b21c06f3c9f9222ee84379244232b3e388fc35f827beafaf93d5191bb",
-        "url": "https://pub.dev"
+        "path": "../rinf",
+        "relative": true
       },
-      "source": "hosted",
+      "source": "path",
       "version": "8.10.0"
     },
     "sky_engine": {

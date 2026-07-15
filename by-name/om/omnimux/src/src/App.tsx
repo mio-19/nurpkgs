@@ -351,7 +351,6 @@ function App() {
       minWidth: 0,
       fontFamily: "system-ui, -apple-system, sans-serif"
     }}>
-      <div id="drag-ghost-element" style={{ position: 'absolute', top: 0, left: 0, width: 1, height: 1, opacity: 0.01, pointerEvents: 'none', zIndex: -100 }} />
       <header style={{
         alignItems: "center",
         background: theme.toolbarBackground,
@@ -372,29 +371,22 @@ function App() {
             return (
               <div
                 key={tab.id}
-                draggable
-                onDragStart={(e) => {
+                onMouseDown={() => {
                   draggedTabIndex.current = index;
-                  e.dataTransfer.setData('text/plain', index.toString());
-                  const ghost = document.getElementById('drag-ghost-element');
-                  if (ghost) {
-                    e.dataTransfer.setDragImage(ghost, 0, 0);
+                }}
+                onMouseEnter={(e) => {
+                  if (e.buttons !== 1) {
+                    draggedTabIndex.current = null;
+                    return;
                   }
-                }}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  if (draggedTabIndex.current === null || draggedTabIndex.current === index) return;
-                  
-                  const newTabs = [...tabs];
-                  const [removed] = newTabs.splice(draggedTabIndex.current, 1);
-                  newTabs.splice(index, 0, removed);
-                  setTabs(newTabs);
-                  draggedTabIndex.current = null;
-                }}
-                onDragEnd={() => { draggedTabIndex.current = null; }}
+                  if (draggedTabIndex.current !== null && draggedTabIndex.current !== index) {
+                    const newTabs = [...tabs];
+                    const [removed] = newTabs.splice(draggedTabIndex.current, 1);
+                    newTabs.splice(index, 0, removed);
+                    setTabs(newTabs);
+                    draggedTabIndex.current = index;
+                  }
+                }}}
                 onClick={() => setActiveTabId(tab.id)}
                 style={{
                   background: isActive ? theme.background : theme.buttonBackground,

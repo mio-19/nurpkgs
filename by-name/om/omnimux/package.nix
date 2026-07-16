@@ -31,7 +31,6 @@ flutter.buildFlutterApplication (
     targetFlutterPlatform = "linux"; # bypass nixpkgs check
 
     # Allow macOS to use the host's Xcode (requires sandbox = false in nix.conf)
-    __noChroot = true;
 
     nativeBuildInputs = [
       pkg-config
@@ -86,6 +85,7 @@ flutter.buildFlutterApplication (
     };
   }
   // lib.optionalAttrs stdenv.hostPlatform.isDarwin {
+    __noChroot = true;
     buildPhase = ''
       runHook preBuild
       export HOME=$NIX_BUILD_TOP

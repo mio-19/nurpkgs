@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:rinf/rinf.dart';
 import 'package:xterm/xterm.dart';
 import 'src/bindings/bindings.dart';
@@ -491,6 +492,8 @@ class TerminalSession {
               if (event is KeyDownEvent || event is KeyRepeatEvent) {
                 final isCtrlOrCmd = HardwareKeyboard.instance.isControlPressed ||
                                     HardwareKeyboard.instance.isMetaPressed;
+                final isShift = HardwareKeyboard.instance.isShiftPressed;
+
                 if (isCtrlOrCmd) {
                   if (event.logicalKey == LogicalKeyboardKey.equal ||
                       event.logicalKey == LogicalKeyboardKey.numpadAdd) {
@@ -504,6 +507,20 @@ class TerminalSession {
                              event.logicalKey == LogicalKeyboardKey.numpad0) {
                     fontSize.value = 14;
                     return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.keyC && (isShift || Platform.isMacOS)) {
+                    final text = terminal.selectedText;
+                    if (text != null && text.isNotEmpty) {
+                      Clipboard.setData(ClipboardData(text: text));
+                      terminal.clearSelection();
+                    }
+                    return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.keyV && (isShift || Platform.isMacOS)) {
+                    Clipboard.getData(Clipboard.kTextPlain).then((data) {
+                      if (data?.text != null && !_disposed) {
+                        terminal.paste(data!.text!);
+                      }
+                    });
+                    return KeyEventResult.handled;
                   }
                 }
               }
@@ -512,7 +529,10 @@ class TerminalSession {
             child: TerminalView(
               terminal,
               theme: isDark ? _darkTheme : _lightTheme,
-              textStyle: TerminalStyle(fontSize: size.toDouble()),
+              textStyle: TerminalStyle(
+                fontFamily: GoogleFonts.jetbrainsMono().fontFamily ?? 'monospace',
+                fontSize: size.toDouble(),
+              ),
               focusNode: focusNode,
               autofocus: autofocus,
             ),

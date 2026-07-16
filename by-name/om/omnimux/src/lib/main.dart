@@ -199,24 +199,44 @@ class _MainScreenState extends State<MainScreen> {
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {
+                String customUser = '';
                 showDialog(
                   context: context,
                   builder: (context) {
                     return AlertDialog(
                       title: const Text('New Session'),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: _hosts
-                            .map(
-                              (host) => ListTile(
-                                title: Text(host),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  _addTab(host);
-                                },
+                      content: SizedBox(
+                        width: 300,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextField(
+                              decoration: const InputDecoration(
+                                labelText: 'Username (optional)',
+                                hintText: 'Default from ~/.ssh/config',
                               ),
-                            )
-                            .toList(),
+                              onChanged: (val) => customUser = val.trim(),
+                            ),
+                            const SizedBox(height: 16),
+                            Flexible(
+                              child: ListView(
+                                shrinkWrap: true,
+                                children: _hosts.map((host) {
+                                  return ListTile(
+                                    title: Text(host),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      final finalHost = (customUser.isNotEmpty && host != 'localhost')
+                                          ? '$customUser@$host'
+                                          : host;
+                                      _addTab(finalHost);
+                                    },
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },

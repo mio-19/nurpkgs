@@ -226,6 +226,7 @@ class _MainScreenState extends State<MainScreen> {
           ],
         ),
       ),
+      ),
       body: _sessions.isEmpty
           ? const Center(child: Text('No active sessions. Click + to start.'))
           // IndexedStack keeps inactive tabs mounted so TerminalView can

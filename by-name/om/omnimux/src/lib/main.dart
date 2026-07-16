@@ -89,7 +89,7 @@ class _MainScreenState extends State<MainScreen> {
     _hostsSub = SshHostsResult.rustSignalStream.listen((event) {
       if (mounted) {
         setState(() {
-          _hosts = ['localhost', ...event.message.hosts];
+          _hosts = event.message.hosts;
         });
       }
     });

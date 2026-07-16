@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:rinf/rinf.dart';
@@ -149,6 +150,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 48,
+        titleSpacing: 0,
+        leadingWidth: Platform.isMacOS ? 80 : 0,
+        leading: Platform.isMacOS ? const SizedBox(width: 80) : null,
         title: Row(
           children: [
             Expanded(

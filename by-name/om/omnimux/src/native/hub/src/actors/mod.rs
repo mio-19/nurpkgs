@@ -83,7 +83,9 @@ pub async fn create_actors() {
                 };
 
                 let mut command = if host == "localhost" || host == "127.0.0.1" {
-                    let mut command = CommandBuilder::new("sh");
+                    let default_shell = if cfg!(target_os = "macos") { "zsh" } else { "sh" };
+                    let shell = std::env::var("SHELL").unwrap_or_else(|_| default_shell.to_string());
+                    let mut command = CommandBuilder::new(shell);
                     command.arg("-lc");
                     command.arg("tmux a || tmux new");
                     command

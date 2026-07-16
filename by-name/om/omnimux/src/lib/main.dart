@@ -477,15 +477,47 @@ class TerminalSession {
     focusNode.dispose();
   }
 
+  final ValueNotifier<int> fontSize = ValueNotifier(14);
+
   Widget buildWidget(BuildContext context, {required bool autofocus}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return KeyedSubtree(
       key: ValueKey(id),
-      child: TerminalView(
-        terminal,
-        theme: isDark ? _darkTheme : _lightTheme,
-        focusNode: focusNode,
-        autofocus: autofocus,
+      child: ValueListenableBuilder<int>(
+        valueListenable: fontSize,
+        builder: (context, size, child) {
+          return Focus(
+            onKeyEvent: (node, event) {
+              if (event is KeyDownEvent || event is KeyRepeatEvent) {
+                final isCtrlOrCmd = HardwareKeyboard.instance.isControlPressed ||
+                                    HardwareKeyboard.instance.isMetaPressed;
+                if (isCtrlOrCmd) {
+                  if (event.logicalKey == LogicalKeyboardKey.equal ||
+                      event.logicalKey == LogicalKeyboardKey.numpadAdd) {
+                    fontSize.value = (fontSize.value + 1).clamp(6, 72);
+                    return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.minus ||
+                             event.logicalKey == LogicalKeyboardKey.numpadSubtract) {
+                    fontSize.value = (fontSize.value - 1).clamp(6, 72);
+                    return KeyEventResult.handled;
+                  } else if (event.logicalKey == LogicalKeyboardKey.digit0 ||
+                             event.logicalKey == LogicalKeyboardKey.numpad0) {
+                    fontSize.value = 14;
+                    return KeyEventResult.handled;
+                  }
+                }
+              }
+              return KeyEventResult.ignored;
+            },
+            child: TerminalView(
+              terminal,
+              theme: isDark ? _darkTheme : _lightTheme,
+              textStyle: TerminalStyle(fontSize: size.toDouble()),
+              focusNode: focusNode,
+              autofocus: autofocus,
+            ),
+          );
+        },
       ),
     );
   }

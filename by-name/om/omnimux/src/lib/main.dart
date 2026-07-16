@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rinf/rinf.dart';
 import 'package:xterm/xterm.dart';
 import 'src/bindings/bindings.dart';
@@ -154,9 +155,16 @@ class _MainScreenState extends State<MainScreen> {
         titleSpacing: 0,
         leadingWidth: Platform.isMacOS ? 80 : 0,
         leading: Platform.isMacOS ? const SizedBox(width: 80) : null,
-        title: Row(
-          children: [
-            Expanded(
+        title: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onDoubleTap: () {
+            if (Platform.isMacOS) {
+              const MethodChannel('omnimux/window').invokeMethod('zoom');
+            }
+          },
+          child: Row(
+            children: [
+              Expanded(
               child: SizedBox(
                 height: 48,
                 child: ReorderableListView(

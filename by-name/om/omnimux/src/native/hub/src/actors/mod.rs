@@ -101,6 +101,11 @@ pub async fn create_actors() {
                 };
                 // Merges with inherited base env (portable-pty CommandBuilder).
                 command.env("TERM", "xterm-256color");
+                if let Ok(path) = std::env::var("PATH") {
+                    command.env("PATH", format!("/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:{}", path));
+                } else {
+                    command.env("PATH", "/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:$HOME/.nix-profile/bin:/usr/bin:/bin:/usr/sbin:/sbin");
+                }
 
                 let child = match pair.slave.spawn_command(command) {
                     Ok(c) => c,

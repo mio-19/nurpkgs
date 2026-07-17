@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
 import 'package:rinf/rinf.dart';
 import 'package:xterm/xterm.dart';
 import 'src/bindings/bindings.dart';

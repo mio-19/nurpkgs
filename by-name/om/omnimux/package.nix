@@ -153,11 +153,11 @@ flutter.buildFlutterApplication (
       mkdir -p $out/Applications
       cp -r build/macos/Build/Products/Release/*.app $out/Applications/omnimux.app
       mkdir -p $out/bin
-      
+
       # Find the executable inside MacOS directory
       EXEC_NAME=$(ls $out/Applications/omnimux.app/Contents/MacOS/ | head -n 1)
       ln -s $out/Applications/omnimux.app/Contents/MacOS/$EXEC_NAME $out/bin/omnimux
-      
+
       mkdir -p $debug
       runHook postInstall
     '';

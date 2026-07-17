@@ -32,6 +32,11 @@ rustPlatform.buildRustPackage {
       libxkbcommon
     ];
 
+  postInstall = lib.optionalString stdenv.isLinux ''
+    install -Dm444 ${./omnimux.desktop} $out/share/applications/omnimux.desktop
+    install -Dm444 ${./omnimux.svg} $out/share/icons/hicolor/scalable/apps/omnimux.svg
+  '';
+
   meta = with lib; {
     description = "Omnimux - GPUI terminal multiplexer";
     homepage = "https://github.com/mio-19/nurpkgs";

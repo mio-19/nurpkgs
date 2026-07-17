@@ -4,7 +4,7 @@
   pkg-config,
   apple-sdk_14,
   stdenv,
-  xorg,
+  libxcb,
   libxkbcommon,
 }:
 
@@ -28,7 +28,7 @@ rustPlatform.buildRustPackage {
       apple-sdk_14
     ]
     ++ lib.optionals stdenv.isLinux [
-      xorg.libxcb
+      libxcb
       libxkbcommon
     ];
 

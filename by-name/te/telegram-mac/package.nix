@@ -178,86 +178,24 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     set -x
     pwd
 
-    # Create a fake Xcode DEVELOPER_DIR to overlay the Metal toolchain directly
-    export FAKE_DEVELOPER_DIR="$PWD/FakeXcode.app/Contents/Developer"
-    mkdir -p "$FAKE_DEVELOPER_DIR"
-    ln -s /Applications/Xcode.app/Contents/Info.plist "$PWD/FakeXcode.app/Contents/Info.plist" 2>/dev/null || true
-    ln -s /Applications/Xcode.app/Contents/Developer/* "$FAKE_DEVELOPER_DIR/" 2>/dev/null || true
-    rm -f "$FAKE_DEVELOPER_DIR/Toolchains"
-    mkdir "$FAKE_DEVELOPER_DIR/Toolchains"
-    ln -s /Applications/Xcode.app/Contents/Developer/Toolchains/* "$FAKE_DEVELOPER_DIR/Toolchains/" 2>/dev/null || true
-    rm -f "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain"
-    mkdir "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain"
-    ln -s /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/* "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/" 2>/dev/null || true
-    rm -f "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr"
-    mkdir "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr"
-    ln -s /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/* "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/" 2>/dev/null || true
-    rm -f "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"
-    mkdir "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"
-    ln -s /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/* "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/" 2>/dev/null || true
-    
-    # Overwrite the wrappers with the real Metal toolchain binaries
-    for file in /Users/Shared/Metal.xctoolchain/usr/bin/*; do
-      binname=$(basename "$file")
-      ln -sf "$file" "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/$binname"
-    done
-    # The metal stub at XcodeDefault.xctoolchain/usr/bin/metal checks
-    # $HOME/Library/Developer/Toolchains/ to find the real Metal compiler.
-    # writableTmpDirAsHomeHook gives us a fresh empty $HOME, so the stub can't
-    # find the toolchain and fails. Symlink it in so the stub can find it.
-    # Intercept xcrun so SwiftPM gets our custom metal compiler path
-    mkdir -p "$FAKE_DEVELOPER_DIR/fake_bin"
-    cat > "$FAKE_DEVELOPER_DIR/fake_bin/xcrun" << 'EOFXC'
-    #!/bin/bash
-    is_metal=0
-    is_find=0
-    for arg in "$@"; do
-        if [ "$arg" == "metal" ]; then
-            is_metal=1
-        fi
-        if [ "$arg" == "-find" ] || [ "$arg" == "--find" ] || [ "$arg" == "-f" ] || [ "$arg" == "--f" ]; then
-            is_find=1
-        fi
-    done
-    if [ "$is_metal" == "1" ] && [ "$is_find" == "1" ]; then
-        echo "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/metal"
-        exit 0
-    fi
-    exec /usr/bin/xcrun "$@"
-    EOFXC
-    chmod +x "$FAKE_DEVELOPER_DIR/fake_bin/xcrun"
-    export PATH="$FAKE_DEVELOPER_DIR/fake_bin:$PATH"
-
-    # Hide metal files from Xcode so it doesn't invoke the broken system stub
-    find submodules/telegram-ios/submodules -name "*.metal" -exec mv {} {}.txt \;
+    sed -i '/MetalFunctions.metal in Sources/d' Telegram.xcodeproj/project.pbxproj || true
 
     # Disable SwiftPM sandboxing by passing IDE flags to xcodebuild directly
-    # This prevents sandbox-exec permission errors inside the Nix build sandbox
-    # Pass DEVELOPER_DIR as a build setting too (env var alone is not enough;
-    # xcodebuild resolves XCODE_DEVELOPER_DIR_PATH from xcode-select at startup).
-    "$FAKE_DEVELOPER_DIR/usr/bin/xcodebuild" -workspace Telegram-Mac.xcworkspace \
+    xcodebuild -workspace Telegram-Mac.xcworkspace \
                -scheme Telegram \
                -configuration Release \
                -derivedDataPath build \
                -clonedSourcePackagesDirPath build/swiftpm \
                -IDEPackageSupportDisableManifestSandbox=YES \
                -IDEPackageSupportDisablePluginExecutionSandbox=YES \
-               -toolchain "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain" \
                CODE_SIGN_IDENTITY="" \
                CODE_SIGNING_REQUIRED=NO \
-               CODE_SIGNING_ALLOWED=NO \
-               DEVELOPER_DIR="$FAKE_DEVELOPER_DIR" \
-               XCODE_DEVELOPER_DIR_PATH="$FAKE_DEVELOPER_DIR" \
-               MTL_COMPILER="$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/metal"
+               CODE_SIGNING_ALLOWED=NO
 
     # Manually compile metal shaders using the working compiler
-    /Users/Shared/Metal.xctoolchain/usr/bin/metal -c -target air64-apple-macos10.13 submodules/telegram-ios/submodules/MetalEngine/Sources/MetalEngineShaders.metal.txt -o MetalEngineShaders.air || true
-    /Users/Shared/Metal.xctoolchain/usr/bin/metallib MetalEngineShaders.air -o default.metallib || true
-    # Find the MetalEngine bundle inside the app and copy it
-    bundle_path=$(find build -name "MetalEngine_MetalEngine.bundle" -type d | head -n 1)
-    if [ -n "$bundle_path" ]; then
-        cp default.metallib "$bundle_path/Contents/Resources/default.metallib" || true
-    fi
+    /Users/Shared/Metal.xctoolchain/usr/bin/metal -c -target air64-apple-macos10.13 Telegram-Mac/MetalFunctions.metal -o MetalFunctions.air || true
+    /Users/Shared/Metal.xctoolchain/usr/bin/metallib MetalFunctions.air -o default.metallib || true
+    cp default.metallib build/Build/Products/Release/Telegram.app/Contents/Resources/default.metallib || true
 
     runHook postBuild
   '';

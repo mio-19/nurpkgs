@@ -7,7 +7,15 @@
 
 pear-desktop.overrideAttrs (
   old:
-  lib.optionalAttrs stdenv.isLinux {
+  {
+    postPatch = (old.postPatch or "") + ''
+      substituteInPlace src/plugins/do-not-track/index.ts \
+        --replace-fail "enabled: false," "enabled: true,"
+      substituteInPlace src/plugins/sponsorblock/index.ts \
+        --replace-fail "enabled: false," "enabled: true,"
+    '';
+  }
+  // lib.optionalAttrs stdenv.isLinux {
     pname = "pear-desktop_patched";
     desktopItems = [
       (makeDesktopItem {
@@ -19,11 +27,5 @@ pear-desktop.overrideAttrs (
         categories = [ "AudioVideo" ];
       })
     ];
-    postPatch = (old.postPatch or "") + ''
-      substituteInPlace src/plugins/do-not-track/index.ts \
-        --replace-fail "enabled: false," "enabled: true,"
-      substituteInPlace src/plugins/sponsorblock/index.ts \
-        --replace-fail "enabled: false," "enabled: true,"
-    '';
   }
 )

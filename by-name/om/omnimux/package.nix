@@ -10,6 +10,7 @@
   cocoapods,
   cacert,
   stdenv,
+  adwaita-icon-theme,
 }:
 
 let
@@ -44,6 +45,10 @@ flutter.buildFlutterApplication (
     ]
     ++ lib.optionals stdenv.hostPlatform.isDarwin [
       cocoapods
+    ];
+
+    buildInputs = [
+      adwaita-icon-theme
     ];
 
     # Intentional: do not wrap with tmux/openssh — use the ones from PATH.

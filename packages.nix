@@ -251,15 +251,7 @@ byName
       ++ pkgs.lib.optional pkgs.stdenv.hostPlatform.isDarwin pkgs.desktopToDarwinBundle;
   });
 
-  pear-desktop_patched = pkgs.pear-desktop.overrideAttrs (old: {
-    pname = "pear-desktop_patched";
-    postPatch = (old.postPatch or "") + ''
-      substituteInPlace src/plugins/do-not-track/index.ts \
-        --replace-fail "enabled: false," "enabled: true,"
-      substituteInPlace src/plugins/sponsorblock/index.ts \
-        --replace-fail "enabled: false," "enabled: true,"
-    '';
-  });
+
 
 })
 // (lib.optionalAttrs (!nurbot) (

@@ -212,18 +212,20 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     # This prevents sandbox-exec permission errors inside the Nix build sandbox
     # Pass DEVELOPER_DIR as a build setting too (env var alone is not enough;
     # xcodebuild resolves XCODE_DEVELOPER_DIR_PATH from xcode-select at startup).
-    xcodebuild -workspace Telegram-Mac.xcworkspace \
+    "$FAKE_DEVELOPER_DIR/usr/bin/xcodebuild" -workspace Telegram-Mac.xcworkspace \
                -scheme Telegram \
                -configuration Release \
                -derivedDataPath build \
                -clonedSourcePackagesDirPath build/swiftpm \
                -IDEPackageSupportDisableManifestSandbox=YES \
                -IDEPackageSupportDisablePluginExecutionSandbox=YES \
+               -toolchain "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain" \
                CODE_SIGN_IDENTITY="" \
                CODE_SIGNING_REQUIRED=NO \
                CODE_SIGNING_ALLOWED=NO \
                DEVELOPER_DIR="$FAKE_DEVELOPER_DIR" \
-               XCODE_DEVELOPER_DIR_PATH="$FAKE_DEVELOPER_DIR"
+               XCODE_DEVELOPER_DIR_PATH="$FAKE_DEVELOPER_DIR" \
+               MTL_COMPILER="$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/metal"
 
     runHook postBuild
   '';

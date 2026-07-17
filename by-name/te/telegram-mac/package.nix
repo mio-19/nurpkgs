@@ -15,6 +15,9 @@
   nasm,
   pkg-config,
   unzip,
+  meson,
+  fetchzip,
+  writableTmpDirAsHomeHook,
 }:
 
 # NOTE: Building TelegramSwift (the native Telegram for macOS client) from source
@@ -32,6 +35,11 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "telegram-mac";
   version = "10.14"; # Update to the latest desired version
 
+  ffmpegSrc = fetchzip {
+    url = "https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz";
+    hash = "sha256-cNb7sIx7YIoVcamG6/cCFAdELSAm/N0OFBaJ1imJDQk=";
+  };
+
   src = stdenvNoCC.mkDerivation {
     name = "telegram-mac-source";
     outputHashMode = "recursive";
@@ -41,10 +49,10 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     nativeBuildInputs = [
       git
       cacert
+      writableTmpDirAsHomeHook
     ];
 
     buildCommand = ''
-      export HOME=$(mktemp -d)
       git config --global url."https://github.com/".insteadOf "git@github.com:"
       git config --global url."https://gitlab.com/".insteadOf "git@gitlab.com:"
 
@@ -69,19 +77,29 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     nasm
     pkg-config
     unzip
+    meson
+    writableTmpDirAsHomeHook
   ];
 
   # Using xcodebuild directly usually requires the environment to have Xcode available.
   # This requires setting `sandbox = false` in your nix.conf for Darwin.
   __noChroot = true; # Hint for Hydra/Nix to disable sandbox if possible
   dontUseCmakeConfigure = true;
+  dontUseMesonConfigure = true;
 
   buildPhase = ''
     runHook preBuild
 
+    # Copy FFmpeg source
+    mkdir -p submodules/telegram-ios/submodules/ffmpeg/Sources/FFMpeg/ffmpeg-7.1
+    cp -r ${finalAttrs.ffmpegSrc}/* submodules/telegram-ios/submodules/ffmpeg/Sources/FFMpeg/ffmpeg-7.1/
+
     # Allow scripts to find xcrun and xcodebuild on the host
     export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
     export PATH=$PATH:/usr/bin:/bin:/usr/sbin:/sbin
+    
+    # CoreFoundation uses the user database for home dir, override it:
+    export CFFIXED_USER_HOME=$HOME
 
     # Telegram for macOS requires framework configuration first
     sed -i 's/no/yes/g' scripts/rebuild || true
@@ -92,17 +110,120 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     # Fix libwebp ZIP extraction (Nix GNU tar does not support ZIP, use unzip)
     sed -i 's/tar -xzf "$SOURCE_ARCHIVE" --directory "$OUT_DIR"/unzip -q "$SOURCE_ARCHIVE" -d "$OUT_DIR"/g' core-xprojects/libwebp/libwebp/build*.sh || true
 
+    # Fix webrtc build script to correctly copy source directory contents (avoids missing CMakeLists.txt)
+    sed -i 's/cp -R \$SOURCE_DIR \$BUILD_DIR/cp -R "$SOURCE_DIR"\/. "$BUILD_DIR"\//g' core-xprojects/webrtc/webrtc/build.sh || true
+
+    # Fix Mozjpeg build script for GNU cp
+    sed -i 's/mozjpeg\/" "''${BUILD_DIR}build\/"/mozjpeg\/"\/. "''${BUILD_DIR}build\/"/g' core-xprojects/Mozjpeg/Mozjpeg/build.sh || true
+
+    # Fix webrtc libopus include path
+    sed -i 's/libopus\/build\/libopus\/include\/opus/libopus\/build\/libopus\/include\/opus\/include/g' core-xprojects/webrtc/webrtc.xcodeproj/project.pbxproj || true
+
+    # Fix the custom pkg-config wrapper to parse custom paths properly when ffmpeg prepends them
+    cat > submodules/telegram-ios/submodules/ffmpeg/Sources/FFMpeg/pkg-config <<'EOF'
+    #!/bin/sh
+    LIBOPUS_PATH=""
+    LIBVPX_PATH=""
+    LIBDAV1D_PATH=""
+    CMD=""
+    NAME=""
+
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            --libopus_path) LIBOPUS_PATH="$2"; shift 2 ;;
+            --libvpx_path) LIBVPX_PATH="$2"; shift 2 ;;
+            --libdav1d_path) LIBDAV1D_PATH="$2"; shift 2 ;;
+            --version|--exists|--cflags|--libs) CMD="$1"; shift 1 ;;
+            --print-errors) shift 1 ;;
+            zlib*|opus*|vpx*|dav1d*) NAME="$1"; shift 1 ;;
+            *) shift 1 ;;
+        esac
+    done
+
+    if [ "$CMD" == "--version" ]; then
+        echo "0.29.2"
+        exit 0
+    elif [ "$CMD" == "--exists" ]; then
+        case "$NAME" in
+            zlib*|opus*|vpx*|dav1d*) exit 0 ;;
+            *) exit 1 ;;
+        esac
+    elif [ "$CMD" == "--cflags" ]; then
+        case "$NAME" in
+            zlib*) echo "" ;;
+            opus*) echo "-I$LIBOPUS_PATH/include/opus/include -I$LIBOPUS_PATH/include/opus" ;;
+            vpx*) echo "-I$LIBVPX_PATH/include" ;;
+            dav1d*) echo "-I$LIBDAV1D_PATH/include" ;;
+            *) exit 1 ;;
+        esac
+        exit 0
+    elif [ "$CMD" == "--libs" ]; then
+        case "$NAME" in
+            zlib*) echo "-lz" ;;
+            opus*) echo "-L$LIBOPUS_PATH/lib -lopus" ;;
+            vpx*) echo "-L$LIBVPX_PATH/lib -lVPX" ;;
+            dav1d*) echo "-L$LIBDAV1D_PATH/lib -ldav1d" ;;
+            *) exit 1 ;;
+        esac
+        exit 0
+    else
+        exit 1
+    fi
+    EOF
+    chmod +x submodules/telegram-ios/submodules/ffmpeg/Sources/FFMpeg/pkg-config
+
     # Run the setup script
     sh scripts/configure_frameworks.sh
 
-    # Build the app using xcodebuild
+    set -x
+    pwd
+
+    # Create a fake Xcode DEVELOPER_DIR to overlay the Metal toolchain directly
+    export FAKE_DEVELOPER_DIR="$PWD/FakeXcode.app/Contents/Developer"
+    mkdir -p "$FAKE_DEVELOPER_DIR"
+    ln -s /Applications/Xcode.app/Contents/Info.plist "$PWD/FakeXcode.app/Contents/Info.plist" 2>/dev/null || true
+    ln -s /Applications/Xcode.app/Contents/Developer/* "$FAKE_DEVELOPER_DIR/" 2>/dev/null || true
+    rm -f "$FAKE_DEVELOPER_DIR/Toolchains"
+    mkdir "$FAKE_DEVELOPER_DIR/Toolchains"
+    ln -s /Applications/Xcode.app/Contents/Developer/Toolchains/* "$FAKE_DEVELOPER_DIR/Toolchains/" 2>/dev/null || true
+    rm -f "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain"
+    mkdir "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain"
+    ln -s /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/* "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/" 2>/dev/null || true
+    rm -f "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr"
+    mkdir "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr"
+    ln -s /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/* "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/" 2>/dev/null || true
+    rm -f "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+    mkdir "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+    ln -s /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/* "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/" 2>/dev/null || true
+    
+    # Overwrite the wrappers with the real Metal toolchain binaries
+    for file in /Users/Shared/Metal.xctoolchain/usr/bin/*; do
+      binname=$(basename "$file")
+      ln -sf "$file" "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/$binname"
+    done
+    # The metal stub at XcodeDefault.xctoolchain/usr/bin/metal checks
+    # $HOME/Library/Developer/Toolchains/ to find the real Metal compiler.
+    # writableTmpDirAsHomeHook gives us a fresh empty $HOME, so the stub can't
+    # find the toolchain and fails. Symlink it in so the stub can find it.
+    mkdir -p "$HOME/Library/Developer/Toolchains"
+    ln -sf /Users/Shared/Metal.xctoolchain "$HOME/Library/Developer/Toolchains/Metal.xctoolchain"
+
+    # Disable SwiftPM sandboxing by passing IDE flags to xcodebuild directly
+    # This prevents sandbox-exec permission errors inside the Nix build sandbox
+    # Pass DEVELOPER_DIR as a build setting too (env var alone is not enough;
+    # xcodebuild resolves XCODE_DEVELOPER_DIR_PATH from xcode-select at startup).
     xcodebuild -workspace Telegram-Mac.xcworkspace \
                -scheme Telegram \
                -configuration Release \
                -derivedDataPath build \
+               -clonedSourcePackagesDirPath build/swiftpm \
+               -IDEPackageSupportDisableManifestSandbox=YES \
+               -IDEPackageSupportDisablePluginExecutionSandbox=YES \
                CODE_SIGN_IDENTITY="" \
                CODE_SIGNING_REQUIRED=NO \
-               CODE_SIGNING_ALLOWED=NO
+               CODE_SIGNING_ALLOWED=NO \
+               DEVELOPER_DIR="$FAKE_DEVELOPER_DIR" \
+               XCODE_DEVELOPER_DIR_PATH="$FAKE_DEVELOPER_DIR"
 
     runHook postBuild
   '';

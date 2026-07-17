@@ -208,23 +208,23 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     # Intercept xcrun so SwiftPM gets our custom metal compiler path
     mkdir -p "$FAKE_DEVELOPER_DIR/fake_bin"
     cat > "$FAKE_DEVELOPER_DIR/fake_bin/xcrun" << 'EOFXC'
-#!/bin/bash
-is_metal=0
-is_find=0
-for arg in "$@"; do
-    if [ "$arg" == "metal" ]; then
-        is_metal=1
+    #!/bin/bash
+    is_metal=0
+    is_find=0
+    for arg in "$@"; do
+        if [ "$arg" == "metal" ]; then
+            is_metal=1
+        fi
+        if [ "$arg" == "-find" ] || [ "$arg" == "--find" ] || [ "$arg" == "-f" ] || [ "$arg" == "--f" ]; then
+            is_find=1
+        fi
+    done
+    if [ "$is_metal" == "1" ] && [ "$is_find" == "1" ]; then
+        echo "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/metal"
+        exit 0
     fi
-    if [ "$arg" == "-find" ] || [ "$arg" == "--find" ] || [ "$arg" == "-f" ] || [ "$arg" == "--f" ]; then
-        is_find=1
-    fi
-done
-if [ "$is_metal" == "1" ] && [ "$is_find" == "1" ]; then
-    echo "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/metal"
-    exit 0
-fi
-exec /usr/bin/xcrun "$@"
-EOFXC
+    exec /usr/bin/xcrun "$@"
+    EOFXC
     chmod +x "$FAKE_DEVELOPER_DIR/fake_bin/xcrun"
     export PATH="$FAKE_DEVELOPER_DIR/fake_bin:$PATH"
 

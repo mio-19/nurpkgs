@@ -16,6 +16,7 @@ struct TerminalSession {
     selection_end: Option<(u16, u16)>,
     is_dragging: bool,
     grid_bounds: Option<Bounds<Pixels>>,
+    font_size: f32,
 }
 
 impl TerminalSession {
@@ -75,6 +76,7 @@ impl TerminalSession {
             selection_end: None,
             is_dragging: false,
             grid_bounds: None,
+            font_size: 14.0,
         }
     }
 
@@ -97,8 +99,10 @@ impl TerminalSession {
         if let Some(bounds) = self.grid_bounds {
             let x: f32 = (pos.x - bounds.origin.x).into();
             let y: f32 = (pos.y - bounds.origin.y).into();
-            let col = (x / 8.4).floor() as i32;
-            let row = (y / 16.0).floor() as i32;
+            let cell_width = self.font_size * 0.6;
+            let cell_height = self.font_size * 1.14;
+            let col = (x / cell_width).floor() as i32;
+            let row = (y / cell_height).floor() as i32;
             if col >= 0 && col < self.cols as i32 && row >= 0 && row < self.rows as i32 {
                 return Some((row as u16, col as u16));
             }
@@ -179,9 +183,9 @@ impl Render for TerminalView {
         let session = self.session.clone();
         let session_clone = self.session.clone();
         
-        let (rows, cols) = {
+        let (rows, cols, font_size) = {
             let s = self.session.read(cx);
-            (s.rows, s.cols)
+            (s.rows, s.cols, s.font_size)
         };
         
         let parser = &self.session.read(cx).parser;
@@ -196,14 +200,13 @@ impl Render for TerminalView {
             .bg(rgb(0x1e1e1e))
             .size_full()
             .font_family("Monaco")
-            .text_sm()
+            .text_size(px(font_size))
             .track_focus(&cx.focus_handle())
             .child(
                 canvas(
                     move |bounds, _window, cx| {
-                        // Approximate sizes for Monaco text_sm (approx 14px font size)
-                        let cell_width = 8.4;
-                        let cell_height = 16.0;
+                        let cell_width = font_size * 0.6;
+                        let cell_height = font_size * 1.14;
                         let w: f32 = bounds.size.width.into();
                         let h: f32 = bounds.size.height.into();
                         let new_cols = (w / cell_width).max(10.0) as u16;
@@ -221,14 +224,32 @@ impl Render for TerminalView {
             )
             .on_key_down({
                 let session = self.session.clone();
+                let write_tx_keys = write_tx_keys.clone();
                 move |ev, _window, cx| {
                     let key = ev.keystroke.key.as_str();
                     let mut bytes = Vec::new();
                     
-                    if ev.keystroke.modifiers.platform && key == "c" {
-                        let text = session.read(cx).get_selected_text();
-                        if !text.is_empty() {
-                            cx.write_to_clipboard(ClipboardItem::new_string(text));
+                    if ev.keystroke.modifiers.platform {
+                        if key == "c" {
+                            let text = session.read(cx).get_selected_text();
+                            if !text.is_empty() {
+                                cx.write_to_clipboard(ClipboardItem::new_string(text));
+                            }
+                            return;
+                        } else if key == "v" {
+                            if let Some(item) = cx.read_from_clipboard() {
+                                if let Some(text) = item.text() {
+                                    bytes.extend_from_slice(text.as_bytes());
+                                }
+                            }
+                        } else if key == "=" {
+                            cx.update_entity(&session, |session, _cx| { session.font_size = (session.font_size + 1.0).clamp(6.0, 72.0); });
+                            return;
+                        } else if key == "-" {
+                            cx.update_entity(&session, |session, _cx| { session.font_size = (session.font_size - 1.0).clamp(6.0, 72.0); });
+                            return;
+                        } else if key == "0" {
+                            cx.update_entity(&session, |session, _cx| { session.font_size = 14.0; });
                             return;
                         }
                     }
@@ -251,7 +272,7 @@ impl Render for TerminalView {
                             bytes.push(0x1b);
                             bytes.push(key.as_bytes()[0]);
                         }
-                    } else {
+                    } else if !ev.keystroke.modifiers.platform {
                         match key {
                             "enter" => bytes.extend_from_slice(b"\r"),
                             "backspace" => bytes.extend_from_slice(b"\x7f"),
@@ -325,10 +346,10 @@ impl Render for TerminalView {
             });
         
         for r in 0..rows {
-            let mut row_div = div().flex().flex_row().h(px(16.0));
+            let mut row_div = div().flex().flex_row().h(px(font_size * 1.14));
             for c in 0..cols {
                 if let Some(cell) = screen.cell(r, c) {
-                    let mut cell_div = div().child(cell.contents().to_string()).w(px(8.4));
+                    let mut cell_div = div().child(cell.contents().to_string()).w(px(font_size * 0.6));
                     
                     let mut fg = rgb(0xcccccc);
                     let mut bg = rgb(0x1e1e1e);
@@ -490,7 +511,7 @@ impl Render for TerminalTabs {
 }
 
 fn main() {
-    gpui::Application::new().run(|cx: &mut App| {
+    gpui::Application::new().run(|cx: &mut gpui::App| {
         let bounds = Bounds::centered(None, size(px(800.0), px(600.0)), cx);
         cx.open_window(
             WindowOptions {

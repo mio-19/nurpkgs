@@ -205,8 +205,31 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     # $HOME/Library/Developer/Toolchains/ to find the real Metal compiler.
     # writableTmpDirAsHomeHook gives us a fresh empty $HOME, so the stub can't
     # find the toolchain and fails. Symlink it in so the stub can find it.
-    mkdir -p "$HOME/Library/Developer/Toolchains"
-    ln -sf /Users/Shared/Metal.xctoolchain "$HOME/Library/Developer/Toolchains/Metal.xctoolchain"
+    # Intercept xcrun so SwiftPM gets our custom metal compiler path
+    mkdir -p "$FAKE_DEVELOPER_DIR/fake_bin"
+    cat > "$FAKE_DEVELOPER_DIR/fake_bin/xcrun" << 'EOFXC'
+#!/bin/bash
+is_metal=0
+is_find=0
+for arg in "$@"; do
+    if [ "$arg" == "metal" ]; then
+        is_metal=1
+    fi
+    if [ "$arg" == "-find" ] || [ "$arg" == "--find" ] || [ "$arg" == "-f" ] || [ "$arg" == "--f" ]; then
+        is_find=1
+    fi
+done
+if [ "$is_metal" == "1" ] && [ "$is_find" == "1" ]; then
+    echo "$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/metal"
+    exit 0
+fi
+exec /usr/bin/xcrun "$@"
+EOFXC
+    chmod +x "$FAKE_DEVELOPER_DIR/fake_bin/xcrun"
+    export PATH="$FAKE_DEVELOPER_DIR/fake_bin:$PATH"
+
+    # Hide metal files from Xcode so it doesn't invoke the broken system stub
+    find submodules/telegram-ios/submodules -name "*.metal" -exec mv {} {}.txt \;
 
     # Disable SwiftPM sandboxing by passing IDE flags to xcodebuild directly
     # This prevents sandbox-exec permission errors inside the Nix build sandbox
@@ -226,6 +249,15 @@ stdenvNoCC.mkDerivation (finalAttrs: {
                DEVELOPER_DIR="$FAKE_DEVELOPER_DIR" \
                XCODE_DEVELOPER_DIR_PATH="$FAKE_DEVELOPER_DIR" \
                MTL_COMPILER="$FAKE_DEVELOPER_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/metal"
+
+    # Manually compile metal shaders using the working compiler
+    /Users/Shared/Metal.xctoolchain/usr/bin/metal -c -target air64-apple-macos10.13 submodules/telegram-ios/submodules/MetalEngine/Sources/MetalEngineShaders.metal.txt -o MetalEngineShaders.air || true
+    /Users/Shared/Metal.xctoolchain/usr/bin/metallib MetalEngineShaders.air -o default.metallib || true
+    # Find the MetalEngine bundle inside the app and copy it
+    bundle_path=$(find build -name "MetalEngine_MetalEngine.bundle" -type d | head -n 1)
+    if [ -n "$bundle_path" ]; then
+        cp default.metallib "$bundle_path/Contents/Resources/default.metallib" || true
+    fi
 
     runHook postBuild
   '';

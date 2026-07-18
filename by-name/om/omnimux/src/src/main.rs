@@ -215,8 +215,9 @@ impl Render for TerminalTabs {
 
         let mut tab_bar = div().flex().flex_row().bg(bg_color_bar).h(px(32.0)).items_center();
         
-        for (i, _session) in self.tabs.iter().enumerate() {
+        for (i, session) in self.tabs.iter().enumerate() {
             let bg_color = if i == self.active_tab { bg_color_active } else { bg_color_bar };
+            let tab_label = session.read(cx).host.clone().unwrap_or_else(|| "localhost".to_string());
             
             let tab = div()
                 .id(("tab", i))
@@ -234,7 +235,7 @@ impl Render for TerminalTabs {
                         this.active_tab = i;
                     }
                 }))
-                .child(div().child(format!("Tab {}", i + 1)).text_color(text_color).text_sm())
+                .child(div().child(tab_label).text_color(text_color).text_sm())
                 .child(
                     div()
                         .id(("close_tab", i))

@@ -1,9 +1,14 @@
+use gpui::prelude::*;
 use gpui::*;
 use gpui_terminal::{ColorPalette, TerminalConfig, TerminalView};
 use portable_pty::{CommandBuilder, NativePtySystem, PtySize, PtySystem};
 
 struct TerminalSession {
     terminal_view: Entity<TerminalView>,
+    child: std::sync::Arc<std::sync::Mutex<Box<dyn portable_pty::Child + Send + Sync>>>,
+    has_exited: bool,
+    exit_status: Option<u32>,
+    host: Option<String>,
 }
 
 impl TerminalSession {
@@ -19,15 +24,17 @@ impl TerminalSession {
             .unwrap();
 
         let mut cmd = CommandBuilder::new("sh");
-        if let Some(h) = host {
+        if let Some(ref h) = host {
             cmd.args(["-c", &format!("ssh {}", h)]);
         } else {
             cmd.args(["-c", "tmux attach || tmux new-session"]);
         }
         cmd.env("TERM", "xterm-256color");
         cmd.env("COLORTERM", "truecolor");
-        let _child = pair.slave.spawn_command(cmd).unwrap();
+        let child_proc = pair.slave.spawn_command(cmd).unwrap();
         drop(pair.slave);
+        
+        let child = std::sync::Arc::new(std::sync::Mutex::new(child_proc));
 
         let reader = pair.master.try_clone_reader().unwrap();
         let writer = pair.master.take_writer().unwrap();
@@ -69,7 +76,18 @@ impl TerminalSession {
                 })
         });
 
-        Self { terminal_view }
+        Self { terminal_view, child, has_exited: false, exit_status: None, host }
+    }
+    
+    fn check_exit(&mut self) {
+        if !self.has_exited {
+            if let Ok(mut child) = self.child.lock() {
+                if let Ok(Some(status)) = child.try_wait() {
+                    self.has_exited = true;
+                    self.exit_status = Some(if status.success() { 0 } else { 255 });
+                }
+            }
+        }
     }
 }
 
@@ -107,6 +125,9 @@ struct TerminalTabs {
     prompt: Option<String>,
     ssh_hosts: Vec<String>,
     selected_host_index: usize,
+    show_settings: bool,
+    keep_tab_after_exit: bool,
+    auto_reconnect: bool,
 }
 
 fn get_ssh_hosts() -> Vec<String> {
@@ -134,7 +155,39 @@ impl TerminalTabs {
             loop {
                 gpui::Timer::after(std::time::Duration::from_millis(16)).await;
                 let _ = gpui::AsyncApp::update(&mut cx, |cx| {
-                    gpui::WeakEntity::<TerminalTabs>::update(&this, cx, |_, cx| cx.notify()).ok()
+                    gpui::WeakEntity::<TerminalTabs>::update(&this, cx, |this, cx| {
+                        let mut needs_notify = false;
+                        for i in (0..this.tabs.len()).rev() {
+                            let mut has_exited = false;
+                            let mut success = false;
+                            this.tabs[i].update(cx, |session, _| {
+                                if !session.has_exited {
+                                    session.check_exit();
+                                    if session.has_exited {
+                                        has_exited = true;
+                                        success = session.exit_status == Some(0);
+                                    }
+                                }
+                            });
+                            
+                            if has_exited {
+                                if !success && this.auto_reconnect {
+                                    let host = this.tabs[i].read(cx).host.clone();
+                                    this.tabs[i] = cx.new(|cx| TerminalSession::new(host, cx));
+                                    needs_notify = true;
+                                } else if !this.keep_tab_after_exit {
+                                    if this.tabs.len() > 1 {
+                                        this.tabs.remove(i);
+                                        this.active_tab = this.active_tab.min(this.tabs.len().saturating_sub(1));
+                                    }
+                                    needs_notify = true;
+                                }
+                            }
+                        }
+                        if needs_notify {
+                            cx.notify();
+                        }
+                    }).ok()
                 });
             }
         }).detach();
@@ -145,6 +198,9 @@ impl TerminalTabs {
             prompt: None,
             ssh_hosts: get_ssh_hosts(),
             selected_host_index: 0,
+            show_settings: false,
+            keep_tab_after_exit: true,
+            auto_reconnect: false,
         }
     }
 }
@@ -215,6 +271,24 @@ impl Render for TerminalTabs {
                     this.ssh_hosts = get_ssh_hosts();
                 }))
                 .child(div().child("+").text_color(text_color))
+        );
+
+        tab_bar = tab_bar.child(
+            div()
+                .id("settings_btn")
+                .flex()
+                .items_center()
+                .justify_center()
+                .size_6()
+                .ml_2()
+                .bg(if is_dark { rgb(0x3d3d3d) } else { rgb(0xcccccc) })
+                .hover(|style| style.bg(if is_dark { rgb(0x555555) } else { rgb(0xaaaaaa) }))
+                .rounded_sm()
+                .cursor_pointer()
+                .on_click(cx.listener(|this, _, _, _| {
+                    this.show_settings = true;
+                }))
+                .child(div().child("S").text_color(text_color))
         );
 
         self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));
@@ -311,7 +385,7 @@ impl Render for TerminalTabs {
                 .cloned()
                 .collect();
             
-            let mut list_div = div().flex_col().mt_2().max_h(px(300.0)).overflow_y_scroll();
+            let mut list_div = div().id("host_list").flex_col().mt_2().max_h(px(300.0)).overflow_y_scroll();
             
             for (idx, host) in visible_hosts.iter().enumerate() {
                 let is_selected = idx == self.selected_host_index.min(visible_hosts.len().saturating_sub(1));
@@ -348,6 +422,60 @@ impl Render for TerminalTabs {
                                 .p_2()
                         )
                         .child(list_div)
+                );
+            main_div = main_div.child(overlay);
+        }
+        
+        if self.show_settings {
+            let overlay = div()
+                .absolute()
+                .inset_0()
+                .bg(rgba(0x00000080))
+                .flex()
+                .justify_center()
+                .items_center()
+                .child(
+                    div()
+                        .w_96()
+                        .bg(if is_dark { rgb(0x2d2d2d) } else { rgb(0xf0f0f0) })
+                        .rounded_lg()
+                        .p_4()
+                        .flex_col()
+                        .child(div().child("Settings").text_color(text_color).text_xl().mb_4())
+                        .child(
+                            div().flex().flex_row().items_center().mb_2().child(
+                                div().child("Keep tab after exit?").text_color(text_color).w_48()
+                            ).child(
+                                div()
+                                    .id("keep_tab_toggle")
+                                    .cursor_pointer()
+                                    .on_click(cx.listener(|this, _, _, _| { this.keep_tab_after_exit = !this.keep_tab_after_exit; }))
+                                    .child(div().child(if self.keep_tab_after_exit { "[x]" } else { "[ ]" }).text_color(text_color))
+                            )
+                        )
+                        .child(
+                            div().flex().flex_row().items_center().mb_4().child(
+                                div().child("Auto-reconnect on drop?").text_color(text_color).w_48()
+                            ).child(
+                                div()
+                                    .id("auto_reconnect_toggle")
+                                    .cursor_pointer()
+                                    .on_click(cx.listener(|this, _, _, _| { this.auto_reconnect = !this.auto_reconnect; }))
+                                    .child(div().child(if self.auto_reconnect { "[x]" } else { "[ ]" }).text_color(text_color))
+                            )
+                        )
+                        .child(
+                            div()
+                                .id("close_settings")
+                                .p_2()
+                                .bg(if is_dark { rgb(0x444444) } else { rgb(0xcccccc) })
+                                .rounded_sm()
+                                .cursor_pointer()
+                                .flex()
+                                .justify_center()
+                                .on_click(cx.listener(|this, _, _, _| { this.show_settings = false; }))
+                                .child(div().child("Close").text_color(text_color))
+                        )
                 );
             main_div = main_div.child(overlay);
         }

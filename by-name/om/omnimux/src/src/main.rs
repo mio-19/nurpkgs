@@ -330,6 +330,8 @@ impl Render for TerminalTabs {
             .bg(bg_color_active)
             .on_key_down(cx.listener(move |this, ev: &gpui::KeyDownEvent, _window, cx| {
                 if let Some(ref mut input) = this.prompt {
+                    // Swallow the event — don't let it reach the terminal below
+                    cx.stop_propagation();
                     let key = ev.keystroke.key.as_str();
                     
                     let host_query = if input.contains('@') {

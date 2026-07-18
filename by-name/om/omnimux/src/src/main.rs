@@ -241,7 +241,7 @@ impl Render for TerminalTabs {
                         .ml_2()
                         .p_1()
                         .hover(|style| style.bg(if is_dark { rgb(0x555555) } else { rgb(0xcccccc) }).rounded_sm())
-                        .child(div().child("x").text_color(if is_dark { rgb(0xcccccc) } else { rgb(0x555555) }).text_xs())
+                        .child(div().child("✕").text_color(if is_dark { rgb(0xcccccc) } else { rgb(0x555555) }).text_xs())
                         .on_click(cx.listener(move |this, _, _, _| {
                             if this.tabs.len() > 1 {
                                 this.tabs.remove(i);
@@ -288,7 +288,7 @@ impl Render for TerminalTabs {
                 .on_click(cx.listener(|this, _, _, _| {
                     this.show_settings = true;
                 }))
-                .child(div().child("S").text_color(text_color))
+                .child(div().child("⚙").text_color(text_color))
         );
 
         self.active_tab = self.active_tab.min(self.tabs.len().saturating_sub(1));

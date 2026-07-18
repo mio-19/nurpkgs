@@ -105,6 +105,25 @@ struct TerminalTabs {
     active_tab: usize,
     tabs: Vec<Entity<TerminalSession>>,
     prompt: Option<String>,
+    ssh_hosts: Vec<String>,
+    selected_host_index: usize,
+}
+
+fn get_ssh_hosts() -> Vec<String> {
+    let mut hosts = vec!["localhost".to_string()];
+    let home = std::env::var("HOME").unwrap_or_default();
+    if let Ok(contents) = std::fs::read_to_string(format!("{}/.ssh/config", home)) {
+        for line in contents.lines() {
+            let line = line.trim();
+            if line.to_lowercase().starts_with("host ") {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                if parts.len() > 1 && !parts[1].contains('*') {
+                    hosts.push(parts[1].to_string());
+                }
+            }
+        }
+    }
+    hosts
 }
 
 impl TerminalTabs {
@@ -124,6 +143,8 @@ impl TerminalTabs {
             active_tab: 0,
             tabs: vec![first_tab],
             prompt: None,
+            ssh_hosts: get_ssh_hosts(),
+            selected_host_index: 0,
         }
     }
 }
@@ -190,6 +211,8 @@ impl Render for TerminalTabs {
                 .cursor_pointer()
                 .on_click(cx.listener(|this, _, _, _| {
                     this.prompt = Some(String::new());
+                    this.selected_host_index = 0;
+                    this.ssh_hosts = get_ssh_hosts();
                 }))
                 .child(div().child("+").text_color(text_color))
         );
@@ -205,11 +228,39 @@ impl Render for TerminalTabs {
             .on_key_down(cx.listener(move |this, ev: &gpui::KeyDownEvent, _window, cx| {
                 if let Some(ref mut input) = this.prompt {
                     let key = ev.keystroke.key.as_str();
+                    
+                    let host_query = if input.contains('@') {
+                        input.split('@').last().unwrap_or("")
+                    } else {
+                        input.as_str()
+                    };
+                    
+                    let visible_hosts: Vec<String> = this.ssh_hosts.iter()
+                        .filter(|h| h.to_lowercase().contains(&host_query.to_lowercase()))
+                        .cloned()
+                        .collect();
+                        
                     match key {
                         "enter" => {
-                            let host = input.clone();
+                            let prefix = if input.contains('@') {
+                                format!("{}@", input.split('@').next().unwrap())
+                            } else {
+                                "".to_string()
+                            };
+                            
+                            let final_host = if !visible_hosts.is_empty() {
+                                let selected = &visible_hosts[this.selected_host_index.min(visible_hosts.len().saturating_sub(1))];
+                                if selected == "localhost" {
+                                    "localhost".to_string()
+                                } else {
+                                    format!("{}{}", prefix, selected)
+                                }
+                            } else {
+                                input.clone()
+                            };
+                            
                             this.prompt = None;
-                            let host_opt = if host.trim().is_empty() { None } else { Some(host) };
+                            let host_opt = if final_host.trim().is_empty() || final_host == "localhost" { None } else { Some(final_host) };
                             let new_tab = cx.new(|cx| TerminalSession::new(host_opt, cx));
                             this.tabs.push(new_tab);
                             this.active_tab = this.tabs.len() - 1;
@@ -219,13 +270,26 @@ impl Render for TerminalTabs {
                         }
                         "backspace" => {
                             input.pop();
+                            this.selected_host_index = 0;
                         }
                         "space" => {
                             input.push(' ');
+                            this.selected_host_index = 0;
+                        }
+                        "up" => {
+                            if this.selected_host_index > 0 {
+                                this.selected_host_index -= 1;
+                            }
+                        }
+                        "down" => {
+                            if this.selected_host_index + 1 < visible_hosts.len() {
+                                this.selected_host_index += 1;
+                            }
                         }
                         _ => {
                             if key.chars().count() == 1 {
                                 input.push_str(key);
+                                this.selected_host_index = 0;
                             }
                         }
                     }
@@ -236,6 +300,30 @@ impl Render for TerminalTabs {
             .child(div().flex_grow().child(active_session));
 
         if let Some(ref input) = self.prompt {
+            let host_query = if input.contains('@') {
+                input.split('@').last().unwrap_or("")
+            } else {
+                input.as_str()
+            };
+            
+            let visible_hosts: Vec<String> = self.ssh_hosts.iter()
+                .filter(|h| h.to_lowercase().contains(&host_query.to_lowercase()))
+                .cloned()
+                .collect();
+            
+            let mut list_div = div().flex_col().mt_2().max_h(px(300.0)).overflow_y_scroll();
+            
+            for (idx, host) in visible_hosts.iter().enumerate() {
+                let is_selected = idx == self.selected_host_index.min(visible_hosts.len().saturating_sub(1));
+                list_div = list_div.child(
+                    div()
+                        .p_2()
+                        .rounded_sm()
+                        .bg(if is_selected { if is_dark { rgb(0x444444) } else { rgb(0xcccccc) } } else { rgba(0x00000000) })
+                        .child(div().child(host.clone()).text_color(text_color))
+                );
+            }
+
             let overlay = div()
                 .absolute()
                 .inset_0()
@@ -259,6 +347,7 @@ impl Render for TerminalTabs {
                                 .bg(if is_dark { rgb(0x1e1e1e) } else { rgb(0xffffff) })
                                 .p_2()
                         )
+                        .child(list_div)
                 );
             main_div = main_div.child(overlay);
         }

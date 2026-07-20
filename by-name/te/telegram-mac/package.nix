@@ -97,7 +97,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     # Allow scripts to find xcrun and xcodebuild on the host
     export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
     export PATH=$PATH:/usr/bin:/bin:/usr/sbin:/sbin
-    
+
     # CoreFoundation uses the user database for home dir, override it:
     export CFFIXED_USER_HOME=$HOME
 
@@ -178,24 +178,141 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     set -x
     pwd
 
+    # Fix OpusBinding header search path
+    mkdir -p submodules/telegram-ios/submodules/OpusBinding/SharedHeaders/libopus/include/opus
+    find . -name "opus*.h" -exec cp {} submodules/telegram-ios/submodules/OpusBinding/SharedHeaders/libopus/include/opus/ \;
+
+    # Fix Sparkle using BSD ln -sfh instead of GNU ln -sfn (coreutils)
+    find submodules -name "project.pbxproj" -exec sed -i 's/ln -sfh/ln -sfn/g' {} + || true
+
+    # Xcode's metal stub is broken even after `xcodebuild -downloadComponent MetalToolchain`.
+    # Precompile with the working Shared Metal toolchain, then hide sources so xcodebuild
+    # does not invoke CompileMetalFile.
+    METAL=/Users/Shared/Metal.xctoolchain/usr/bin/metal
+    METALLIB=/Users/Shared/Metal.xctoolchain/usr/bin/metallib
+
+    $METAL -c -target air64-apple-macos10.13 \
+      submodules/telegram-ios/submodules/MetalEngine/Sources/MetalEngineShaders.metal \
+      -o MetalEngineShaders.air
+    $METALLIB MetalEngineShaders.air -o MetalEngine.metallib
+
+    $METAL -c -target air64-apple-macos10.13 -I packages/DustLayer/Sources \
+      packages/DustLayer/Sources/DustEffectShaders.metal -o DustEffectShaders.air
+    $METAL -c -target air64-apple-macos10.13 -I packages/DustLayer/Sources \
+      packages/DustLayer/Sources/loki.metal -o loki.air
+    $METAL -c -target air64-apple-macos10.13 -I packages/DustLayer/Sources \
+      packages/DustLayer/Sources/loki_header.metal -o loki_header.air
+    $METALLIB DustEffectShaders.air loki.air loki_header.air -o DustLayer.metallib
+
+    if [ -f Telegram-Mac/MetalFunctions.metal ]; then
+      $METAL -c -target air64-apple-macos10.13 Telegram-Mac/MetalFunctions.metal -o MetalFunctions.air
+      $METALLIB MetalFunctions.air -o MetalFunctions.metallib
+    fi
+
+    # Hide metal sources so Xcode skips CompileMetalFile; keep copies as resources for Bundle.module
+    find . -name "*.metal" -exec mv {} {}.txt \;
+    find . -name "Package.swift" -exec sed -i 's/\.metal"/.metal.txt"/g' {} +
     sed -i '/MetalFunctions.metal in Sources/d' Telegram.xcodeproj/project.pbxproj || true
 
-    # Disable SwiftPM sandboxing by passing IDE flags to xcodebuild directly
-    xcodebuild -workspace Telegram-Mac.xcworkspace \
-               -scheme Telegram \
-               -configuration Release \
-               -derivedDataPath build \
-               -clonedSourcePackagesDirPath build/swiftpm \
-               -IDEPackageSupportDisableManifestSandbox=YES \
-               -IDEPackageSupportDisablePluginExecutionSandbox=YES \
-               CODE_SIGN_IDENTITY="" \
-               CODE_SIGNING_REQUIRED=NO \
-               CODE_SIGNING_ALLOWED=NO
+    # Xcode 26 rejects Firebase/Google SPM frameworks that use iOS-style shallow bundles on macOS.
+    deepen_framework() {
+      local fw="$1"
+      local name
+      name=$(basename "$fw" .framework)
+      [ -d "$fw" ] || return 0
+      [ -d "$fw/Versions" ] && return 0
+      [ -f "$fw/Info.plist" ] || return 0
 
-    # Manually compile metal shaders using the working compiler
-    /Users/Shared/Metal.xctoolchain/usr/bin/metal -c -target air64-apple-macos10.13 Telegram-Mac/MetalFunctions.metal -o MetalFunctions.air || true
-    /Users/Shared/Metal.xctoolchain/usr/bin/metallib MetalFunctions.air -o default.metallib || true
-    cp default.metallib build/Build/Products/Release/Telegram.app/Contents/Resources/default.metallib || true
+      mkdir -p "$fw/Versions/A/Resources"
+      [ -f "$fw/$name" ] && mv "$fw/$name" "$fw/Versions/A/"
+      [ -d "$fw/Headers" ] && mv "$fw/Headers" "$fw/Versions/A/"
+      [ -d "$fw/Modules" ] && mv "$fw/Modules" "$fw/Versions/A/"
+      if [ -d "$fw/Resources" ]; then
+        # Merge existing Resources into Versions/A/Resources
+        mv "$fw/Resources"/* "$fw/Versions/A/Resources/" 2>/dev/null || true
+        rmdir "$fw/Resources" 2>/dev/null || rm -rf "$fw/Resources"
+      fi
+      [ -f "$fw/Info.plist" ] && mv "$fw/Info.plist" "$fw/Versions/A/Resources/"
+      # Move any leftover top-level files into Versions/A
+      for item in "$fw"/*; do
+        base=$(basename "$item")
+        case "$base" in
+          Versions) ;;
+          *) [ -e "$item" ] && mv "$item" "$fw/Versions/A/" ;;
+        esac
+      done
+      ln -sfn A "$fw/Versions/Current"
+      [ -e "$fw/Versions/Current/$name" ] && ln -sfn "Versions/Current/$name" "$fw/$name"
+      [ -d "$fw/Versions/Current/Headers" ] && ln -sfn Versions/Current/Headers "$fw/Headers"
+      [ -d "$fw/Versions/Current/Modules" ] && ln -sfn Versions/Current/Modules "$fw/Modules"
+      ln -sfn Versions/Current/Resources "$fw/Resources"
+    }
+
+    deepen_embedded_frameworks() {
+      local app="$1"
+      local fw
+      for fw in "$app"/Contents/Frameworks/*.framework; do
+        deepen_framework "$fw"
+      done
+    }
+
+    run_xcodebuild() {
+      xcodebuild -workspace Telegram-Mac.xcworkspace \
+                 -scheme Telegram \
+                 -configuration Release \
+                 -derivedDataPath build \
+                 -clonedSourcePackagesDirPath build/swiftpm \
+                 -IDEPackageSupportDisableManifestSandbox=YES \
+                 -IDEPackageSupportDisablePluginExecutionSandbox=YES \
+                 VALIDATE_PRODUCT=NO \
+                 DISABLE_INFOPLIST_BUNDLE_VALIDATION=YES \
+                 CODE_SIGN_IDENTITY="" \
+                 CODE_SIGNING_REQUIRED=NO \
+                 CODE_SIGNING_ALLOWED=NO
+    }
+
+    # First pass may fail at Validate on shallow Firebase frameworks.
+    # Deepen them in-place and accept the app: re-running xcodebuild would
+    # re-embed shallow copies from the XCFrameworks and fail again.
+    set +e
+    run_xcodebuild
+    xcstatus=$?
+    set -e
+    if [ "$xcstatus" -ne 0 ]; then
+      deepen_embedded_frameworks build/Build/Products/Release/Telegram.app
+      if [ ! -d build/Build/Products/Release/Telegram.app/Contents/MacOS ]; then
+        echo "xcodebuild failed before producing Telegram.app" >&2
+        exit "$xcstatus"
+      fi
+      for fw in build/Build/Products/Release/Telegram.app/Contents/Frameworks/*.framework; do
+        [ -d "$fw" ] || continue
+        name=$(basename "$fw" .framework)
+        case "$name" in
+          FirebaseAnalytics|GoogleAppMeasurement|GoogleAppMeasurementIdentitySupport)
+            if [ -f "$fw/Info.plist" ] || [ ! -f "$fw/Versions/Current/Resources/Info.plist" ]; then
+              echo "failed to deepen $fw" >&2
+              exit 1
+            fi
+            ;;
+        esac
+      done
+    fi
+
+    # Inject precompiled metallibs into SPM resource bundles / app
+    metal_engine_bundle=$(find build/Build/Products/Release -type d -name 'MetalEngine_MetalEngine.bundle' | head -1)
+    if [ -n "$metal_engine_bundle" ] && [ -f MetalEngine.metallib ]; then
+      mkdir -p "$metal_engine_bundle/Contents/Resources"
+      cp MetalEngine.metallib "$metal_engine_bundle/Contents/Resources/default.metallib"
+    fi
+    dust_bundle=$(find build/Build/Products/Release -type d -name 'DustLayer_DustLayer.bundle' | head -1)
+    if [ -n "$dust_bundle" ] && [ -f DustLayer.metallib ]; then
+      mkdir -p "$dust_bundle/Contents/Resources"
+      cp DustLayer.metallib "$dust_bundle/Contents/Resources/default.metallib"
+    fi
+    if [ -f MetalFunctions.metallib ]; then
+      mkdir -p build/Build/Products/Release/Telegram.app/Contents/Resources
+      cp MetalFunctions.metallib build/Build/Products/Release/Telegram.app/Contents/Resources/default.metallib
+    fi
 
     runHook postBuild
   '';

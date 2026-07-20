@@ -81,7 +81,6 @@ files are copied from following locations. some are modified in this repo and so
 + cacert_3108 <https://github.com/NixOS/nixpkgs/blob/9a9ab6b9242c4526f04abeeef99b8de1d7af1fea/pkgs/data/misc/cacert/default.nix>
 + stuntrally ogre mygui nixpkgs commit 56d904a94724499dd1cae942468f8740cdbb112a
 + icu nixpkgs commit 588c72d6229385ef2bab17ec4fc21db014790e4e
-+ pkgs/os-specific/linux/kernel/common-flags.nix pkgs/os-specific/linux/zfs/generic.nix nixpkgs commit 154743920299
 + <https://github.com/emmanuelrosa/erosanix/tree/master/pkgs/mkwindowsapp> commit 464f070d952afff764d82041d371cfee3e689d2a mkwindowsapp mkwindowsapp-tools line.nix hooks lib pkgs/wineshell
 + unmodified - prismlauncher-unwrapped prismlauncher materialgram telegram-desktop - should sync with nixpkgs
 + android-translation-layer nixpkgs commit d9f0b9cb3d82342268db374b40bf062ea9a5f044

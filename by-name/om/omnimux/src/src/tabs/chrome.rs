@@ -17,8 +17,9 @@ pub fn render_title_bar(
             .flex()
             .items_center()
             .justify_center()
-            .h(px(28.0))
-            .px_2()
+            .h(px(32.0))
+            .min_w(px(40.0))
+            .px_3()
             .ml_1()
             .rounded_sm()
             .cursor_pointer()
@@ -27,7 +28,7 @@ pub fn render_title_bar(
                 div()
                     .child(label)
                     .text_color(colors.text)
-                    .text_sm()
+                    .text_base()
                     .font_weight(FontWeight::MEDIUM),
             )
     };

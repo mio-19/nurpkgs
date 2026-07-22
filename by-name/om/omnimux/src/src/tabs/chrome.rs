@@ -121,7 +121,12 @@ pub fn render_title_bar(
                     .hover(|s| s.bg(colors.hover))
                     .window_control_area(WindowControlArea::Max)
                     .on_click(|_, window, _| window.zoom_window())
-                    .child(div().child("□").text_color(colors.text)),
+                    // □ = maximize; ❐ = restore (already maximized).
+                    .child(
+                        div()
+                            .child(if window.is_maximized() { "❐" } else { "□" })
+                            .text_color(colors.text),
+                    ),
             )
             .child(
                 ctl("win_close")

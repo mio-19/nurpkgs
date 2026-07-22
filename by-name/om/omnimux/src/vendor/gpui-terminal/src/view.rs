@@ -1525,12 +1525,8 @@ impl TerminalView {
         // Store the new config
         self.config = config;
 
-        // Trigger a repaint - cell dimensions will be recalculated via measure_cell()
-        // Note: do NOT push unsolicited OSC 10/11/12 here — that is non-standard and
-        // can leak into the shell prompt. Live dark/light for TUIs that poll OSC 11
-        // (e.g. Gemini CLI) works because ColorRequest reads the updated palette.
-        // Opt-in Contour/Ghostty DEC mode 2031 (CSI ? 997;Ps n) is the correct
-        // unsolicited notification path for Neovim and similar.
+        // Trigger a repaint - cell dimensions will be recalculated via measure_cell().
+        // Appearance sync / OSC theme policy: see Omnimux README.md (not unsolicited OSC).
         cx.notify();
     }
 

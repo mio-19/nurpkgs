@@ -41,7 +41,7 @@ pub fn render_title_bar(
         .flex()
         .flex_row()
         .items_center()
-        .h(px(36.0))
+        .h(px(40.0))
         .w_full()
         .px_2()
         .bg(colors.bar)

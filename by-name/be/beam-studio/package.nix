@@ -1,0 +1,198 @@
+{
+  pkgs,
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  makeWrapper,
+  electron,
+  python3,
+  nodejs,
+  pnpm_10,
+  fetchPnpmDeps,
+  pnpmConfigHook,
+  makeDesktopItem,
+  copyDesktopItems,
+  autoPatchelfHook,
+  pkg-config,
+  fontconfig,
+  freetype,
+  fetchurl,
+  appimageTools,
+  libxcb,
+  libx11,
+  cairo,
+  libGL,
+  node-gyp,
+}:
+let
+  customBackend = pkgs.callPackage ./backend.nix { };
+in
+stdenv.mkDerivation (finalAttrs: {
+  pname = "beam-studio";
+  version = "2.6.8-stable";
+
+  src = fetchFromGitHub {
+    owner = "flux3dp";
+    repo = "beam-studio";
+    rev = "refs/tags/app-2.6.8-stable";
+    hash = "sha256-gfmIuw3aKDzAFGIDZTs1V/mDIkDWDvdbb+dJ9m0OOeQ=";
+  };
+
+  pnpmDeps = fetchPnpmDeps {
+    inherit (finalAttrs) pname version src;
+    pnpm = pnpm_10;
+    fetcherVersion = 4;
+    hash = "sha256-4LZ37gYPpFQ/tR/T8R+bdvnp5tHllcdSPwjml9B1uHo=";
+  };
+
+  nativeBuildInputs = [
+    makeWrapper
+    python3
+    nodejs
+    node-gyp
+    pnpmConfigHook
+    pnpm_10
+    copyDesktopItems
+    autoPatchelfHook
+    pkg-config
+  ];
+
+  buildInputs = [
+    stdenv.cc.cc.lib
+    fontconfig
+    freetype
+    libxcb
+    libx11
+    cairo
+    libGL
+  ];
+
+  env = {
+    ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
+    PUBLISH_PATH = "";
+    PUBLISH_SUFFIX = "";
+    npm_config_build_from_source = "true";
+  };
+
+  buildPhase = ''
+    runHook preBuild
+
+    export XDG_CACHE_HOME=$(mktemp -d)
+    export FONTCONFIG_FILE=${pkgs.fontconfig.out}/etc/fonts/fonts.conf
+
+    # prevent node-gyp from downloading Electron headers
+    export ELECTRON_HEADERS_DIR="$PWD/.electron-headers"
+    mkdir -p "$ELECTRON_HEADERS_DIR"
+    cp -R ${electron.headers}/* "$ELECTRON_HEADERS_DIR/"
+    ln -s "$ELECTRON_HEADERS_DIR/include/node/common.gypi" "$ELECTRON_HEADERS_DIR/common.gypi"
+    ln -s "$ELECTRON_HEADERS_DIR/include/node/config.gypi" "$ELECTRON_HEADERS_DIR/config.gypi"
+    export npm_config_nodedir="$ELECTRON_HEADERS_DIR"
+
+    pnpm rebuild
+
+    # Patch prebuilt binaries in node_modules
+    autoPatchelf node_modules
+
+    # Match the official build size by building the Node bundle in production mode
+    sed -i "s/mode: 'development'/mode: 'production'/g" apps/app/webpack.node.js
+
+    # Beam Studio build
+    pnpm --filter @beam-studio/app run build
+    pnpm --filter @beam-studio/app run build-node
+
+    # In a Nix environment wrapper, process.defaultApp is true.
+    # This causes Electron to incorrectly use '.' instead of process.resourcesPath
+    # and opens DevTools on startup. Replace it with false.
+    sed -i 's/process.defaultApp/false/g' apps/app/public/js/node/main.js
+
+    # process.resourcesPath points to the electron binary's resources directory,
+    # not the app's resources directory. Fix it to point to our app.asar's parent.
+    sed -i 's|process.resourcesPath|require("path").join(__dirname, "../../../../")|g' apps/app/public/js/node/main.js
+
+    # Build font-scanner AFTER webpack to prevent fontconfig hangs during webpack
+    for dir in $(find node_modules -path "*/node_modules/font-scanner" -type d); do
+      if [ -f "$dir/binding.gyp" ]; then
+        echo "Building $dir"
+        (cd "$dir" && node-gyp rebuild)
+        autoPatchelf "$dir"
+      fi
+    done
+
+    # Run electron-builder
+    cp -r ${electron.dist} electron-dist
+    chmod -R u+w electron-dist
+
+    cd apps/app
+    pnpm exec electron-builder \
+      --dir \
+      -c.electronDist=../../electron-dist \
+      -c.electronVersion=${electron.version} \
+      -c.npmRebuild=false \
+      -c.asarUnpack="**/*.node" \
+      -c.linux.target=dir
+    cd ../..
+
+    runHook postBuild
+  '';
+
+  installPhase = ''
+    runHook preInstall
+
+    mkdir -p $out/share/beam-studio
+    cp -r apps/app/dist/linux-unpacked/locales $out/share/beam-studio/
+    cp -r apps/app/dist/linux-unpacked/resources $out/share/beam-studio/
+    cp apps/app/dist/linux-unpacked/*.pak $out/share/beam-studio/ || true
+
+    # Setup our source-built custom backend (Linux AppImage does not use swiftray)
+    mkdir -p $out/share/beam-studio/resources/backend/flux_api
+    ln -s ${customBackend}/bin/flux_api $out/share/beam-studio/resources/backend/flux_api/flux_api
+
+    mkdir -p $out/bin
+    # The official AppImage explicitly hardcodes --no-sandbox in its desktop file to prevent
+    # Chromium sandbox crashes (like /dev/shm IPC failures) on various Linux distributions.
+    makeWrapper ${electron}/bin/electron $out/bin/beam-studio \
+      --add-flags $out/share/beam-studio/resources/app.asar \
+      --add-flags "\''${NIXOS_OZONE_WL:+\''${WAYLAND_DISPLAY:+--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true --wayland-text-input-version=3}}" \
+      --add-flags "--no-sandbox" \
+      --set-default ELECTRON_FORCE_IS_PACKAGED 1 \
+      --set-default ELECTRON_IS_DEV 0 \
+      --inherit-argv0
+
+    # Install the application icon
+    mkdir -p $out/share/icons/hicolor/1024x1024/apps
+    cp apps/app/public/img/icon.png $out/share/icons/hicolor/1024x1024/apps/beam-studio.png
+
+    runHook postInstall
+  '';
+
+  desktopItems = [
+    (makeDesktopItem {
+      name = "beam-studio";
+      exec = "beam-studio %U";
+      icon = "beam-studio";
+      desktopName = "Beam Studio";
+      comment = finalAttrs.meta.description;
+      categories = [
+        "Graphics"
+        "Engineering"
+      ];
+      startupWMClass = "Beam Studio";
+    })
+  ];
+
+  meta = {
+    description = "Beam Studio";
+    homepage = "https://github.com/flux3dp/beam-studio";
+    # Note: While the backend components are proprietary (unfree), beam-studio is
+    # licensed under AGPL-3.0. According to the Software Freedom Conservancy,
+    # users might or might not be entitled to reverse engineer the combined work to exercise their
+    # rights under the AGPL-3.0. Please consult a lawyer if you are unsure about your rights.
+    license = with lib.licenses; [
+      agpl3Only
+      unfree
+    ];
+    maintainers = [ ];
+    mainProgram = "beam-studio";
+    platforms = lib.platforms.linux;
+  };
+})

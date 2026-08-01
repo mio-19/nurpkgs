@@ -1,0 +1,21 @@
+diff --git a/lib/core/bootstrap/app_initializer.dart b/lib/core/bootstrap/app_initializer.dart
+--- a/lib/core/bootstrap/app_initializer.dart
++++ b/lib/core/bootstrap/app_initializer.dart
+@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
+ import 'package:display_mode/display_mode.dart';
+ import 'package:rain/core/bootstrap/background_bootstrap.dart';
+ import 'package:rain/core/bootstrap/timezone_bootstrap.dart';
++import 'package:geolocator_linux/geolocator_linux.dart';
+ import 'package:home_widget/home_widget.dart';
+ import 'package:isar_community/isar.dart';
+ import 'package:rain/core/bootstrap/app_bootstrap.dart';
+@@ -26,6 +27,9 @@ class AppInitializer {
+   /// Runs all bootstrap steps and returns the loaded [AppBootstrap].
+   static Future<AppBootstrap> initialize() async {
+     ConnectivityService.setup();
++    if (Platform.isLinux) {
++      await GeolocatorLinux.registerWith();
++    }
+     await initializeAppTimeZone();
+     final bootstrap = await _initializeIsar();
+     await initializeNotificationsPlugin();

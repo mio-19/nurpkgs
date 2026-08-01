@@ -1,0 +1,115 @@
+{
+  lib,
+  flutter,
+  fetchFromGitHub,
+  copyDesktopItems,
+  makeDesktopItem,
+  runCommand,
+  yq-go,
+  _experimental-update-script-combinators,
+  gitUpdater,
+  dart,
+  geoclue2,
+}:
+
+flutter.buildFlutterApplication rec {
+  pname = "rain";
+  version = "1.3.19";
+
+  src = fetchFromGitHub {
+    owner = "darkmoonight";
+    repo = "Rain";
+    tag = "v${version}";
+    hash = "sha256-/4GbzTfMW9Vh7oIYPRoCylJJ2em96xS4uxNzzHWOxtM=";
+  };
+
+  pubspecLock = lib.importJSON ./pubspec.lock.json;
+  gitHashes = lib.importJSON ./git-hashes.json;
+
+  nativeBuildInputs = [
+    copyDesktopItems
+  ];
+
+  buildInputs = [
+    geoclue2
+  ];
+
+  desktopItems = [
+    (makeDesktopItem {
+      name = "rain";
+      exec = "rain";
+      icon = "rain";
+      desktopName = "Rain";
+      comment = "Weather application";
+      categories = [ "Utility" ];
+    })
+  ];
+
+  postPatch = ''
+    # Force Flutter to regenerate plugin registrants with added deps.
+    rm -f linux/flutter/generated_plugin_registrant.cc \
+      linux/flutter/generated_plugin_registrant.h \
+      linux/flutter/generated_plugins.cmake
+  '';
+
+  patches = [
+    ./geolocator-linux-register.patch
+  ];
+
+  postInstall = ''
+    install -Dm644 assets/icons/icon.png \
+      $out/share/icons/hicolor/512x512/apps/rain.png
+  '';
+
+  # Ensure Isar can dlopen libisar.so when the binary is invoked via a symlink.
+  extraWrapProgramArgs = ''
+    --prefix LD_LIBRARY_PATH : $out/app/${pname}/lib
+  '';
+
+  passthru = {
+    pubspecSource =
+      runCommand "pubspec.lock.json"
+        {
+          inherit src;
+          nativeBuildInputs = [ yq-go ];
+        }
+        ''
+          yq eval --output-format=json --prettyPrint $src/pubspec.lock > "$out"
+        '';
+    updateScript = _experimental-update-script-combinators.sequence [
+      (
+        (gitUpdater {
+          ignoredVersions = ".*(rc|beta).*";
+          rev-prefix = "v";
+        })
+        // {
+          supportedFeatures = [ ];
+        }
+      )
+      (
+        (_experimental-update-script-combinators.copyAttrOutputToFile "rain.pubspecSource" ./pubspec.lock.json)
+        // {
+          supportedFeatures = [ ];
+        }
+      )
+      {
+        command = [
+          dart.fetchGitHashesScript
+          "--input"
+          ./pubspec.lock.json
+          "--output"
+          ./git-hashes.json
+        ];
+        supportedFeatures = [ ];
+      }
+    ];
+  };
+
+  meta = {
+    description = "Weather application";
+    homepage = "https://github.com/darkmoonight/Rain";
+    license = lib.licenses.mit;
+    mainProgram = "rain";
+    platforms = lib.platforms.linux;
+  };
+}

@@ -1,0 +1,202 @@
+diff --git a/bin/builders/BaseBuilder.ts b/bin/builders/BaseBuilder.ts
+--- a/bin/builders/BaseBuilder.ts
++++ b/bin/builders/BaseBuilder.ts
+@@ -68,6 +68,7 @@
+     const packageManager = await detectPackageManager();
+     const timeout = getInstallTimeout();
+     const buildEnv = getBuildEnvironment();
++    const skipInstall = process.env.PAKE_SKIP_INSTALL === '1';
+ 
+     // Show helpful message for first-time users
+     if (!tauriTargetPathExists) {
+@@ -84,20 +85,26 @@
+       );
+     }
+ 
+-    try {
+-      await shellExec(getInstallCommand(packageManager, useCnMirror), timeout, {
+-        ...buildEnv,
+-        CI: 'true',
+-      });
+-      spinner.succeed(chalk.green('Package installed!'));
+-    } catch (error) {
+-      spinner.fail(chalk.red('Installation failed'));
+-      if (!useCnMirror) {
+-        logger.info(
+-          `✺ If downloads are slow in China, retry with ${CN_MIRROR_ENV}=1 to use CN mirrors.`,
+-        );
++    if (skipInstall) {
++      spinner.succeed(
++        chalk.green('Skipping dependency install (PAKE_SKIP_INSTALL=1)'),
++      );
++    } else {
++      try {
++        await shellExec(getInstallCommand(packageManager, useCnMirror), timeout, {
++          ...buildEnv,
++          CI: 'true',
++        });
++        spinner.succeed(chalk.green('Package installed!'));
++      } catch (error) {
++        spinner.fail(chalk.red('Installation failed'));
++        if (!useCnMirror) {
++          logger.info(
++            `✺ If downloads are slow in China, retry with ${CN_MIRROR_ENV}=1 to use CN mirrors.`,
++          );
++        }
++        throw error;
+       }
+-      throw error;
+     }
+ 
+     if (!tauriTargetPathExists) {
+diff --git a/bin/builders/LinuxBuilder.ts b/bin/builders/LinuxBuilder.ts
+--- a/bin/builders/LinuxBuilder.ts
++++ b/bin/builders/LinuxBuilder.ts
+@@ -3,6 +3,7 @@ import fsExtra from 'fs-extra';
+ import BaseBuilder from './BaseBuilder';
+ import { PakeAppOptions } from '@/types';
+ import tauriConfig from '@/helpers/tauriConfig';
++import { npmDirectory } from '@/utils/dir';
+ import { shellExec } from '@/utils/shell';
+ import { generateLinuxPackageName } from '@/utils/name';
+ import {
+@@ -219,6 +220,9 @@ export default class LinuxBuilder extends BaseBuilder {
+   // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
+   async buildAndCopy(url: string, target: string, logSuccess = true) {
+     this.currentBuildType = target;
++    if (target === 'appimage') {
++      await this.ensureAppImageTools();
++    }
+     await super.buildAndCopy(url, target, logSuccess);
+   }
+ 
+@@ -284,4 +288,18 @@ export default class LinuxBuilder extends BaseBuilder {
+     }
+     return super.getArchSpecificPath();
+   }
++
++  private async ensureAppImageTools(): Promise<void> {
++    const toolsDir = process.env.PAKE_APPIMAGE_TOOLS_DIR;
++    if (!toolsDir) {
++      return;
++    }
++
++    const targetDir = path.join(npmDirectory, 'src-tauri', 'target', '.tauri');
++    await fsExtra.ensureDir(targetDir);
++    await fsExtra.copy(toolsDir, targetDir, {
++      overwrite: false,
++      errorOnExist: false,
++    });
++  }
+ }
+diff --git a/bin/helpers/tauriConfig.ts b/bin/helpers/tauriConfig.ts
+--- a/bin/helpers/tauriConfig.ts
++++ b/bin/helpers/tauriConfig.ts
+@@ -30,7 +30,10 @@
+ 
+ let tauriConfig = {
+   ...CommonConf,
+-  bundle: platformConfig.bundle,
++  bundle: {
++    ...platformConfig.bundle,
++    useLocalToolsDir: process.platform === 'linux',
++  },
+   app: {
+     ...CommonConf.app,
+     trayIcon: {
+diff --git a/bin/utils/dir.ts b/bin/utils/dir.ts
+--- a/bin/utils/dir.ts
++++ b/bin/utils/dir.ts
+@@ -1,11 +1,90 @@
++import fsExtra from 'fs-extra';
++import os from 'os';
+ import path from 'path';
+ import { fileURLToPath } from 'url';
+ 
+ // Convert the current module URL to a file path
+ const currentModulePath = fileURLToPath(import.meta.url);
+ 
+-// Resolve the parent directory of the current module
+-export const npmDirectory = path.join(path.dirname(currentModulePath), '..');
++const packageDirectory = path.join(path.dirname(currentModulePath), '..');
++
++const runtimeDirectory = (() => {
++  const envDir = process.env.PAKE_RUNTIME_DIR;
++  const cacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
++  const baseDir = envDir || path.join(cacheHome, 'pake');
++  let version = 'unknown';
++
++  try {
++    const pkg = fsExtra.readJSONSync(path.join(packageDirectory, 'package.json'));
++    version = pkg.version || version;
++  } catch {
++    // Keep fallback version for non-standard layouts.
++  }
++
++  const targetDir = envDir ? envDir : path.join(baseDir, `pake-${version}`);
++  const srcTauri = path.join(targetDir, 'src-tauri');
++
++  const makeWritable = (dirPath: string) => {
++    fsExtra.chmodSync(dirPath, 0o755);
++    for (const entry of fsExtra.readdirSync(dirPath, { withFileTypes: true })) {
++      const entryPath = path.join(dirPath, entry.name);
++      if (entry.isDirectory()) {
++        fsExtra.chmodSync(entryPath, 0o755);
++        makeWritable(entryPath);
++      } else {
++        const mode = fsExtra.statSync(entryPath).mode;
++        const isExecutable = (mode & 0o111) !== 0;
++        fsExtra.chmodSync(entryPath, isExecutable ? 0o755 : 0o644);
++      }
++    }
++  };
++
++  fsExtra.ensureDirSync(targetDir);
++
++  if (!fsExtra.existsSync(srcTauri)) {
++    fsExtra.copySync(path.join(packageDirectory, 'src-tauri'), srcTauri);
++  }
++
++  if (fsExtra.existsSync(srcTauri)) {
++    makeWritable(srcTauri);
++  }
++
++  const packageJsonSrc = path.join(packageDirectory, 'package.json');
++  const packageJsonTarget = path.join(targetDir, 'package.json');
++  if (!fsExtra.existsSync(packageJsonTarget) && fsExtra.existsSync(packageJsonSrc)) {
++    fsExtra.copySync(packageJsonSrc, packageJsonTarget);
++    fsExtra.chmodSync(packageJsonTarget, 0o644);
++  }
++
++  const lockfileSrc = path.join(packageDirectory, 'pnpm-lock.yaml');
++  const lockfileTarget = path.join(targetDir, 'pnpm-lock.yaml');
++  if (!fsExtra.existsSync(lockfileTarget) && fsExtra.existsSync(lockfileSrc)) {
++    fsExtra.copySync(lockfileSrc, lockfileTarget);
++    fsExtra.chmodSync(lockfileTarget, 0o644);
++  }
++
++  const nodeModulesSrc = path.join(packageDirectory, 'node_modules');
++  const nodeModulesTarget = path.join(targetDir, 'node_modules');
++  if (!fsExtra.existsSync(nodeModulesTarget) && fsExtra.existsSync(nodeModulesSrc)) {
++    fsExtra.copySync(nodeModulesSrc, nodeModulesTarget);
++    makeWritable(nodeModulesTarget);
++  }
++
++  const distDir = path.join(packageDirectory, 'dist');
++  const distTarget = path.join(targetDir, 'dist');
++  if (!fsExtra.existsSync(distTarget) && fsExtra.existsSync(distDir)) {
++    fsExtra.copySync(distDir, distTarget);
++  }
++
++  if (fsExtra.existsSync(distTarget)) {
++    makeWritable(distTarget);
++  }
++
++  return targetDir;
++})();
++
++// Resolve the writable package directory
++export const npmDirectory = runtimeDirectory;
+ 
+ export const tauriConfigDirectory = path.join(
+   npmDirectory,

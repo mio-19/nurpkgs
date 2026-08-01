@@ -1,0 +1,392 @@
+# please put certain same name packages in default.nix to avoid accident overrides or infinite recursion
+
+{
+  pkgs ? import <nixpkgs> {
+    config.allowUnfree = true;
+  },
+  no-ifd ? true,
+}:
+with (import ./private.nix { inherit pkgs; });
+let
+  nonurbot = x: if no-ifd then null else x;
+  callPackage = pkgs.callPackage;
+  lib = pkgs.lib // import ./lib { inherit pkgs; };
+  byName = lib.makeScope pkgs.newScope (
+    self:
+    let
+      readDir = builtins.readDir ./by-name;
+      flattened = builtins.foldl' (
+        acc: dir:
+        if builtins.stringLength dir == 2 && readDir.${dir} == "directory" then
+          acc
+          // (
+            let
+              subdir = ./by-name + "/${dir}";
+            in
+            builtins.listToAttrs (
+              map
+                (name: {
+                  inherit name;
+                  value = self.callPackage (subdir + "/${name}/package.nix") { };
+                })
+                (
+                  builtins.filter (name: (builtins.readDir subdir).${name} == "directory") (
+                    builtins.attrNames (builtins.readDir subdir)
+                  )
+                )
+            )
+          )
+        else
+          acc
+      ) { } (builtins.attrNames readDir);
+    in
+    flattened
+  );
+in
+byName
+// (with byName; rec {
+  wireguird = goV3OverrideAttrs (pkgs.callPackage ./pkgs/wireguird { });
+  graphene-hardened-malloc = v3overrideAttrs pkgs.graphene-hardened-malloc;
+
+  # https://github.com/a1ive/grub — a1ive's GRUB fork with mouse/touchscreen support
+  # (efi_mouse + ps2mouse modules). Archived upstream but buildable.
+  grub2-a1ive =
+    let
+      # a1ive's fork requires this specific gnulib revision (different from nixpkgs grub2)
+      gnulib-a1ive = pkgs.fetchgit {
+        url = "https://git.savannah.gnu.org/git/gnulib.git";
+        rev = "d271f868a8df9bbec29049d01e056481b7a1a263";
+        hash = "sha256-AON1MEfEbSTZMeDDwawRDUD22/4+jIiWYnk35xg7ZSk=";
+      };
+    in
+    pkgs.grub2_efi.overrideAttrs (old: {
+      src = pkgs.fetchFromGitHub {
+        owner = "a1ive";
+        repo = "grub";
+        rev = "77322411ddd574b461ca7c2b666c881bae51d8bd";
+        sha256 = "0l51g7cm32dkamg3bgc58129rsdpvj2zjj4ff6w7c5ias7mzjzb0";
+      };
+      patches = [ ];
+      # Fix GCC-15 / C23 keyword conflicts with gnulib's stdbool by enforcing gnu11
+      # Disable Werror since the older a1ive fork triggers warnings in newer GCC
+      env.NIX_CFLAGS_COMPILE = "-std=gnu11 -Wno-error";
+      configureFlags = builtins.filter (f: f != "--enable-grub-mount") (old.configureFlags or [ ]) ++ [
+        "--disable-nls"
+      ];
+      preConfigure = ''
+        chmod -R u+w .
+        # gnulib-tool writes into its own srcdir, so give it a writable copy
+        cp -r ${gnulib-a1ive} gnulib-writable
+        chmod -R u+w gnulib-writable
+        # stub missing dist-only file
+        mkdir -p docs
+        touch docs/org.gnu.grub.policy
+        # remove po from SUBDIRS to completely skip translations build
+        sed -i 's/ po / /g' Makefile.am
+        # bootstrap populates grub-core/lib/gnulib/ but then fails at autoreconf
+        # because Makefile.util.am doesn't exist yet in a git checkout — that's OK
+        ./bootstrap --no-git --gnulib-srcdir=gnulib-writable || true
+        # now generate Makefile.util.am + grub-core/Makefile.core.am via Python,
+        # then run autoreconf properly
+        bash ./autogen.sh
+      '';
+      # skip 'make dist' in postConfigure — the a1ive fork lacks some dist-only targets
+      postConfigure = "";
+      postBuild = "";
+    });
+
+  minetest591 = pkgs.callPackage ./pkgs/minetest591 {
+    stdenv = v3Optimizations pkgs.clangStdenv;
+  };
+  minetest591client = minetest591.override { buildServer = false; };
+  minetest591server = minetest591.override { buildClient = false; };
+  minetest580 = pkgs.callPackage ./pkgs/minetest580 {
+    irrlichtmt = pkgs.callPackage ./pkgs/irrlichtmt {
+      stdenv = v3Optimizations pkgs.clangStdenv;
+    };
+    stdenv = v3Optimizations pkgs.clangStdenv;
+  };
+  minetest580client = minetest580.override { buildServer = false; };
+  minetest580-touch = minetest580.override {
+    buildServer = false;
+    withTouchSupport = true;
+  };
+  minetest580server = minetest580.override { buildClient = false; };
+  # https://github.com/musescore/MuseScore/pull/21874
+  # https://github.com/adazem009/MuseScore/tree/piano_keyboard_playing_notes
+  # broken on nixpkgs between a98f368960a921d4fdc048e3a2401d12739bc1f9 and 7fd9583d8c174ecc7ac0094bed29bde80135c876
+  # broken by qt 6.10.0 -> 6.10.1 update
+  # https://github.com/NixOS/nixpkgs/compare/a98f368960a921d4fdc048e3a2401d12739bc1f9%E2%80%A67fd9583d8c174ecc7ac0094bed29bde80135c876
+  musescore-adazem009 = v3override (
+    pkgs.musescore.overrideAttrs (old: {
+      version = "4.4.0-piano_keyboard_playing_notes";
+      src = pkgs.fetchFromGitHub {
+        owner = "adazem009";
+        repo = "MuseScore";
+        rev = "e3de9347f6078f170ddbfa6dcb922f72bb7fef88";
+        hash = "sha256-1HvwkolmKa317ozprLEpo6v/aNX75sEdaXHlt5Cj6NA=";
+      };
+      patches = [
+        ./patches/piano_keyboard_playing_notes.patch
+        ./patches/musescore-qt610.patch
+      ];
+      preConfigure = "";
+    })
+  );
+  # https://github.com/musescore/MuseScore/pull/28073
+  # https://github.com/githubwbp1988/MuseScore/tree/alex
+  # https://github.com/githubwbp1988/MuseScore/tree/develop
+  # audit: https://github.com/musescore/MuseScore/compare/main...githubwbp1988:MuseScore:develop
+  musescore-alex = v3override (
+    pkgs.musescore.overrideAttrs (old: {
+      version = "4.6.3-alex-unstable-20260417";
+      src = pkgs.fetchFromGitHub {
+        owner = "githubwbp1988";
+        repo = "MuseScore";
+        rev = "076b5ccac40cf25ce24f6cd480a6c0eae3311ace";
+        hash = "sha256-VMysCO9LlNX8aiqBZtsseF6224RY20AXJMq8xrjnaR4=";
+      };
+      patches = [ ];
+      preConfigure = "";
+    })
+  );
+
+  #aria2-wrapped = pkgs.writeShellScriptBin "aria2" ''
+  #  ${pkgs.aria2}/bin/aria2c -s65536 -j65536 -x16 -k1M "$@"
+  #'';
+  audacity4 = nodarwin (pkgs.qt6Packages.callPackage ./pkgs/audacity4/package.nix { });
+  cider = pkgs.callPackage ./pkgs/cider {
+    electron = electron_castlabs_38;
+  };
+  local-ai-cuda = local-ai.override { with_cublas = true; };
+  mdbook-generate-summary = v3overrideAttrs (pkgs.callPackage ./pkgs/mdbook-generate-summary { });
+  gifcurry = nonurbot (pkgs.callPackage ./pkgs/gifcurry { });
+  # currently no changes so just use nixpkgs version of bionic-translation and art-standalone
+  bionic-translation = pkgs.bionic-translation; # pkgs.callPackage ./pkgs/bionic-translation/package.nix { };
+  art-standalone = pkgs.art-standalone;
+  /*
+    pkgs.callPackage ./pkgs/art-standalone/package.nix {
+      bionic-translation = bionic-translation;
+    };
+  */
+  android-translation-layer = pkgs.callPackage ./pkgs/android-translation-layer/package.nix {
+    art-standalone = art-standalone;
+    bionic-translation = bionic-translation;
+  };
+  ogre-1_11 = v3overrideAttrs (pkgs.callPackage ./pkgs/ogre-1_11/package.nix { });
+  angelscript_2_35_1 = v3overrideAttrs (
+    pkgs.angelscript.overrideAttrs (
+      old:
+      let
+        version = "2.35.1";
+      in
+      {
+        inherit version;
+        src = pkgs.fetchzip {
+          url = "https://www.angelcode.com/angelscript/sdk/files/angelscript_${version}.zip";
+          hash = "sha256-ncs3pPsJErx3el8/Lsj+NSu7LQ1hPRlBmcTSvLGWL1s=";
+        };
+      }
+    )
+  );
+  socketw = v3overrideAttrs (pkgs.callPackage ./pkgs/socketw/package.nix { });
+  mygui-ogre = v3overrideAttrs (
+    pkgs.mygui.override {
+      withOgre = true;
+      ogre = ogre-1_11;
+    }
+  );
+  rigs-of-rods = pkgs.callPackage ./pkgs/rigs-of-rods/package.nix {
+    ogre = ogre-1_11;
+    mygui = mygui-ogre;
+    socketw = socketw;
+    angelscript = angelscript_2_35_1;
+  };
+
+  layan-sddm = nodarwin (pkgs.callPackage ./pkgs/layan-sddm { });
+  zw3d = pkgs.callPackage ./pkgs/zw3d {
+    notoFontsCjk = pkgs.noto-fonts-cjk-sans;
+  };
+  chatgpt-pake = pkgs.callPackage ./pkgs/chatgpt-pake/package.nix {
+    inherit makePakeApp;
+  };
+  apple-music-pake = pkgs.callPackage ./pkgs/apple-music-pake/package.nix {
+    inherit makePakeApp;
+  };
+  apple-music-desktop = pkgs.callPackage ./pkgs/apple-music-desktop/package.nix {
+    electron = electron_castlabs_38;
+  };
+
+  polkit126 = (pkgs.callPackage ./pkgs/polkit/package.nix { }).override (prev: {
+    doCheck = false; # something wrong with check pharse after last staging-next merge. checking not terminate. 20260225
+  });
+
+  prismlauncher-diegiwg =
+    let
+      # https://github.com/NixOS/nixpkgs/blob/ab0821a8289da5bd2cde49ae89cbf6db1e5931ae/pkgs/by-name/pr/prismlauncher/package.nix#L41
+      msaClientID = null;
+      prismlauncher = pkgs.prismlauncher;
+      prismlauncher-unwrapped = pkgs.prismlauncher-unwrapped;
+    in
+    prismlauncher.overrideAttrs (old: {
+      paths = [
+        # https://github.com/NixOS/nixpkgs/blob/ab0821a8289da5bd2cde49ae89cbf6db1e5931ae/pkgs/by-name/pr/prismlauncher/package.nix#L61
+        (v3overrideAttrs (
+          (prismlauncher-unwrapped.override { inherit msaClientID; }).overrideAttrs (old': {
+            patches = (old.patches or [ ]) ++ [
+              (pkgs.fetchpatch {
+                name = "12a.patch";
+                url = "https://github.com/PrismLauncher/PrismLauncher/commit/12acabdb57ba6f12fcf9047c28ec8afa7a4fb970.patch";
+                sha256 = "sha256-t+sanKiSEuqmshy6Y+Y9tfpDf+7L3A8d0CBcA+oqLUs=";
+              })
+              (pkgs.fetchpatch {
+                name = "911.patch";
+                url = "https://github.com/PrismLauncher/PrismLauncher/commit/911c0f3593dd6b825f6d91900e48bdf3b59ad3a9.patch";
+                sha256 = "sha256-mCkZ613f7kvMQTW+UOi2dcnvzHg/c2vhPcPGCvdz+0k=";
+              })
+            ];
+          })
+        ))
+      ];
+    });
+
+  davinci-resolve-studio2033 = davinci-resolve2033.override {
+    studioVariant = true;
+  };
+
+  baobab = pkgs.baobab.overrideAttrs (old: {
+    nativeBuildInputs =
+      (old.nativeBuildInputs or [ ])
+      ++ pkgs.lib.optional pkgs.stdenv.hostPlatform.isDarwin pkgs.desktopToDarwinBundle;
+  });
+
+  evince = pkgs.evince.overrideAttrs (old: {
+    nativeBuildInputs =
+      (old.nativeBuildInputs or [ ])
+      ++ pkgs.lib.optional pkgs.stdenv.hostPlatform.isDarwin pkgs.desktopToDarwinBundle;
+  });
+
+})
+// (lib.optionalAttrs (!no-ifd) (
+  with byName;
+  rec {
+
+    jetbrains_idea-oss = pkgs.callPackage ./pkgs/jetbrains_idea-oss/package.nix {
+    };
+
+    supertuxkart-evolution = v3override (
+      pkgs.callPackage ./pkgs/supertuxkart-evolution/default.nix { }
+    );
+
+    mkwindowsapp-tools = callPackage ./pkgs/mkwindowsapp-tools { wrapProgram = pkgs.wrapProgram; };
+
+    line = callPackage ./pkgs/line.nix {
+      inherit (lib) mkWindowsAppNoCC copyDesktopIcons makeDesktopIcon;
+      wine = pkgs.wineWow64Packages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
+    };
+    adobe-acrobat-reader = callPackage ./pkgs/adobe-acrobat-reader.nix {
+      inherit (lib) mkWindowsAppNoCC makeDesktopIcon copyDesktopIcons;
+      inherit (pkgs)
+        copyDesktopItems
+        makeDesktopItem
+        p7zip
+        gawk
+        ;
+      wine = pkgs.winePackages.full;
+    };
+    adobe-acrobat-reader_virtualDesktop = adobe-acrobat-reader.override {
+      virtualDesktop = true;
+    };
+
+    affinity-v3 = callPackage ./pkgs/affinity-v3 {
+      inherit pkgs;
+      build = lib;
+      wine = pkgs.wineWow64Packages.full;
+    };
+
+    wineshell-wine64 = callPackage ./pkgs/wineshell/default.nix {
+      inherit (lib) mkWindowsApp;
+      wine = pkgs.wine64Packages.stableFull;
+      wineArch = "win64";
+      wineFlavor = "wine64";
+    };
+
+    wineshell-wineWow64 = callPackage ./pkgs/wineshell/default.nix {
+      inherit (lib) mkWindowsApp;
+      wine = pkgs.wineWow64Packages.stableFull;
+      wineArch = "win64";
+      wineFlavor = "wineWow64";
+    };
+
+    wineshell-wine = callPackage ./pkgs/wineshell/default.nix {
+      inherit (lib) mkWindowsApp;
+      wine = pkgs.winePackages.stableFull;
+      wineArch = "win32";
+      wineFlavor = "wine";
+    };
+
+    wineshell-wine64-base = callPackage ./pkgs/wineshell/default.nix {
+      inherit (lib) mkWindowsApp;
+      wine = pkgs.wine64Packages.base;
+      wineArch = "win64";
+      wineFlavor = "wine64";
+      enableMonoBootPrompt = false;
+    };
+
+    wineshell-wineWow64-base = callPackage ./pkgs/wineshell/default.nix {
+      inherit (lib) mkWindowsApp;
+      wine = pkgs.wineWow64Packages.base;
+      wineArch = "win64";
+      wineFlavor = "wineWow64";
+      enableMonoBootPrompt = false;
+    };
+
+    wineshell-wine-base = callPackage ./pkgs/wineshell/default.nix {
+      inherit (lib) mkWindowsApp;
+      wine = pkgs.winePackages.base;
+      wineArch = "win32";
+      wineFlavor = "wine";
+      enableMonoBootPrompt = false;
+    };
+
+    wineshell-wine64-vulkan = wineshell-wine64.override {
+      enableVulkan = true;
+    };
+
+    wineshell-wineWow64-vulkan = wineshell-wineWow64.override {
+      enableVulkan = true;
+    };
+
+    wineshell-wine-vulkan = wineshell-wine.override {
+      enableVulkan = true;
+    };
+
+    wineshell-wine64-base-vulkan = wineshell-wine64-base.override {
+      enableVulkan = true;
+    };
+
+    wineshell-wineWow64-base-vulkan = wineshell-wineWow64-base.override {
+      enableVulkan = true;
+    };
+
+    wineshell-wine-base-vulkan = wineshell-wine-base.override {
+      enableVulkan = true;
+    };
+
+    # https://github.com/NixOS/nixpkgs/issues/10165
+    # https://discourse.nixos.org/t/what-is-your-approach-to-packaging-wine-applications-with-nix-derivations/12799/1
+    notepad-plus-plus = callPackage ./pkgs/notepad++.nix {
+      inherit pkgs;
+      build = lib;
+      wine = pkgs.wineWow64Packages.full; # enableMonoBootPrompt is broken rightnow. use full to avoid boot prompt
+    };
+
+    insta360-studio = callPackage ./pkgs/insta360-studio.nix {
+      inherit pkgs;
+      build = lib;
+      wine = pkgs.wineWow64Packages.full;
+    };
+
+    forku-chatgpt = v3overrideAttrs (pkgs.callPackage ./pkgs/forku-chatgpt/package.nix { });
+  }
+))

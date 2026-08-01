@@ -1,13 +1,13 @@
-name: Update clice
+name: Auto-update packages and flake
 
 on:
   schedule:
-    # Run every day at 03:30 UTC
-    - cron: '30 3 * * *'
+    # Run every day at 00:00 UTC
+    - cron: '0 0 * * *'
   workflow_dispatch: # Allow manual triggering
 
 jobs:
-  update-clice:
+  update:
     runs-on: ubuntu-latest
     
     steps:
@@ -15,7 +15,6 @@ jobs:
         uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6.0.3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
       
       - name: Install nix
         uses: cachix/install-nix-action@8aa03977d8d733052d78f4e008a241fd1dbf36b3 # v31.10.6
@@ -32,8 +31,17 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
       
-      - name: Update clice
-        run: nix run nixpkgs#nix-update -- clice --flake --commit
+      - name: Update flake
+        run: |
+          nix flake update
+          git add flake.lock
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update flake.lock [automated]"
+          fi
+      
+      - name: Auto-update packages
+        run: |
+          nix run nixpkgs#nix-update -- clice --flake --commit || true
       
       - name: Push changes
         run: |

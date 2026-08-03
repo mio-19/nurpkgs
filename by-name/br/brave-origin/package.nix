@@ -12,6 +12,7 @@ let
       git
       python3
       nodejs
+      pnpm
       ninja
       pkg-config
       gn
@@ -61,13 +62,10 @@ pkgs.writeShellScriptBin "build-brave-origin-from-source" ''
     fi
     cd brave-core
     
-    echo '3. Installing pnpm...'
-    npm install -g pnpm
-    
-    echo '4. Running pnpm run init (fetches chromium)...'
+    echo '3. Running pnpm run init (fetches chromium)...'
     pnpm run init
     
-    echo '5. Building the browser...'
+    echo '4. Building the browser...'
     pnpm run build
     
     echo 'Build complete! Binary should be in out/Release/brave'

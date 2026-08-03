@@ -40,6 +40,9 @@ let
       alsa-lib
       mesa
       libdrm
+      udev
+      systemd
+      libusb1
     ];
     runScript = "bash";
   };

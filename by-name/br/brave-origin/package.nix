@@ -55,20 +55,20 @@ pkgs.writeShellScriptBin "build-brave-origin-from-source" ''
     fi
     export PATH=\$PWD/depot_tools:\$PATH
     
-    echo '2. Cloning brave-browser...'
-    if [ ! -d brave-browser ]; then
-      git clone https://github.com/brave/brave-browser.git
+    echo '2. Cloning brave-core...'
+    if [ ! -d brave-core ]; then
+      git clone https://github.com/brave/brave-core.git
     fi
-    cd brave-browser
+    cd brave-core
     
-    echo '3. Running npm install (FHS prevents /usr/bin/env errors!)...'
-    npm install
+    echo '3. Installing pnpm...'
+    npm install -g pnpm
     
-    echo '4. Running npm run init (fetches chromium)...'
-    npm run init
+    echo '4. Running pnpm run init (fetches chromium)...'
+    pnpm run init
     
     echo '5. Building the browser...'
-    npm run build
+    pnpm run build
     
     echo 'Build complete! Binary should be in out/Release/brave'
   "

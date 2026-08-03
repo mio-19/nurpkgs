@@ -1,68 +1,75 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, python3
-, nodejs
-, ninja
-, pkg-config
-, gn
-, runCommand
-, fetchurl
-}:
+{ lib, pkgs }:
 
-stdenv.mkDerivation rec {
-  pname = "brave-origin";
-  version = "1.65.114"; # Example version
+# The BEST way forward to build Brave from source on Nix is to bypass the strict
+# Nix sandbox using an FHS (Filesystem Hierarchy Standard) environment. 
+# This provides a virtual Debian/Ubuntu-like environment where /usr/bin/env exists,
+# and all the dynamic network fetching from depot_tools, python, and npm will succeed.
 
-  src = fetchFromGitHub {
-    owner = "brave";
-    repo = "brave-browser";
-    rev = "v${version}";
-    hash = lib.fakeHash;
+let
+  brave-build-env = pkgs.buildFHSEnv {
+    name = "brave-build-env";
+    targetPkgs = pkgs: with pkgs; [
+      git
+      python3
+      nodejs
+      ninja
+      pkg-config
+      gn
+      curl
+      cacert
+      bash
+      which
+      # Add necessary C/C++ dependencies for chromium
+      glib
+      nss
+      nspr
+      atk
+      at-spi2-atk
+      cups
+      dbus
+      pango
+      cairo
+      xorg.libX11
+      xorg.libXcomposite
+      xorg.libXdamage
+      xorg.libXext
+      xorg.libXfixes
+      xorg.libXrandr
+      xorg.libxcb
+      alsa-lib
+      mesa
+      libdrm
+    ];
+    runScript = "bash";
   };
-
-  nativeBuildInputs = [
-    python3
-    nodejs
-    ninja
-    pkg-config
-    gn
-  ];
-
-  # Note: Building Brave from source requires fetching the full chromium source
-  # tree and setting up a massive environment with depot_tools.
-  # This is a skeleton derivation to show the shape of a source build.
-  # A full build would require setting up fixed-output derivations for NPM and
-  # Cargo dependencies, and passing hundreds of GN flags (similar to pkgs.chromium).
-
-  configurePhase = ''
-    runHook preConfigure
-    # This is where one would normally initialize depot_tools,
-    # fetch the chromium source tree (which brave patches),
-    # and run `gn gen`.
-    # npm install
-    # gn gen out/Release --args="..."
-    runHook postConfigure
-  '';
-
-  buildPhase = ''
-    runHook preBuild
-    # ninja -C out/Release brave
-    runHook postBuild
-  '';
-
-  installPhase = ''
-    runHook preInstall
-    # mkdir -p $out/bin
-    # cp out/Release/brave $out/bin/brave-origin
-    runHook postInstall
-  '';
-
-  meta = with lib; {
-    description = "Brave Origin built from source (Skeleton)";
-    homepage = "https://brave.com/origin/";
-    license = licenses.mpl20;
-    maintainers = [ ];
-    platforms = platforms.linux;
-  };
-}
+in
+pkgs.writeShellScriptBin "build-brave-origin-from-source" ''
+  echo "Entering FHS environment to build Brave from source..."
+  exec ${brave-build-env}/bin/brave-build-env -c "
+    set -e
+    export GIT_SSL_NO_VERIFY=1
+    
+    echo '1. Setting up depot_tools...'
+    if [ ! -d depot_tools ]; then
+      git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
+    fi
+    export PATH=\$PWD/depot_tools:\$PATH
+    
+    echo '2. Cloning brave-browser...'
+    if [ ! -d brave-browser ]; then
+      git clone https://github.com/brave/brave-browser.git
+    fi
+    cd brave-browser
+    
+    echo '3. Running npm install (FHS prevents /usr/bin/env errors!)...'
+    npm install
+    
+    echo '4. Running npm run init (fetches chromium)...'
+    npm run init
+    
+    echo '5. Building the browser...'
+    npm run build
+    
+    echo 'Build complete! Binary should be in out/Release/brave'
+  "
+''

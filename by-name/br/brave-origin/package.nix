@@ -59,11 +59,12 @@ pkgs.writeShellScriptBin "build-brave-origin-from-source" ''
     fi
     export PATH=\$PWD/depot_tools:\$PATH
     
-    echo '2. Cloning brave-core...'
-    if [ ! -d brave-core ]; then
-      git clone https://github.com/brave/brave-core.git
+    echo '2. Cloning brave-core into src/brave...'
+    mkdir -p src
+    if [ ! -d src/brave ]; then
+      git clone https://github.com/brave/brave-core.git src/brave
     fi
-    cd brave-core
+    cd src/brave
     
     echo '3. Running pnpm run init (fetches chromium)...'
     pnpm run init

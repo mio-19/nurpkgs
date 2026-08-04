@@ -150,15 +150,6 @@ buildNpmPackage (finalAttrs: {
     if [ "$defaultBuildPlatform" = "linux" ]; then
       mkdir -p $out/share/waveterm
       cp -r make/*-unpacked/resources $out/share/waveterm/resources
-    else
-      # Check what is created on Darwin
-      ls -la make/
-      ls -la make/* || true
-    fi
-
-    if [ "$defaultBuildPlatform" = "linux" ]; then
-      mkdir -p $out/share/waveterm
-      cp -r make/*-unpacked/resources $out/share/waveterm/resources
 
       # use makeShellWrapper (instead of makeBinaryWrapper) for proper shell variable
       # expansion of the NIXOS_OZONE_WL flags, see https://github.com/NixOS/nixpkgs/issues/172583

@@ -7,10 +7,13 @@ let
   # Python env with all modules depot_tools needs
   pythonEnv = pkgs.python3.withPackages (ps: with ps; [
     httplib2
+    pysocks
     requests
     six
     setuptools
     pip
+    fido2
+    packaging
   ]);
 
   fhsEnv = pkgs.buildFHSEnv {

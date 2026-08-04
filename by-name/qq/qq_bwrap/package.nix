@@ -123,6 +123,8 @@ stdenv.mkDerivation (finalAttrs: {
     ${bubblewrap}/bin/bwrap \
         --new-session --cap-drop ALL --unshare-user-try --unshare-pid --unshare-cgroup-try \
         --ro-bind /nix /nix \
+        --ro-bind-try /bin /bin \
+        --ro-bind-try /usr/bin /usr/bin \
         --ro-bind-try /etc/machine-id /etc/machine-id \
         --ro-bind-try /etc/passwd /etc/passwd \
         --ro-bind-try /etc/nsswitch.conf /etc/nsswitch.conf \
@@ -267,6 +269,8 @@ stdenv.mkDerivation (finalAttrs: {
         --unshare-net \
         --cap-add CAP_NET_ADMIN,CAP_NET_RAW,CAP_SYS_ADMIN \
         --ro-bind /nix /nix \
+        --ro-bind-try /bin /bin \
+        --ro-bind-try /usr/bin /usr/bin \
         --ro-bind-try /etc/machine-id /etc/machine-id \
         --ro-bind-try /etc/passwd /etc/passwd \
         --ro-bind-try /etc/nsswitch.conf /etc/nsswitch.conf \

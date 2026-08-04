@@ -4,16 +4,34 @@
 # FHS provides /usr/bin/env and lets depot_tools, gclient, vpython3 work correctly.
 
 let
+  # depot_tools uses `import httplib2.socks` which requires a socks.py file
+  # INSIDE the httplib2 package dir (bundled in old versions, removed in modern).
+  # We patch the nixpkgs httplib2 to inject a shim that re-exports PySocks.
+  httplib2WithSocks = pkgs.python3.pkgs.httplib2.overrideAttrs (old: {
+    propagatedBuildInputs = (old.propagatedBuildInputs or []) ++ [ pkgs.python3.pkgs.pysocks ];
+    postInstall = (old.postInstall or "") + ''
+      sitepkgs=$out/lib/${pkgs.python3.libPrefix}/site-packages
+      cat > $sitepkgs/httplib2/socks.py << 'SOCKSEOF'
+# shim: re-export PySocks as httplib2.socks for depot_tools compatibility
+try:
+    from socks import *
+    from socks import socksocket, setdefaultproxy, wrapmodule
+except ImportError:
+    pass
+SOCKSEOF
+    '';
+  });
+
   # Python env with all modules depot_tools needs
   pythonEnv = pkgs.python3.withPackages (ps: with ps; [
-    httplib2
-    pysocks
-    requests
-    six
-    setuptools
-    pip
-    fido2
-    packaging
+    (ps.toPythonModule httplib2WithSocks)
+    ps.pysocks
+    ps.requests
+    ps.six
+    ps.setuptools
+    ps.pip
+    ps.fido2
+    ps.packaging
   ]);
 
   fhsEnv = pkgs.buildFHSEnv {

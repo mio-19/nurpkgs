@@ -47,7 +47,8 @@ buildNpmPackage (finalAttrs: {
   nativeBuildInputs = [
     nodejs
     makeShellWrapper
-  ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isLinux [
     copyDesktopItems
     wrapGAppsHook3
   ];

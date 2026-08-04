@@ -57,7 +57,7 @@ pkgs.writeShellScriptBin "build-brave-origin-from-source" ''
     if [ ! -d depot_tools ]; then
       git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
     fi
-    export PATH=\$PWD/depot_tools:\$PATH
+    export PATH=$PWD/depot_tools:$PATH
     
     echo '2. Cloning brave-core into src/brave...'
     mkdir -p src

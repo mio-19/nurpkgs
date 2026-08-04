@@ -88,7 +88,7 @@ with (import ./private.nix { inherit pkgs; });
   bees = nodarwin (v3overridegcc pkgs.bees);
   netdata = (v3override (goV3OverrideAttrs pkgs.netdata)).override { withCloudUi = true; };
   # https://gist.github.com/nstarke/baa031e0cab64a608c9bd77d73c50fc6
-  ghidra = v3override (
+  ghidra_hidpi = v3override (
     pkgs.ghidra.overrideAttrs (old: {
       patches = (old.patches or [ ]) ++ [ ./patches/ghidra-ui-scale.patch ];
     })
@@ -147,7 +147,7 @@ with (import ./private.nix { inherit pkgs; });
               beammp-launcher
               mdbook-generate-summary
               #betterbird
-              ghidra
+              ghidra_hidpi
               prismlauncher-diegiwg
               android-translation-layer
               #pake # started failing recently

@@ -4,12 +4,21 @@
 # FHS provides /usr/bin/env and lets depot_tools, gclient, vpython3 work correctly.
 
 let
+  # Python env with all modules depot_tools needs
+  pythonEnv = pkgs.python3.withPackages (ps: with ps; [
+    httplib2
+    requests
+    six
+    setuptools
+    pip
+  ]);
+
   fhsEnv = pkgs.buildFHSEnv {
     name = "brave-build-env";
     targetPkgs = pkgs: with pkgs; [
       # Core build tools
       git
-      (python3.withPackages (ps: with ps; [ httplib2 requests six setuptools ]))
+      pythonEnv
       nodejs
       pnpm
       ninja
@@ -56,7 +65,6 @@ let
       expat
       zlib
       openssl
-      # For gsutil / vpython
       glibc
     ];
     runScript = "bash";
@@ -71,15 +79,22 @@ let
 
     echo "==> Build directory: $BUILD_DIR"
 
+    # Expose depot_tools Python modules explicitly so gclient can import them
+    export PYTHONPATH="${pythonEnv}/${pythonEnv.sitePackages}''${PYTHONPATH:+:$PYTHONPATH}"
+    # Tell depot_tools not to self-update and not to use vpython
+    export DEPOT_TOOLS_UPDATE=0
+    export VPYTHON_BYPASS="manually managed python not supported by chrome operations"
+    # SSL certs
+    export GIT_SSL_CAINFO="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+    export SSL_CERT_FILE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+    export CURL_CA_BUNDLE="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+
     # Step 1: depot_tools
     echo "==> 1. Setting up depot_tools..."
     if [ ! -d depot_tools ]; then
       git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
     fi
     export PATH="$BUILD_DIR/depot_tools:$PATH"
-    # Tell depot_tools to use the system python3 (not download its own)
-    export DEPOT_TOOLS_UPDATE=0
-    export VPYTHON_BYPASS="manually managed python not supported by chrome operations"
 
     # Step 2: brave-core in the right place
     echo "==> 2. Cloning brave-core..."

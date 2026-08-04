@@ -9,8 +9,7 @@ let
     targetPkgs = pkgs: with pkgs; [
       # Core build tools
       git
-      python3
-      python3Packages.pip
+      (python3.withPackages (ps: with ps; [ httplib2 requests six setuptools ]))
       nodejs
       pnpm
       ninja

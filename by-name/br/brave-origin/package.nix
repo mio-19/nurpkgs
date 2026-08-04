@@ -1,27 +1,33 @@
 { lib, pkgs }:
 
-# The BEST way forward to build Brave from source on Nix is to bypass the strict
-# Nix sandbox using an FHS (Filesystem Hierarchy Standard) environment. 
-# This provides a virtual Debian/Ubuntu-like environment where /usr/bin/env exists,
-# and all the dynamic network fetching from depot_tools, python, and npm will succeed.
+# Build Brave from source using an FHS environment.
+# FHS provides /usr/bin/env and lets depot_tools, gclient, vpython3 work correctly.
 
 let
-  brave-build-env = pkgs.buildFHSEnv {
+  fhsEnv = pkgs.buildFHSEnv {
     name = "brave-build-env";
     targetPkgs = pkgs: with pkgs; [
+      # Core build tools
       git
       python3
+      python3Packages.pip
       nodejs
       pnpm
       ninja
       pkg-config
       gn
       curl
+      wget
       cacert
       bash
       which
-      # Add necessary C/C++ dependencies for chromium
+      lsb-release
+      # Compiler toolchain
+      gcc
+      binutils
+      # C/C++ libraries for Chromium
       glib
+      glib.dev
       nss
       nspr
       atk
@@ -30,48 +36,72 @@ let
       dbus
       pango
       cairo
-      xorg.libX11
-      xorg.libXcomposite
-      xorg.libXdamage
-      xorg.libXext
-      xorg.libXfixes
-      xorg.libXrandr
-      xorg.libxcb
+      libxkbcommon
+      libxkbcommon.dev
+      # X11
+      libx11
+      libxcomposite
+      libxdamage
+      libxext
+      libxfixes
+      libxrandr
+      libxcb
+      # Other system libs
       alsa-lib
       mesa
       libdrm
       udev
-      systemd
       libusb1
+      fontconfig
+      freetype
+      expat
+      zlib
+      openssl
+      # For gsutil / vpython
+      glibc
     ];
     runScript = "bash";
   };
-in
-pkgs.writeShellScriptBin "build-brave-origin-from-source" ''
-  echo "Entering FHS environment to build Brave from source..."
-  exec ${brave-build-env}/bin/brave-build-env -c "
-    set -e
-    export GIT_SSL_NO_VERIFY=1
-    
-    echo '1. Setting up depot_tools...'
+
+  buildScript = pkgs.writeShellScriptBin "build-brave-origin-from-source" ''
+    set -euo pipefail
+
+    BUILD_DIR="''${BUILD_DIR:-$HOME/brave-build}"
+    mkdir -p "$BUILD_DIR"
+    cd "$BUILD_DIR"
+
+    echo "==> Build directory: $BUILD_DIR"
+
+    # Step 1: depot_tools
+    echo "==> 1. Setting up depot_tools..."
     if [ ! -d depot_tools ]; then
       git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
     fi
-    export PATH=$PWD/depot_tools:$PATH
-    
-    echo '2. Cloning brave-core into src/brave...'
+    export PATH="$BUILD_DIR/depot_tools:$PATH"
+    # Tell depot_tools to use the system python3 (not download its own)
+    export DEPOT_TOOLS_UPDATE=0
+    export VPYTHON_BYPASS="manually managed python not supported by chrome operations"
+
+    # Step 2: brave-core in the right place
+    echo "==> 2. Cloning brave-core..."
     mkdir -p src
     if [ ! -d src/brave ]; then
       git clone https://github.com/brave/brave-core.git src/brave
     fi
+
     cd src/brave
-    
-    echo '3. Running pnpm run init (fetches chromium)...'
+
+    # Step 3: pnpm install + gclient sync (what pnpm run init does)
+    echo "==> 3. Running pnpm run init..."
     pnpm run init
-    
-    echo '4. Building the browser...'
+
+    # Step 4: compile
+    echo "==> 4. Building brave (this will take many hours)..."
     pnpm run build
-    
-    echo 'Build complete! Binary should be in out/Release/brave'
-  "
+
+    echo "==> Build complete! Binary: $BUILD_DIR/src/out/Release/brave"
+  '';
+in
+pkgs.writeShellScriptBin "brave-origin-build" ''
+  exec ${fhsEnv}/bin/brave-build-env ${buildScript}/bin/build-brave-origin-from-source "$@"
 ''

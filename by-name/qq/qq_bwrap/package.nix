@@ -4,6 +4,7 @@
   qq,
   bubblewrap,
   makeWrapper,
+  flatpak-xdg-utils,
   withMacFix ? false,
   slirp4netns ? null,
   socat ? null,
@@ -18,7 +19,11 @@ stdenv.mkDerivation (finalAttrs: {
   version = qq.version;
 
   nativeBuildInputs = [ makeWrapper ];
-  buildInputs = lib.optionals withMacFix [ slirp4netns socat iproute2 ];
+  buildInputs = lib.optionals withMacFix [
+    slirp4netns
+    socat
+    iproute2
+  ];
 
   src = qq;
 
@@ -30,9 +35,9 @@ stdenv.mkDerivation (finalAttrs: {
 
   installPhase = ''
     runHook preInstall
-    
+
     mkdir -p $out/bin $out/libexec $out/share
-    
+
     # Copy desktop and icons from qq
     if [ -d "${qq}/share/applications" ]; then
       cp -r ${qq}/share/applications $out/share/
@@ -40,16 +45,16 @@ stdenv.mkDerivation (finalAttrs: {
     if [ -d "${qq}/share/icons" ]; then
       cp -r ${qq}/share/icons $out/share/
     fi
-    
+
     if [ -f "$out/share/applications/qq.desktop" ]; then
       substituteInPlace $out/share/applications/qq.desktop \
         --replace-fail "Exec=${qq}/bin/qq" "Exec=qq" \
         --replace-fail "Icon=${qq}/share/icons/hicolor/512x512/apps/qq.png" "Icon=qq"
     fi
-    
+
     cat << 'EOF' > $out/libexec/qq_normal
     #!/bin/bash
-    
+
     USER_RUN_DIR="/run/user/$(id -u)"
     XAUTHORITY="''${XAUTHORITY:-$HOME/.Xauthority}"
     XDG_CONFIG_HOME="''${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -61,14 +66,14 @@ stdenv.mkDerivation (finalAttrs: {
         fi
         QQ_DOWNLOAD_DIR="''${XDG_DOWNLOAD_DIR:-$HOME/Downloads}"
     fi
-    
+
     if [ "''${QQ_DOWNLOAD_DIR%/}" = "''${HOME}" ]; then
         QQ_DOWNLOAD_DIR="''${HOME}/Downloads"
     fi
-    
+
     mkdir -p "''${QQ_APP_DIR}"
     mkdir -p "''${QQ_DOWNLOAD_DIR}"
-    
+
     bwrap_flags_file="''${XDG_CONFIG_HOME}/qq-bwrap-flags.conf"
     declare -a bwrap_flags
     if [[ -f "''${bwrap_flags_file}" ]]; then
@@ -78,7 +83,7 @@ stdenv.mkDerivation (finalAttrs: {
             fi
         done < "''${bwrap_flags_file}"
     fi
-    
+
     electron_flags_file="''${XDG_CONFIG_HOME}/qq-electron-flags.conf"
     declare -a electron_flags
     if [[ -f "''${electron_flags_file}" ]]; then
@@ -88,7 +93,7 @@ stdenv.mkDerivation (finalAttrs: {
             fi
         done < "''${electron_flags_file}"
     fi
-    
+
     # 移除无用崩溃报告和日志 (Before start)
     rm -rf "''${QQ_APP_DIR}/crash_files"
     touch "''${QQ_APP_DIR}/crash_files"
@@ -112,6 +117,8 @@ stdenv.mkDerivation (finalAttrs: {
     if [ -d "''${QQ_HOTUPDATE_DIR}" ]; then
         rm -rf "''${QQ_HOTUPDATE_DIR}/"*.zip
     fi
+
+    export PATH="${flatpak-xdg-utils}/bin:$PATH"
 
     ${bubblewrap}/bin/bwrap \
         --new-session --cap-drop ALL --unshare-user-try --unshare-pid --unshare-cgroup-try \
@@ -147,7 +154,7 @@ stdenv.mkDerivation (finalAttrs: {
         --setenv LITELOADERQQNT_PROFILE "''${QQ_APP_DIR}/LiteLoaderQQNT" \
         "''${bwrap_flags[@]}" \
         ${qq}/bin/qq "''${electron_flags[@]}" "$@"
-    
+
     EXIT_CODE=$?
 
     # 移除无用崩溃报告和日志 (After start)
@@ -179,10 +186,14 @@ stdenv.mkDerivation (finalAttrs: {
         sleep 0.01
     done
     unset http_proxy https_proxy ftp_proxy all_proxy
-    ${if withMacFix then "${socat}/bin/socat" else "socat"} tcp-listen:94301,reuseaddr,fork tcp:127.0.0.1:4301 &
-    ${if withMacFix then "${socat}/bin/socat" else "socat"} tcp-listen:94310,reuseaddr,fork tcp:127.0.0.1:4310 &
+    ${
+      if withMacFix then "${socat}/bin/socat" else "socat"
+    } tcp-listen:94301,reuseaddr,fork tcp:127.0.0.1:4301 &
+    ${
+      if withMacFix then "${socat}/bin/socat" else "socat"
+    } tcp-listen:94310,reuseaddr,fork tcp:127.0.0.1:4310 &
     ${qq}/bin/qq --no-proxy-server "$@"
-    
+
     # 移除无用崩溃报告和日志
     rm -rf "''${QQ_APP_DIR}/crash_files"
     touch "''${QQ_APP_DIR}/crash_files"
@@ -209,7 +220,7 @@ stdenv.mkDerivation (finalAttrs: {
         QQ_DOWNLOAD_DIR="''${XDG_DOWNLOAD_DIR:-$HOME/Downloads}"
     fi
     if [ "''${QQ_DOWNLOAD_DIR%/}" = "''${HOME}" ]; then QQ_DOWNLOAD_DIR="''${HOME}/Downloads"; fi
-    
+
     mkdir -p "''${QQ_APP_DIR}"
     mkdir -p "''${QQ_DOWNLOAD_DIR}"
 
@@ -247,6 +258,8 @@ stdenv.mkDerivation (finalAttrs: {
 
     INFO_DIR=$(mktemp -d)
     INFO_FILE=$INFO_DIR/info
+
+    export PATH="${flatpak-xdg-utils}/bin:$PATH"
 
     ${bubblewrap}/bin/bwrap --new-session --unshare-user-try --unshare-cgroup-try \
         --unshare-user \
@@ -288,7 +301,7 @@ stdenv.mkDerivation (finalAttrs: {
         --setenv INFO_FILE "''${INFO_FILE}" \
         "''${bwrap_flags[@]}" \
         $out/libexec/qq_inner "''${electron_flags[@]}" "$@" &
-    
+
     if [ "$?" -ne 0 ]; then
         rm "$INFO_FILE"
         exit 1
@@ -297,7 +310,9 @@ stdenv.mkDerivation (finalAttrs: {
     PID="$(cat "$INFO_FILE")"
 
     SLIRP_API_SOCKET=$INFO_DIR/slirp.sock
-    ${if withMacFix then "${slirp4netns}/bin/slirp4netns" else "slirp4netns"} --configure --mtu=65520 --disable-host-loopback --enable-ipv6 "$PID" eth0 --macaddress "$qq_mac" --api-socket "$SLIRP_API_SOCKET" &
+    ${
+      if withMacFix then "${slirp4netns}/bin/slirp4netns" else "slirp4netns"
+    } --configure --mtu=65520 --disable-host-loopback --enable-ipv6 "$PID" eth0 --macaddress "$qq_mac" --api-socket "$SLIRP_API_SOCKET" &
     SLIRP_PID=$!
     while [ ! -S "$SLIRP_API_SOCKET" ]; do sleep 0.01; done
 
@@ -313,14 +328,16 @@ stdenv.mkDerivation (finalAttrs: {
         shift 2
         local ports=("$@")
         for port in "''${ports[@]}"; do
-            result=$(echo -n "{\"execute\": \"add_hostfwd\", \"arguments\": {\"proto\": \"$proto\", \"host_addr\": \"127.0.0.1\", \"host_port\": $port, \"guest_port\": $guest_port}}" | ${if withMacFix then "${socat}/bin/socat" else "socat"} UNIX-CONNECT:$SLIRP_API_SOCKET -)
+            result=$(echo -n "{\"execute\": \"add_hostfwd\", \"arguments\": {\"proto\": \"$proto\", \"host_addr\": \"127.0.0.1\", \"host_port\": $port, \"guest_port\": $guest_port}}" | ${
+              if withMacFix then "${socat}/bin/socat" else "socat"
+            } UNIX-CONNECT:$SLIRP_API_SOCKET -)
             if [[ $result != *"error"* ]]; then
                 return 0
             fi
         done
         return 1
     }
-    
+
     https_ports=(4301 4303 4305 4307 4309)
     http_ports=(4310 4308 4306 4304 4302)
     add_hostfwd "tcp" 94301 "''${https_ports[@]}"
@@ -338,11 +355,13 @@ stdenv.mkDerivation (finalAttrs: {
     cat << 'EOF' > $out/bin/qq
     #!/bin/bash
     XDG_CONFIG_HOME="''${XDG_CONFIG_HOME:-$HOME/.config}"
-    
+
     if [ "''${QQ_FIX_MAC}" != 1 ]; then
         if [ -s "''${XDG_CONFIG_HOME}/qq-fix-mac.conf" ]; then
             export QQ_FIX_MAC=1
-        elif ${if withMacFix then "${iproute2}/bin/ip" else "ip"} link show 2>/dev/null | grep -q "docker"; then
+        elif ${
+          if withMacFix then "${iproute2}/bin/ip" else "ip"
+        } link show 2>/dev/null | grep -q "docker"; then
             export QQ_FIX_MAC=1
         elif [ -n "$(${if withMacFix then "${iproute2}/bin/ip" else "ip"} tuntap 2>/dev/null)" ]; then
             export QQ_FIX_MAC=1
@@ -350,18 +369,23 @@ stdenv.mkDerivation (finalAttrs: {
     fi
 
     if [ "''${QQ_FIX_MAC}" == 1 ]; then
-        ${if withMacFix then ''exec $out/libexec/qq_mac_fix "$@"'' else ''
-        echo "WARNING: QQ_FIX_MAC is set, but qq_bwrap was not built with withMacFix=true."
-        echo "Please rebuild with withMacFix=true to use MAC spoofing. Falling back to normal."
-        exec $out/libexec/qq_normal "$@"
-        ''}
+        ${
+          if withMacFix then
+            ''exec $out/libexec/qq_mac_fix "$@"''
+          else
+            ''
+              echo "WARNING: QQ_FIX_MAC is set, but qq_bwrap was not built with withMacFix=true."
+              echo "Please rebuild with withMacFix=true to use MAC spoofing. Falling back to normal."
+              exec $out/libexec/qq_normal "$@"
+            ''
+        }
     else
         exec $out/libexec/qq_normal "$@"
     fi
     EOF
 
     chmod +x $out/libexec/* $out/bin/*
-    
+
     runHook postInstall
   '';
 
@@ -370,7 +394,10 @@ stdenv.mkDerivation (finalAttrs: {
     homepage = "https://im.qq.com/linuxqq/index.shtml";
     license = licenses.unfree;
     maintainers = with maintainers; [ ];
-    platforms = [ "x86_64-linux" "aarch64-linux" ];
+    platforms = [
+      "x86_64-linux"
+      "aarch64-linux"
+    ];
     mainProgram = "qq";
   };
 })

@@ -86,7 +86,31 @@ stdenv.mkDerivation (finalAttrs: {
         done < "''${electron_flags_file}"
     fi
     
-    exec ${bubblewrap}/bin/bwrap \
+    # 移除无用崩溃报告和日志 (Before start)
+    rm -rf "''${QQ_APP_DIR}/crash_files"
+    touch "''${QQ_APP_DIR}/crash_files"
+    if [ -d "''${QQ_APP_DIR}/log" ]; then
+        rm -rf "''${QQ_APP_DIR}/log"
+    fi
+    for nt_qq_userdata in "''${QQ_APP_DIR}/nt_qq_"*; do
+        if [ -d "''${nt_qq_userdata}/log" ]; then
+            rm -rf "''${nt_qq_userdata}/log"
+        fi
+        if [ -d "''${nt_qq_userdata}/log-cache" ]; then
+            rm -rf "''${nt_qq_userdata}/log-cache"
+        fi
+    done
+    if [ -d "''${QQ_APP_DIR}/Crashpad" ]; then
+        rm -rf "''${QQ_APP_DIR}/Crashpad"
+    fi
+
+    # 处理旧版本/热更新
+    QQ_HOTUPDATE_DIR="''${QQ_APP_DIR}/versions"
+    if [ -d "''${QQ_HOTUPDATE_DIR}" ]; then
+        rm -rf "''${QQ_HOTUPDATE_DIR}/"*.zip
+    fi
+
+    ${bubblewrap}/bin/bwrap \
         --new-session --cap-drop ALL --unshare-user-try --unshare-pid --unshare-cgroup-try \
         --ro-bind /nix /nix \
         --ro-bind-try /etc/machine-id /etc/machine-id \
@@ -120,6 +144,28 @@ stdenv.mkDerivation (finalAttrs: {
         --setenv LITELOADERQQNT_PROFILE "''${QQ_APP_DIR}/LiteLoaderQQNT" \
         "''${bwrap_flags[@]}" \
         ${qq}/bin/qq "''${electron_flags[@]}" "$@"
+    
+    EXIT_CODE=$?
+
+    # 移除无用崩溃报告和日志 (After start)
+    rm -rf "''${QQ_APP_DIR}/crash_files"
+    touch "''${QQ_APP_DIR}/crash_files"
+    if [ -d "''${QQ_APP_DIR}/log" ]; then
+        rm -rf "''${QQ_APP_DIR}/log"
+    fi
+    for nt_qq_userdata in "''${QQ_APP_DIR}/nt_qq_"*; do
+        if [ -d "''${nt_qq_userdata}/log" ]; then
+            rm -rf "''${nt_qq_userdata}/log"
+        fi
+        if [ -d "''${nt_qq_userdata}/log-cache" ]; then
+            rm -rf "''${nt_qq_userdata}/log-cache"
+        fi
+    done
+    if [ -d "''${QQ_APP_DIR}/Crashpad" ]; then
+        rm -rf "''${QQ_APP_DIR}/Crashpad"
+    fi
+
+    exit $EXIT_CODE
     EOF
     
     chmod +x $out/bin/qq

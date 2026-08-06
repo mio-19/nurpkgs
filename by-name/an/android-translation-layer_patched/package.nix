@@ -25,6 +25,8 @@
       ./android-translation-layer-newpipe-esc-stub.patch
       ./android-translation-layer-newpipe-red-layer.patch
       ./android-translation-layer-wifiinfo-ssid-stub.patch
+      ./android-translation-layer-apk-sourcedir.patch
+      ./android-translation-layer-wifi-ap-stub.patch
     ];
     postInstall = (old.postInstall or "") + ''
       mkdir -p $out/etc/security

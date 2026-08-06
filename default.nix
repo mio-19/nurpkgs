@@ -93,9 +93,13 @@ with (import ./private.nix { inherit pkgs; });
       patches = (old.patches or [ ]) ++ [ ./patches/ghidra-ui-scale.patch ];
     })
   );
-  android-translation-layer_patched = v3override (
+  android-translation-layer_patched = v3overridegcc (
     (import ./packages.nix { inherit pkgs no-ifd; }).android-translation-layer.overrideAttrs (old: {
-      patches = (old.patches or [ ]) ++ [ ./patches/android-translation-layer-bitmap-unlock.patch ];
+      patches = (old.patches or [ ]) ++ [
+        ./patches/android-translation-layer-bitmap-unlock.patch
+        ./patches/android-translation-layer-kotatsu-stub.patch
+        ./patches/android-translation-layer-mr290.patch
+      ];
     })
   );
 

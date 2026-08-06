@@ -1,3 +1,7 @@
+From: Developer
+Date: Thu, 06 Aug 2026
+Subject: [PATCH] add Kotatsu SearchRecentSuggestions stub
+
 diff --git a/src/api-impl/android/provider/SearchRecentSuggestions.java b/src/api-impl/android/provider/SearchRecentSuggestions.java
 new file mode 100644
 index 00000000..315ee36c

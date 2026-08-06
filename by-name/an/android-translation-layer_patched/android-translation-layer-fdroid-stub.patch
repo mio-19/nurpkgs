@@ -1,3 +1,7 @@
+From: Developer
+Date: Thu, 06 Aug 2026
+Subject: [PATCH] add F-Droid Settings.System.canWrite stub
+
 diff --git a/src/api-impl/android/provider/Settings.java b/src/api-impl/android/provider/Settings.java
 index e19bdde0..08d15fdd 100644
 --- a/src/api-impl/android/provider/Settings.java

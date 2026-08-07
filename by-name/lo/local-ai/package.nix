@@ -22,6 +22,9 @@
   opencv,
   curl,
   git,
+  fetchNpmDeps,
+  npmHooks,
+  nodejs,
 
   enable_upx ? true,
   upx,
@@ -447,6 +450,35 @@ let
       ${cp} ${stable-diffusion} sources/stablediffusion-ggml.cpp
     '';
 
+  frontend = stdenv.mkDerivation {
+    pname = "${pname}-frontend";
+    inherit version src;
+
+    sourceRoot = "${src.name}/core/http/react-ui";
+
+    npmDeps = fetchNpmDeps {
+      src = "${src}/core/http/react-ui";
+      hash = "sha256-CWG9xlnukGI/9KqyCOslTJtYJ7TireRH4TWI01WVzRo=";
+    };
+
+    nativeBuildInputs = [
+      nodejs
+      npmHooks.npmConfigHook
+    ];
+
+    buildPhase = ''
+      runHook preBuild
+      npm run build
+      runHook postBuild
+    '';
+
+    installPhase = ''
+      runHook preInstall
+      cp -r dist $out
+      runHook postInstall
+    '';
+  };
+
   self = buildGoModule.override { stdenv = effectiveStdenv; } {
     inherit pname version src;
 
@@ -497,10 +529,9 @@ let
         cp -r --no-preserve=mode,ownership ${stable-diffusion}/build "$sd_dir/build"
       fi
 
-      # satisfy go:embed directive for react UI with a dummy file
-      # LocalAI gracefully handles a missing UI if the file is empty/invalid
+      # Inject pre-built React UI
       mkdir -p core/http/react-ui/dist
-      touch core/http/react-ui/dist/index.html
+      cp -r --no-preserve=mode,ownership ${frontend}/* core/http/react-ui/dist/
 
       # avoid rebuild of prebuilt make targets
       touch backend-assets/grpc/* backend-assets/util/*

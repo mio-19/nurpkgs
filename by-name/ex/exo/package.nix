@@ -121,8 +121,9 @@ python313Packages.buildPythonApplication {
   meta = with lib; {
     description = "Run your own AI cluster at home with everyday devices";
     homepage = "https://github.com/exo-explore/exo";
+    changelog = "https://github.com/exo-explore/exo/releases/tag/v${version}";
     license = licenses.asl20;
-    platforms = [ "x86_64-darwin" "aarch64-darwin" ];
+    platforms = lib.platforms.darwin;
     mainProgram = "exo";
   };
 }

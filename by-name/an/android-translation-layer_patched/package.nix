@@ -38,6 +38,7 @@
       ./android-translation-layer-gms-availability-stub.patch
       ./android-translation-layer-firebase-stubs.patch
       ./android-translation-layer-gms-client-stubs.patch
+      ./android-translation-layer-gms-tasks-stubs.patch
     ];
     postInstall = (old.postInstall or "") + ''
       mkdir -p $out/etc/security

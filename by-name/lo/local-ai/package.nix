@@ -581,7 +581,7 @@ let
 
     proxyVendor = true;
 
-    # should be passed as makeFlags, but build system failes with strings
+    # should be passed as makeFlags, but build system fails with strings
     # containing spaces
     env.GO_TAGS = builtins.concatStringsSep " " GO_TAGS;
     env.LD_FLAGS = "-s -w -X github.com/mudler/LocalAI/internal.Version=v${version} -X github.com/mudler/LocalAI/internal.Commit=unknown";
@@ -625,8 +625,8 @@ let
       runHook postInstall
     '';
 
-    # patching rpath with patchelf doens't work. The executable
-    # raises an segmentation fault
+    # patching rpath with patchelf doesn't work. The executable
+    # raises a segmentation fault
     postFixup =
       let
         LD_LIBRARY_PATH =

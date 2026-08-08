@@ -53,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _uploadFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.pickFiles();
     if (result != null && result.files.single.path != null) {
       final file = File(result.files.single.path!);
       final bytes = await file.readAsBytes();

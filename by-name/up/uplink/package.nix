@@ -38,7 +38,10 @@ if [ "$1" = "build-cmake" ]; then
     else
         cargo build --manifest-path "$MANIFEST"
     fi
-    find "$CARGOKIT_MANIFEST_DIR/target" -name libhub.so -exec cp {} "$CARGOKIT_OUTPUT_DIR/" \;
+    LIB_PATH=$(find /build -name libhub.so | head -n 1)
+    if [ -n "$LIB_PATH" ] && [ "$LIB_PATH" != "$CARGOKIT_OUTPUT_DIR/libhub.so" ]; then
+        cp "$LIB_PATH" "$CARGOKIT_OUTPUT_DIR/libhub.so"
+    fi
 fi
 EOF
       chmod +x ./rinf_patched/cargokit/run_build_tool.sh

@@ -24,10 +24,17 @@ diff -ur a/src/api-impl-jni/graphics/android_graphics_Bitmap.c b/src/api-impl-jn
 +	gdk_texture_download(texture, tmp, stride * 4);
 +	uint32_t *dst = (uint32_t *)(array + offset);
 +	for (int i = 0; i < height * stride; i++) {
-+		uint32_t r = tmp[i * 4 + 0];
++		uint32_t b = tmp[i * 4 + 0]; // GDK_MEMORY_DEFAULT is BGRA
 +		uint32_t g = tmp[i * 4 + 1];
-+		uint32_t b = tmp[i * 4 + 2];
++		uint32_t r = tmp[i * 4 + 2];
 +		uint32_t a = tmp[i * 4 + 3];
++		// GTK returns pre-multiplied alpha. We should unpremultiply it for Android,
++		// but if we don't, at least the color channels must be in the right place!
++		if (a > 0 && a < 255) {
++			r = (r * 255) / a;
++			g = (g * 255) / a;
++			b = (b * 255) / a;
++		}
 +		dst[i] = (a << 24) | (r << 16) | (g << 8) | (b << 0);
 +	}
 +	g_free(tmp);

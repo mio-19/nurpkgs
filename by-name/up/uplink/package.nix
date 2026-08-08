@@ -1,4 +1,4 @@
-{ lib, flutter, rustPlatform, cargo, rustc, pkg-config, cmake, ninja, clang }:
+{ lib, flutter, rustPlatform, cargo, rustc, pkg-config, cmake, ninja, clang, gtk3, glib, pcre2 }:
 
 flutter.buildFlutterApplication {
   pname = "uplink";
@@ -13,6 +13,10 @@ flutter.buildFlutterApplication {
 
   nativeBuildInputs = [
     cargo rustc pkg-config cmake ninja rustPlatform.cargoSetupHook clang
+  ];
+  
+  buildInputs = [
+    gtk3 glib pcre2
   ];
   
   preBuild = ''

@@ -33,14 +33,12 @@ flutter.buildFlutterApplication {
 set -e
 if [ "$1" = "build-cmake" ]; then
     MANIFEST="$CARGOKIT_MANIFEST_DIR/Cargo.toml"
-    TARGET_DIR="$CARGOKIT_MANIFEST_DIR/../../target"
     if [ "$CARGOKIT_CONFIGURATION" = "Release" ]; then
         cargo build --manifest-path "$MANIFEST" --release
-        cp "$TARGET_DIR/release/libhub.so" "$CARGOKIT_OUTPUT_DIR/libhub.so"
     else
         cargo build --manifest-path "$MANIFEST"
-        cp "$TARGET_DIR/debug/libhub.so" "$CARGOKIT_OUTPUT_DIR/libhub.so"
     fi
+    find /build -name libhub.so -exec cp {} "$CARGOKIT_OUTPUT_DIR/" \; || true
 fi
 EOF
       chmod +x ./rinf_patched/cargokit/run_build_tool.sh

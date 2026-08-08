@@ -35,15 +35,10 @@ if [ "$1" = "build-cmake" ]; then
     MANIFEST="$CARGOKIT_MANIFEST_DIR/Cargo.toml"
     if [ "$CARGOKIT_CONFIGURATION" = "Release" ]; then
         cargo build --manifest-path "$MANIFEST" --release
+        cp target/release/libhub.so "$CARGOKIT_OUTPUT_DIR/libhub.so"
     else
         cargo build --manifest-path "$MANIFEST"
-    fi
-    LIB_PATH=$(find /build -name libhub.so -path "*/target/*" | head -n 1 || true)
-    if [ -n "$LIB_PATH" ]; then
-        cp "$LIB_PATH" "$CARGOKIT_OUTPUT_DIR/libhub.so"
-    else
-        echo "ERROR: libhub.so not found!"
-        exit 1
+        cp target/debug/libhub.so "$CARGOKIT_OUTPUT_DIR/libhub.so"
     fi
 fi
 EOF

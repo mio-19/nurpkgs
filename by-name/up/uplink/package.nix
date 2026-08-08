@@ -38,9 +38,12 @@ if [ "$1" = "build-cmake" ]; then
     else
         cargo build --manifest-path "$MANIFEST"
     fi
-    LIB_PATH=$(find /build -name libhub.so | head -n 1)
-    if [ -n "$LIB_PATH" ] && [ "$LIB_PATH" != "$CARGOKIT_OUTPUT_DIR/libhub.so" ]; then
+    LIB_PATH=$(find /build -name libhub.so | grep -v "plugins/rinf" | head -n 1)
+    if [ -n "$LIB_PATH" ]; then
         cp "$LIB_PATH" "$CARGOKIT_OUTPUT_DIR/libhub.so"
+    else
+        echo "ERROR: libhub.so not found!"
+        exit 1
     fi
 fi
 EOF

@@ -84,7 +84,7 @@ pub async fn upload_file(filename: String, data: Vec<u8>) -> Result<String, Stri
     }
     
     // Provider 3: uguu.se
-    let part = reqwest::multipart::Part::bytes(data).file_name(filename);
+    let part = reqwest::multipart::Part::bytes(data.clone()).file_name(filename.clone());
     let form = reqwest::multipart::Form::new().part("files[]", part);
 
     match client

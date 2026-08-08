@@ -108,5 +108,26 @@ pub async fn upload_file(filename: String, data: Vec<u8>) -> Result<String, Stri
         Ok(res) => last_err = format!("uguu.se HTTP {}", res.status()),
     }
 
+    // Provider 4: pasteboard.co
+    let part = reqwest::multipart::Part::bytes(data).file_name(filename);
+    let form = reqwest::multipart::Form::new().part("file", part);
+
+    match client
+        .post("https://www.pasteboard.co/api/upload")
+        .multipart(form)
+        .send()
+        .await
+    {
+        Ok(res) if res.status().is_success() => {
+            if let Ok(json) = res.json::<serde_json::Value>().await {
+                if let Some(url) = json.get("url").and_then(|u| u.as_str()) {
+                    return Ok(format!("https://pasteboard.co{}", url));
+                }
+            }
+        }
+        Err(e) => last_err = e.to_string(),
+        Ok(res) => last_err = format!("pasteboard.co HTTP {}", res.status()),
+    }
+
     Err(format!("All file upload providers failed. Last error: {}", last_err))
 }

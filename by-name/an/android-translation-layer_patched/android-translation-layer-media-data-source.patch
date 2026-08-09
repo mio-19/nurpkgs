@@ -25,7 +25,7 @@
  	'android/media/RingtoneManager.java',
  	'android/media/SoundPool.java',
 --- a/src/api-impl/android/media/MediaMetadataRetriever.java.bak	2026-08-09 16:07:00.584648826 +1000
-+++ b/src/api-impl/android/media/MediaMetadataRetriever.java	2026-08-09 16:07:09.199647810 +1000
++++ b/src/api-impl/android/media/MediaMetadataRetriever.java	2026-08-09 16:14:22.386818014 +1000
 @@ -23,6 +23,10 @@
  		mediaPlayer.setDataSource(path);
  	}
@@ -35,5 +35,16 @@
 +	}
 +
  	public byte[] getEmbeddedPicture() {
+ 		return null;
+ 	}
+@@ -36,6 +40,10 @@
+ 		}
+ 	}
+ 
++	public Bitmap getFrameAtTime(long timeUs, int option) {
++		return null;
++	}
++
+ 	public Bitmap getFrameAtTime(long time) {
  		return null;
  	}

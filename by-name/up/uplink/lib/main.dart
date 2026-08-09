@@ -153,17 +153,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             onPressed: _uploadText, 
-                            icon: const Icon(Icons.text_fields),
+                            icon: const Icon(Icons.cloud_upload),
                             label: const Text('Upload Text'),
-                          ),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                            onPressed: () => _uploadFile(imageOnly: true), 
-                            icon: const Icon(Icons.image),
-                            label: const Text('Upload Image'),
                           ),
                           OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
@@ -172,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             onPressed: () => _uploadFile(imageOnly: false), 
                             icon: const Icon(Icons.insert_drive_file),
-                            label: const Text('Upload File'),
+                            label: const Text('Select File to Upload'),
                           ),
                         ],
                       ),

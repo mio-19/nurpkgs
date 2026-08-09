@@ -472,6 +472,30 @@ fn init_macro_economy() {
     info!("Simulating global supply chains and dynamic market fluctuations...");
 }
 
+#[cfg(kani)]
+mod verification {
+    use super::*;
+
+    #[kani::proof]
+    fn verify_trust_score_penalization() {
+        let mut ledger = TrustLedger::default();
+        
+        // Use non-deterministic values for the test
+        let raw_entity: u32 = kani::any();
+        let entity = Entity::from_raw(raw_entity);
+        
+        let penalty: f32 = kani::any();
+        // Constrain the penalty to valid bounds
+        kani::assume(penalty >= 0.0 && penalty <= 1.0);
+        
+        ledger.penalize(entity, penalty);
+        let score = ledger.peer_scores.get(&entity).unwrap();
+        
+        // Ensure the formal property holds: score correctly drops from 1.0
+        assert!(*score == 1.0 - penalty, "Trust score should exactly reflect the applied penalty");
+    }
+}
+
 /// Polls the standard input channel non-blockingly and parses text commands
 fn read_terminal_input(
     receiver: Res<StdinReceiver>,

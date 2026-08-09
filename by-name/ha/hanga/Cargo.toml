@@ -1,7 +1,7 @@
 [workspace]
 members = [
     ".",
-    "mods/testbed",
+    "mods/testbed", "mods/urban_chaos",
 ]
 
 [package]

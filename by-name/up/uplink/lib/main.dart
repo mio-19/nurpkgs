@@ -111,14 +111,14 @@ class _MyHomePageState extends State<MyHomePage> {
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(16.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 600),
               child: Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 child: Padding(
-                  padding: const EdgeInsets.all(32.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -182,9 +182,14 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
+                      TextButton.icon(
+                        onPressed: _handlePaste,
+                        icon: const Icon(Icons.paste, size: 16, color: Colors.grey),
+                        label: const Text('Paste Image from Clipboard', style: TextStyle(color: Colors.grey)),
+                      ),
                       const Text(
-                        "Tip: You can press Ctrl+V anywhere to paste and upload an image!",
+                        "Tip: Desktop users can press Ctrl+V anywhere!",
                         style: TextStyle(color: Colors.grey, fontSize: 12),
                         textAlign: TextAlign.center,
                       ),

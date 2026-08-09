@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'src/bindings/bindings.dart';
+import 'package:pasteboard/pasteboard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +48,36 @@ class _MyHomePageState extends State<MyHomePage> {
         _status = event.message.url ?? event.message.error ?? '';
       });
     });
+    
+    HardwareKeyboard.instance.addHandler(_handleKeyEvent);
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
+    _textController.dispose();
+    super.dispose();
+  }
+
+  bool _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.keyV) {
+      final isControlPressed = HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) ||
+                               HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight) ||
+                               HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.metaLeft) ||
+                               HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.metaRight);
+      if (isControlPressed) {
+        _handlePaste();
+        return false; // let it propagate just in case
+      }
+    }
+    return false;
+  }
+
+  Future<void> _handlePaste() async {
+    final imageBytes = await Pasteboard.image;
+    if (imageBytes != null && imageBytes.isNotEmpty) {
+      UploadFileRequest(filename: 'pasted_image.png').sendSignalToRust(imageBytes);
+    }
   }
 
   void _uploadText() {

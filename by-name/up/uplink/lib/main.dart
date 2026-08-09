@@ -9,7 +9,7 @@ import 'package:rinf/rinf.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeRust(assignRustSignal: assignRustSignal);
+  await initializeRust(assignRustSignal);
   runApp(const MyApp());
 }
 

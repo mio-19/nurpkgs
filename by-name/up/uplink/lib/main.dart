@@ -74,13 +74,38 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _handlePaste() async {
-    final imageBytes = await Pasteboard.image;
-    if (imageBytes != null && imageBytes.isNotEmpty) {
-      UploadFileRequest(filename: 'pasted_image.png').sendSignalToRust(imageBytes);
+    setState(() {
+      _status = 'Reading clipboard...';
+    });
+    try {
+      final imageBytes = await Pasteboard.image;
+      if (imageBytes != null && imageBytes.isNotEmpty) {
+        setState(() {
+          _status = 'Uploading pasted image...';
+        });
+        UploadFileRequest(filename: 'pasted_image.png').sendSignalToRust(imageBytes);
+      } else {
+        setState(() {
+          _status = 'No image found on clipboard!';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _status = 'Clipboard error: $e';
+      });
     }
   }
 
   void _uploadText() {
+    if (_textController.text.trim().isEmpty) {
+      setState(() {
+        _status = 'Please enter some text first.';
+      });
+      return;
+    }
+    setState(() {
+      _status = 'Uploading text...';
+    });
     UploadTextRequest(text: _textController.text).sendSignalToRust();
   }
 
@@ -89,6 +114,9 @@ class _MyHomePageState extends State<MyHomePage> {
       type: imageOnly ? FileType.image : FileType.any,
     );
     if (result != null && result.files.single.path != null) {
+      setState(() {
+        _status = 'Uploading file...';
+      });
       final file = File(result.files.single.path!);
       final bytes = await file.readAsBytes();
       final filename = result.files.single.name;

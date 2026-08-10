@@ -138,6 +138,32 @@ pub extern "C" fn calculate_wanted_level(action_type: i32, current_level: i32) -
         _ => current_level,
     }
 }
+
+/// WASM exported function for dynamic economy pricing
+#[unsafe(no_mangle)]
+pub extern "C" fn compute_economy_price(base_price: i32, supply: i32, demand: i32) -> i32 {
+    if supply == 0 {
+        return base_price * 10;
+    }
+    // Simple dynamic pricing model
+    let price = (base_price * demand) / supply;
+    price.max(1) // Price never drops below 1
+}
+
+/// WASM exported function for AI storyteller event generation
+#[unsafe(no_mangle)]
+pub extern "C" fn generate_story_event(player_level: i32) -> i32 {
+    // 0 = peaceful day
+    // 1 = small bandit raid
+    // 2 = alien invasion
+    if player_level < 5 {
+        return 0; // Peaceful
+    } else if player_level < 20 {
+        return 1; // Bandits
+    } else {
+        return 2; // Aliens
+    }
+}
 #[cfg(kani)]
 mod verification {
     use super::*;

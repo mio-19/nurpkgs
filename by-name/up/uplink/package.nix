@@ -103,7 +103,7 @@ lib.overrideDerivation (buildFlutterApp {
         if [[ "$next_is_out" == "1" ]]; then
             out_file="$i"
             break
-        elif [[ "$i" == "-o" ]]; then
+        elif [[ "$i" == "-o" || "$i" == "-output" ]]; then
             next_is_out=1
         fi
     done

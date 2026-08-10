@@ -43,7 +43,7 @@ lib.overrideDerivation (buildFlutterApp {
     echo 'ENABLE_USER_SCRIPT_SANDBOXING = NO' >> macos/Flutter/Flutter-Debug.xcconfig
 
     # Fix permissions for the embedded framework so lipo does not fail with permission denied
-    sed -i '' 's|macos_assemble.sh embed|macos_assemble.sh embed \&\& chmod -R +w \\\\"$BUILT_PRODUCTS_DIR\\\\"|g' macos/Runner.xcodeproj/project.pbxproj
+    sed 's|macos_assemble.sh embed|macos_assemble.sh embed \&\& chmod -R +w \\\\"$BUILT_PRODUCTS_DIR\\\\"|g' macos/Runner.xcodeproj/project.pbxproj > temp.pbxproj && mv temp.pbxproj macos/Runner.xcodeproj/project.pbxproj
 
     # Create a fake DEVELOPER_DIR to wrap xcodebuild since flutter hardcodes /usr/bin/arch xcrun
     export REAL_DEV_DIR=/Applications/Xcode.app/Contents/Developer

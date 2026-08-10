@@ -42,9 +42,6 @@ lib.overrideDerivation (buildFlutterApp {
     echo 'ENABLE_USER_SCRIPT_SANDBOXING = NO' >> macos/Flutter/Flutter-Release.xcconfig
     echo 'ENABLE_USER_SCRIPT_SANDBOXING = NO' >> macos/Flutter/Flutter-Debug.xcconfig
 
-    # Fix permissions for the embedded framework so lipo does not fail with permission denied
-    sed 's|macos_assemble.sh embed|macos_assemble.sh embed \&\& chmod -R +w \\"$BUILT_PRODUCTS_DIR\\"|g' macos/Runner.xcodeproj/project.pbxproj > temp.pbxproj && mv temp.pbxproj macos/Runner.xcodeproj/project.pbxproj
-
     # Create a fake DEVELOPER_DIR to wrap xcodebuild since flutter hardcodes /usr/bin/arch xcrun
     export REAL_DEV_DIR=/Applications/Xcode.app/Contents/Developer
     export FAKE_DEV_DIR="$(pwd)/.developer_dir"
@@ -52,10 +49,12 @@ lib.overrideDerivation (buildFlutterApp {
     
     # Symlink all contents of the real developer dir
     for file in "$REAL_DEV_DIR"/*; do
-        if [ "$(basename "$file")" != "usr" ]; then
+        if [[ "$(basename "$file")" != "usr" && "$(basename "$file")" != "Toolchains" ]]; then
             ln -s "$file" "$FAKE_DEV_DIR/"
         fi
     done
+    
+    # Handle usr/
     mkdir -p "$FAKE_DEV_DIR/usr"
     for file in "$REAL_DEV_DIR/usr"/*; do
         if [ "$(basename "$file")" != "bin" ]; then
@@ -66,14 +65,54 @@ lib.overrideDerivation (buildFlutterApp {
     for file in "$REAL_DEV_DIR/usr/bin"/*; do
         ln -s "$file" "$FAKE_DEV_DIR/usr/bin/"
     done
+
+    # Handle Toolchains/ to wrap lipo
+    mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+    for file in "$REAL_DEV_DIR/Toolchains"/*; do
+        if [ "$(basename "$file")" != "XcodeDefault.xctoolchain" ]; then
+            ln -s "$file" "$FAKE_DEV_DIR/Toolchains/"
+        fi
+    done
+    for file in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain"/*; do
+        if [ "$(basename "$file")" != "usr" ]; then
+            ln -s "$file" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/"
+        fi
+    done
+    mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr"
+    for file in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr"/*; do
+        if [ "$(basename "$file")" != "bin" ]; then
+            ln -s "$file" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/"
+        fi
+    done
+    for file in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"/*; do
+        ln -s "$file" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
+    done
     
-    # Remove symlinked xcodebuild and replace with our wrapper
+    # Remove symlinked xcodebuild and lipo, and replace with our wrappers
     rm "$FAKE_DEV_DIR/usr/bin/xcodebuild"
     cat << 'EOF2' > "$FAKE_DEV_DIR/usr/bin/xcodebuild"
     #!/bin/bash
     exec "$REAL_DEV_DIR/usr/bin/xcodebuild" -IDEPackageSupportDisableManifestSandbox=YES -IDEPackageSupportDisablePluginExecutionSandbox=YES "$@"
     EOF2
     chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
+
+    rm "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
+    cat << 'EOF3' > "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
+    #!/bin/bash
+    for i in "$@"; do
+        if [[ "$next_is_out" == "1" ]]; then
+            out_file="$i"
+            break
+        elif [[ "$i" == "-o" ]]; then
+            next_is_out=1
+        fi
+    done
+    if [[ -n "$out_file" ]]; then
+        chmod -R +w "$(dirname "$out_file")" || true
+    fi
+    exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
+    EOF3
+    chmod +x "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
     
     export DEVELOPER_DIR="$FAKE_DEV_DIR"
 

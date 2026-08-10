@@ -42,7 +42,7 @@ ocamlPackages.buildDunePackage rec {
     brr
     cid
     cmdliner
-    (cohttp-eio.overrideAttrs (old: { doCheck = false; }))
+    cohttp-eio
     datalog
     dune-build-info
     dune-site

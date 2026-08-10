@@ -471,9 +471,6 @@ fn player_movement(
         }
     }
 }
-        }
-    }
-}
 
 /// Allows the player to click and fracture blocks
 fn player_interaction(

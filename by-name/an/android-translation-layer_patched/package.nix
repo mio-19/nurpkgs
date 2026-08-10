@@ -5,6 +5,8 @@
   webp-pixbuf-loader,
   fetchpatch,
   wrapGAppsHook4,
+  gdk-pixbuf,
+  librsvg,
 }:
 
 (android-translation-layer.override {
@@ -16,6 +18,8 @@
     ];
     buildInputs = (old.buildInputs or [ ]) ++ [
       webp-pixbuf-loader
+      gdk-pixbuf
+      librsvg
     ];
     patches = (old.patches or [ ]) ++ [
       ./android-translation-layer-bitmap-unlock.patch
@@ -62,7 +66,17 @@
       ln -s ${cacert.unbundled}/etc/ssl/certs $out/etc/security/cacerts
     '';
     postFixup = (old.postFixup or "") + ''
+      export GDK_PIXBUF_MODULE_FILE="$out/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache"
+      mkdir -p "$(dirname "$GDK_PIXBUF_MODULE_FILE")"
+      ${gdk-pixbuf.dev}/bin/gdk-pixbuf-query-loaders \
+        ${gdk-pixbuf.out}/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so \
+        ${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so \
+        ${webp-pixbuf-loader}/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so \
+        > "$GDK_PIXBUF_MODULE_FILE"
+
       wrapProgram $out/bin/android-translation-layer \
+        "''${gappsWrapperArgs[@]}" \
+        --set GDK_PIXBUF_MODULE_FILE "$GDK_PIXBUF_MODULE_FILE" \
         --set ANDROID_ROOT $out
     '';
   })

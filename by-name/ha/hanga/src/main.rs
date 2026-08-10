@@ -589,6 +589,53 @@ mod verification {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #[test]
+        fn test_action_validator_distance(
+            px in -1000.0f32..1000.0,
+            py in -1000.0f32..1000.0,
+            pz in -1000.0f32..1000.0,
+            tx in -1000.0f32..1000.0,
+            ty in -1000.0f32..1000.0,
+            tz in -1000.0f32..1000.0,
+        ) {
+            let max_dist = 10.0;
+            let possible = is_action_physically_possible(px, py, pz, tx, ty, tz, max_dist);
+            
+            if possible {
+                // Property: If the Euclidean distance is valid, no individual axis 
+                // difference can be greater than the max distance.
+                assert!((px - tx).abs() <= max_dist, "X axis distance exceeded maximum");
+                assert!((py - ty).abs() <= max_dist, "Y axis distance exceeded maximum");
+                assert!((pz - tz).abs() <= max_dist, "Z axis distance exceeded maximum");
+            }
+        }
+        
+        #[test]
+        fn test_trust_ledger_penalization(
+            initial_score in 0.0f32..10.0,
+            penalty in 0.0f32..1.0,
+        ) {
+            let mut ledger = TrustLedger::default();
+            let entity = Entity::from_raw(42);
+            
+            // Set an initial score (simulate a peer that already has a score)
+            ledger.peer_scores.insert(entity, initial_score);
+            ledger.penalize(entity, penalty);
+            
+            let final_score = ledger.peer_scores.get(&entity).unwrap();
+            
+            // Property: The final score must exactly equal initial_score - penalty
+            prop_assert_eq!(*final_score, initial_score - penalty);
+        }
+    }
+}
+
 /// Polls the standard input channel non-blockingly and parses text commands
 fn read_terminal_input(
     receiver: Res<StdinReceiver>,

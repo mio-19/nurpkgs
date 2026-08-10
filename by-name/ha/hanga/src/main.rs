@@ -640,7 +640,7 @@ fn handle_p2p_connections(
         }
         
         // Receive network messages
-        for (peer_id, packet) in socket.0.receive() {
+        for (peer_id, packet) in socket.0.channel_mut(0).receive() {
             if let Ok(action) = bincode::deserialize::<ProposedAction>(&packet) {
                 // Write it to ECS so validate_incoming_actions processes it!
                 event_writer.write(action);
@@ -660,7 +660,7 @@ fn handle_p2p_connections(
                     let peers: Vec<_> = socket.0.connected_peers().collect();
                     let packet_boxed = packet.into_boxed_slice();
                     for peer in peers {
-                        socket.0.send(packet_boxed.clone(), peer);
+                        socket.0.channel_mut(0).send(packet_boxed.clone(), peer);
                     }
                 }
             }

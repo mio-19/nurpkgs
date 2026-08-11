@@ -127,7 +127,38 @@ lib.overrideDerivation (buildFlutterApp {
     echo "$XCRUN_SCRIPT" > "$FAKE_DEV_DIR/usr/bin/xcrun"
     chmod +x "$FAKE_DEV_DIR/usr/bin/xcrun"
     
+    LIPO_SCRIPT=$(cat << 'EOF3'
+    #!/bin/bash
+    echo "FAKE LIPO CALLED WITH ARGS: $@" >&2
+    for i in "$@"; do
+        if [[ "$next_is_out" == "1" ]]; then
+            out_file="$i"
+            break
+        elif [[ "$i" == "-o" || "$i" == "-output" ]]; then
+            next_is_out=1
+        fi
+    done
+    if [[ -n "$out_file" ]]; then
+        dir_to_fix="$(dirname "$out_file")"
+        chmod -R +w "$dir_to_fix" || true
+        chmod -R +w "$dir_to_fix/.." || true
+        chmod -R +w "$dir_to_fix/../.." || true
+    fi
+    exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
+    EOF3
+    )
+    
+    echo "$LIPO_SCRIPT" > "$FAKE_DEV_DIR/usr/bin/lipo"
+    chmod +x "$FAKE_DEV_DIR/usr/bin/lipo"
+    
     export DEVELOPER_DIR="$FAKE_DEV_DIR"
+    
+    echo "DEBUG: which lipo:"
+    which lipo
+    echo "DEBUG: lipo test:"
+    lipo -info /bin/ls || true
+    echo "DEBUG: xcrun --find lipo:"
+    xcrun --find lipo || true
 
     flutter build macos -v --release
     runHook postBuild

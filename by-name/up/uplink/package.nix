@@ -49,7 +49,7 @@ lib.overrideDerivation (buildFlutterApp {
     
     # Symlink all contents of the real developer dir
     for file in "$REAL_DEV_DIR"/*; do
-        if [[ "$(basename "$file")" != "usr" && "$(basename "$file")" != "Toolchains" ]]; then
+        if [[ "$(basename "$file")" != "usr" ]]; then
             ln -s "$file" "$FAKE_DEV_DIR/"
         fi
     done
@@ -72,27 +72,6 @@ lib.overrideDerivation (buildFlutterApp {
     EOF2
     chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
 
-    # Handle Toolchains/ to wrap lipo
-    mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"
-    for file in "$REAL_DEV_DIR/Toolchains"/*; do
-        if [ "$(basename "$file")" != "XcodeDefault.xctoolchain" ]; then
-            ln -s "$file" "$FAKE_DEV_DIR/Toolchains/"
-        fi
-    done
-    for file in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain"/*; do
-        if [ "$(basename "$file")" != "usr" ]; then
-            ln -s "$file" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/"
-        fi
-    done
-    mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr"
-    for file in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr"/*; do
-        if [ "$(basename "$file")" != "bin" ]; then
-            ln -s "$file" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/"
-        fi
-    done
-    for file in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"/*; do
-        ln -s "$file" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
-    done
     
     
     LIPO_SCRIPT=$(cat << 'EOF3'

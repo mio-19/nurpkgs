@@ -152,6 +152,7 @@ lib.overrideDerivation (buildFlutterApp {
     chmod +x "$FAKE_DEV_DIR/usr/bin/lipo"
     
     export DEVELOPER_DIR="$FAKE_DEV_DIR"
+    export PATH="$FAKE_DEV_DIR/usr/bin:$PATH"
     
     echo "DEBUG: which lipo:"
     which lipo

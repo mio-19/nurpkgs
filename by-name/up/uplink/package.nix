@@ -42,38 +42,6 @@ lib.overrideDerivation (buildFlutterApp {
     echo 'ENABLE_USER_SCRIPT_SANDBOXING = NO' >> macos/Flutter/Flutter-Release.xcconfig
     echo 'ENABLE_USER_SCRIPT_SANDBOXING = NO' >> macos/Flutter/Flutter-Debug.xcconfig
 
-    # Create a fake DEVELOPER_DIR to wrap xcodebuild since flutter hardcodes /usr/bin/arch xcrun
-    export REAL_DEV_DIR=/Applications/Xcode.app/Contents/Developer
-    export FAKE_DEV_DIR="$(pwd)/.developer_dir"
-    mkdir -p "$FAKE_DEV_DIR/usr/bin"
-    
-    # Symlink all contents of the real developer dir
-    for file in "$REAL_DEV_DIR"/*; do
-        if [[ "$(basename "$file")" != "usr" ]]; then
-            ln -s "$file" "$FAKE_DEV_DIR/"
-        fi
-    done
-    
-    # Handle usr/
-    mkdir -p "$FAKE_DEV_DIR/usr"
-    for file in "$REAL_DEV_DIR/usr"/*; do
-        if [ "$(basename "$file")" != "bin" ]; then
-            ln -s "$file" "$FAKE_DEV_DIR/usr/"
-        fi
-    done
-    mkdir -p "$FAKE_DEV_DIR/usr/bin"
-    for file in "$REAL_DEV_DIR/usr/bin"/*; do
-        ln -s "$file" "$FAKE_DEV_DIR/usr/bin/"
-    done
-    rm -f "$FAKE_DEV_DIR/usr/bin/xcodebuild"
-    cat << 'EOF2' > "$FAKE_DEV_DIR/usr/bin/xcodebuild"
-    #!/bin/bash
-    exec "$REAL_DEV_DIR/usr/bin/xcodebuild" -IDEPackageSupportDisableManifestSandbox=YES -IDEPackageSupportDisablePluginExecutionSandbox=YES "$@"
-    EOF2
-    chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
-
-    
-    
     LIPO_SCRIPT=$(cat << 'EOF3'
     #!/bin/bash
     echo "FAKE LIPO CALLED WITH ARGS: $@" >&2
@@ -91,16 +59,15 @@ lib.overrideDerivation (buildFlutterApp {
         chmod -R +w "$dir_to_fix/.." || true
         chmod -R +w "$dir_to_fix/../.." || true
     fi
-    exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
+    exec "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
     EOF3
     )
     
-    mkdir -p "$FAKE_DEV_DIR/custom_bin"
-    echo "$LIPO_SCRIPT" > "$FAKE_DEV_DIR/custom_bin/lipo"
-    chmod +x "$FAKE_DEV_DIR/custom_bin/lipo"
+    mkdir -p "$(pwd)/custom_bin"
+    echo "$LIPO_SCRIPT" > "$(pwd)/custom_bin/lipo"
+    chmod +x "$(pwd)/custom_bin/lipo"
     
-    export DEVELOPER_DIR="$FAKE_DEV_DIR"
-    export PATH="$FAKE_DEV_DIR/custom_bin:$PATH"
+    export PATH="$(pwd)/custom_bin:$PATH"
     
     echo "DEBUG: which lipo:"
     which lipo

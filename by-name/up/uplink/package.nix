@@ -38,13 +38,40 @@ lib.overrideDerivation (buildFlutterApp {
     # CoreFoundation bypasses HOME, so we need to set CFFIXED_USER_HOME
     export CFFIXED_USER_HOME=$HOME
 
-    # Disable Xcode User Script Sandboxing which breaks under Nix
-    echo 'ENABLE_USER_SCRIPT_SANDBOXING = NO' >> macos/Flutter/Flutter-Release.xcconfig
-    echo 'ENABLE_USER_SCRIPT_SANDBOXING = NO' >> macos/Flutter/Flutter-Debug.xcconfig
+    # Create a fake DEVELOPER_DIR to wrap xcodebuild since flutter hardcodes /usr/bin/arch xcrun
+    export REAL_DEV_DIR=/Applications/Xcode.app/Contents/Developer
+    export FAKE_DEV_DIR="$(pwd)/.developer_dir"
+    mkdir -p "$FAKE_DEV_DIR/usr/bin"
+    
+    # Symlink all contents of the real developer dir
+    for file in "$REAL_DEV_DIR"/*; do
+        if [[ "$(basename "$file")" != "usr" ]]; then
+            ln -s "$file" "$FAKE_DEV_DIR/"
+        fi
+    done
+    
+    # Handle usr/
+    mkdir -p "$FAKE_DEV_DIR/usr"
+    for file in "$REAL_DEV_DIR/usr"/*; do
+        if [ "$(basename "$file")" != "bin" ]; then
+            ln -s "$file" "$FAKE_DEV_DIR/usr/"
+        fi
+    done
+    mkdir -p "$FAKE_DEV_DIR/usr/bin"
+    for file in "$REAL_DEV_DIR/usr/bin"/*; do
+        ln -s "$file" "$FAKE_DEV_DIR/usr/bin/"
+    done
+    
+    # Replace xcodebuild with our wrapper
+    rm -f "$FAKE_DEV_DIR/usr/bin/xcodebuild"
+    cat << 'EOF2' > "$FAKE_DEV_DIR/usr/bin/xcodebuild"
+    #!/bin/bash
+    exec "$REAL_DEV_DIR/usr/bin/xcodebuild" -IDEPackageSupportDisableManifestSandbox=YES -IDEPackageSupportDisablePluginExecutionSandbox=YES "$@"
+    EOF2
+    chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
 
     LIPO_SCRIPT=$(cat << 'EOF3'
     #!/bin/bash
-    echo "FAKE LIPO CALLED WITH ARGS: $@" >&2
     for i in "$@"; do
         if [[ "$next_is_out" == "1" ]]; then
             out_file="$i"
@@ -59,7 +86,7 @@ lib.overrideDerivation (buildFlutterApp {
         chmod -R +w "$dir_to_fix/.." || true
         chmod -R +w "$dir_to_fix/../.." || true
     fi
-    exec "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
+    exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
     EOF3
     )
     
@@ -67,15 +94,9 @@ lib.overrideDerivation (buildFlutterApp {
     echo "$LIPO_SCRIPT" > "$(pwd)/custom_bin/lipo"
     chmod +x "$(pwd)/custom_bin/lipo"
     
+    export DEVELOPER_DIR="$FAKE_DEV_DIR"
     export PATH="$(pwd)/custom_bin:$PATH"
     
-    echo "DEBUG: which lipo:"
-    which lipo
-    echo "DEBUG: lipo test:"
-    lipo -info /bin/ls || true
-    echo "DEBUG: xcrun --find lipo:"
-    xcrun --find lipo || true
-
     flutter build macos -v --release
     runHook postBuild
   '' else null;

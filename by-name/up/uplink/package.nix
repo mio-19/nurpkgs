@@ -96,7 +96,7 @@ lib.overrideDerivation (buildFlutterApp {
     EOF2
     chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
 
-    rm "$FAKE_DEV_DIR/usr/bin/lipo"
+    rm -f "$FAKE_DEV_DIR/usr/bin/lipo"
     cat << 'EOF3' > "$FAKE_DEV_DIR/usr/bin/lipo"
     #!/bin/bash
     echo "FAKE LIPO CALLED WITH ARGS: $@" >&2

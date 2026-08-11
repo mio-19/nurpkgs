@@ -103,6 +103,10 @@ lib.overrideDerivation (buildFlutterApp {
     export DEVELOPER_DIR="$FAKE_DEV_DIR"
     export PATH="$(pwd)/custom_bin:$PATH"
     
+    # Nixpkgs sets LD=ld, which causes xcodebuild to invoke ld directly
+    # but still pass -Xlinker flags meant for clang. Unset it to use default.
+    unset LD
+    
     flutter build macos -v --release
     runHook postBuild
   '' else null;

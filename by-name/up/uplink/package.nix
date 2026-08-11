@@ -88,16 +88,6 @@ lib.overrideDerivation (buildFlutterApp {
         ln -s "$file" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
     done
     
-    # Remove symlinked xcodebuild and lipo, and replace with our wrappers
-    rm "$FAKE_DEV_DIR/usr/bin/xcodebuild"
-    cat << 'EOF2' > "$FAKE_DEV_DIR/usr/bin/xcodebuild"
-    #!/bin/bash
-    export DEVELOPER_DIR="$REAL_DEV_DIR"
-    exec "$REAL_DEV_DIR/usr/bin/xcodebuild" -IDEPackageSupportDisableManifestSandbox=YES -IDEPackageSupportDisablePluginExecutionSandbox=YES "$@"
-    EOF2
-    chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
-
-
     
     LIPO_SCRIPT=$(cat << 'EOF3'
     #!/bin/bash

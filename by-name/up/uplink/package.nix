@@ -171,6 +171,7 @@ lib.overrideDerivation (buildFlutterApp {
           cp -r "$RINF_PATH" ./rinf_patched
           chmod -R +w ./rinf_patched
           
+          mv ./rinf_patched/cargokit/run_build_tool.sh ./rinf_patched/cargokit/run_build_tool.orig.sh
           cat << 'EOF' > ./rinf_patched/cargokit/run_build_tool.sh
     #!/bin/sh
     set -ex
@@ -184,6 +185,8 @@ lib.overrideDerivation (buildFlutterApp {
             cargo build --manifest-path "$MANIFEST"
             cp -v "$CARGO_TARGET_DIR/debug/libhub.so" "$CARGOKIT_OUTPUT_DIR/libhub.so"
         fi
+    else
+        exec "$(dirname "$0")/run_build_tool.orig.sh" "$@"
     fi
     EOF
           chmod +x ./rinf_patched/cargokit/run_build_tool.sh

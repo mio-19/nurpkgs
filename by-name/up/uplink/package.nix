@@ -96,39 +96,36 @@ lib.overrideDerivation (buildFlutterApp {
     EOF2
     chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
 
-    # We need to wrap lipo in both places to ensure it intercepts correctly.
-    LIPO_SCRIPT=$(cat << 'EOF3'
+    # Flutter calls xcrun lipo, so we must wrap xcrun itself to intercept it!
+    XCRUN_SCRIPT=$(cat << 'EOF3'
     #!/bin/bash
-    echo "FAKE LIPO CALLED WITH ARGS: $@" >&2
-    for i in "$@"; do
-        if [[ "$next_is_out" == "1" ]]; then
-            out_file="$i"
-            break
-        elif [[ "$i" == "-o" || "$i" == "-output" ]]; then
-            next_is_out=1
+    if [[ "$1" == "lipo" ]]; then
+        echo "FAKE XCRUN LIPO CALLED WITH ARGS: $@" >&2
+        for i in "$@"; do
+            if [[ "$next_is_out" == "1" ]]; then
+                out_file="$i"
+                break
+            elif [[ "$i" == "-o" || "$i" == "-output" ]]; then
+                next_is_out=1
+            fi
+        done
+        if [[ -n "$out_file" ]]; then
+            echo "FAKE XCRUN LIPO: out_file is $out_file" >&2
+            dir_to_fix="$(dirname "$out_file")"
+            chmod -R +w "$dir_to_fix" || true
+            chmod -R +w "$dir_to_fix/.." || true
+            chmod -R +w "$dir_to_fix/../.." || true
         fi
-    done
-    if [[ -n "$out_file" ]]; then
-        echo "FAKE LIPO: out_file is $out_file" >&2
-        dir_to_fix="$(dirname "$out_file")"
-        echo "FAKE LIPO: dir_to_fix is $dir_to_fix" >&2
-        ls -la "$dir_to_fix" >&2
-        # Try to fix permissions all the way up to the build dir
-        chmod -R +w "$dir_to_fix" || echo "FAKE LIPO: chmod failed on $dir_to_fix" >&2
-        chmod -R +w "$dir_to_fix/.." || true
-        chmod -R +w "$dir_to_fix/../.." || true
+        exec /usr/bin/xcrun "$@"
+    else
+        exec /usr/bin/xcrun "$@"
     fi
-    exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
     EOF3
     )
     
-    rm -f "$FAKE_DEV_DIR/usr/bin/lipo"
-    echo "$LIPO_SCRIPT" > "$FAKE_DEV_DIR/usr/bin/lipo"
-    chmod +x "$FAKE_DEV_DIR/usr/bin/lipo"
-    
-    rm -f "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
-    echo "$LIPO_SCRIPT" > "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
-    chmod +x "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
+    rm -f "$FAKE_DEV_DIR/usr/bin/xcrun"
+    echo "$XCRUN_SCRIPT" > "$FAKE_DEV_DIR/usr/bin/xcrun"
+    chmod +x "$FAKE_DEV_DIR/usr/bin/xcrun"
     
     export DEVELOPER_DIR="$FAKE_DEV_DIR"
 

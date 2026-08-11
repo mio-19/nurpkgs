@@ -38,10 +38,16 @@ lib.overrideDerivation (buildFlutterApp {
     # CoreFoundation bypasses HOME, so we need to set CFFIXED_USER_HOME
     export CFFIXED_USER_HOME=$HOME
 
-    # Create a fake DEVELOPER_DIR to wrap xcodebuild since flutter hardcodes /usr/bin/arch xcrun
+    # Create a fake Xcode bundle to wrap xcodebuild without breaking xcrun validation
     export REAL_DEV_DIR=/Applications/Xcode.app/Contents/Developer
-    export FAKE_DEV_DIR="$(pwd)/.developer_dir"
+    export FAKE_XCODE="$(pwd)/FakeXcode.app"
+    export FAKE_DEV_DIR="$FAKE_XCODE/Contents/Developer"
+    
     mkdir -p "$FAKE_DEV_DIR/usr/bin"
+    
+    # Symlink the required plists for xcrun to consider this a valid Xcode
+    ln -s /Applications/Xcode.app/Contents/Info.plist "$FAKE_XCODE/Contents/"
+    ln -s /Applications/Xcode.app/Contents/version.plist "$FAKE_XCODE/Contents/"
     
     # Symlink all contents of the real developer dir
     for file in "$REAL_DEV_DIR"/*; do

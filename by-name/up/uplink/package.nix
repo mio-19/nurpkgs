@@ -96,8 +96,8 @@ lib.overrideDerivation (buildFlutterApp {
     EOF2
     chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
 
-    rm -f "$FAKE_DEV_DIR/usr/bin/lipo"
-    cat << 'EOF3' > "$FAKE_DEV_DIR/usr/bin/lipo"
+    # We need to wrap lipo in both places to ensure it intercepts correctly.
+    LIPO_SCRIPT=$(cat << 'EOF3'
     #!/bin/bash
     echo "FAKE LIPO CALLED WITH ARGS: $@" >&2
     for i in "$@"; do
@@ -110,11 +110,25 @@ lib.overrideDerivation (buildFlutterApp {
     done
     if [[ -n "$out_file" ]]; then
         echo "FAKE LIPO: out_file is $out_file" >&2
-        chmod -R +w "$(dirname "$out_file")" || echo "FAKE LIPO: chmod failed" >&2
+        dir_to_fix="$(dirname "$out_file")"
+        echo "FAKE LIPO: dir_to_fix is $dir_to_fix" >&2
+        ls -la "$dir_to_fix" >&2
+        # Try to fix permissions all the way up to the build dir
+        chmod -R +w "$dir_to_fix" || echo "FAKE LIPO: chmod failed on $dir_to_fix" >&2
+        chmod -R +w "${dir_to_fix}/.." || true
+        chmod -R +w "${dir_to_fix}/../.." || true
     fi
     exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
     EOF3
+    )
+    
+    rm -f "$FAKE_DEV_DIR/usr/bin/lipo"
+    echo "$LIPO_SCRIPT" > "$FAKE_DEV_DIR/usr/bin/lipo"
     chmod +x "$FAKE_DEV_DIR/usr/bin/lipo"
+    
+    rm -f "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
+    echo "$LIPO_SCRIPT" > "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
+    chmod +x "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
     
     export DEVELOPER_DIR="$FAKE_DEV_DIR"
 

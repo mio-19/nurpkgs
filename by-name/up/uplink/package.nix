@@ -72,7 +72,7 @@ lib.overrideDerivation (buildFlutterApp {
     rm -f "$FAKE_DEV_DIR/usr/bin/xcodebuild"
     cat << 'EOF2' > "$FAKE_DEV_DIR/usr/bin/xcodebuild"
     #!/bin/bash
-    exec "$REAL_DEV_DIR/usr/bin/xcodebuild" -IDEPackageSupportDisableManifestSandbox=YES -IDEPackageSupportDisablePluginExecutionSandbox=YES "$@"
+    exec "$REAL_DEV_DIR/usr/bin/xcodebuild" ARCHS=$(uname -m) ONLY_ACTIVE_ARCH=YES -IDEPackageSupportDisableManifestSandbox=YES -IDEPackageSupportDisablePluginExecutionSandbox=YES "$@"
     EOF2
     chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
 

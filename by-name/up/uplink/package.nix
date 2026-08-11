@@ -92,40 +92,12 @@ lib.overrideDerivation (buildFlutterApp {
     rm "$FAKE_DEV_DIR/usr/bin/xcodebuild"
     cat << 'EOF2' > "$FAKE_DEV_DIR/usr/bin/xcodebuild"
     #!/bin/bash
+    export DEVELOPER_DIR="$REAL_DEV_DIR"
     exec "$REAL_DEV_DIR/usr/bin/xcodebuild" -IDEPackageSupportDisableManifestSandbox=YES -IDEPackageSupportDisablePluginExecutionSandbox=YES "$@"
     EOF2
     chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
 
-    # Flutter calls xcrun lipo, so we must wrap xcrun itself to intercept it!
-    XCRUN_SCRIPT=$(cat << 'EOF3'
-    #!/bin/bash
-    if [[ "$1" == "lipo" ]]; then
-        echo "FAKE XCRUN LIPO CALLED WITH ARGS: $@" >&2
-        for i in "$@"; do
-            if [[ "$next_is_out" == "1" ]]; then
-                out_file="$i"
-                break
-            elif [[ "$i" == "-o" || "$i" == "-output" ]]; then
-                next_is_out=1
-            fi
-        done
-        if [[ -n "$out_file" ]]; then
-            echo "FAKE XCRUN LIPO: out_file is $out_file" >&2
-            dir_to_fix="$(dirname "$out_file")"
-            chmod -R +w "$dir_to_fix" || true
-            chmod -R +w "$dir_to_fix/.." || true
-            chmod -R +w "$dir_to_fix/../.." || true
-        fi
-        exec /usr/bin/xcrun "$@"
-    else
-        exec /usr/bin/xcrun "$@"
-    fi
-    EOF3
-    )
-    
-    rm -f "$FAKE_DEV_DIR/usr/bin/xcrun"
-    echo "$XCRUN_SCRIPT" > "$FAKE_DEV_DIR/usr/bin/xcrun"
-    chmod +x "$FAKE_DEV_DIR/usr/bin/xcrun"
+
     
     LIPO_SCRIPT=$(cat << 'EOF3'
     #!/bin/bash

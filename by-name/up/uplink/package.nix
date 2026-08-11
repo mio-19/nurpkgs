@@ -115,8 +115,8 @@ lib.overrideDerivation (buildFlutterApp {
         ls -la "$dir_to_fix" >&2
         # Try to fix permissions all the way up to the build dir
         chmod -R +w "$dir_to_fix" || echo "FAKE LIPO: chmod failed on $dir_to_fix" >&2
-        chmod -R +w "${dir_to_fix}/.." || true
-        chmod -R +w "${dir_to_fix}/../.." || true
+        chmod -R +w "$dir_to_fix/.." || true
+        chmod -R +w "$dir_to_fix/../.." || true
     fi
     exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
     EOF3

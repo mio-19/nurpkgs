@@ -99,6 +99,7 @@ lib.overrideDerivation (buildFlutterApp {
     rm "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
     cat << 'EOF3' > "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
     #!/bin/bash
+    echo "FAKE LIPO CALLED WITH ARGS: $@" >&2
     for i in "$@"; do
         if [[ "$next_is_out" == "1" ]]; then
             out_file="$i"
@@ -108,7 +109,11 @@ lib.overrideDerivation (buildFlutterApp {
         fi
     done
     if [[ -n "$out_file" ]]; then
-        chmod -R +w "$(dirname "$out_file")" || true
+        echo "FAKE LIPO: out_file is $out_file" >&2
+        echo "FAKE LIPO: dirname is $(dirname "$out_file")" >&2
+        ls -ld "$(dirname "$out_file")" >&2
+        chmod -R +w "$(dirname "$out_file")" || echo "FAKE LIPO: chmod failed" >&2
+        ls -ld "$(dirname "$out_file")" >&2
     fi
     exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
     EOF3

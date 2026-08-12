@@ -46,6 +46,10 @@
       ./android-translation-layer-media-data-source.patch
       ./android-translation-layer-drawlines-bounds.patch
       ./android-translation-layer-concat-2d.patch
+      ./android-translation-layer-display-getmode.patch
+      ./android-translation-layer-audiomanager-getdevices.patch
+      ./android-translation-layer-mediadescription-setmediauri.patch
+      ./android-translation-layer-audiodevicecallback.patch
       ./android-translation-layer-bitmap-pixels-fix.patch
       ./android-translation-layer-bitmap-factory-null-pixbuf.patch
       ./android-translation-layer-bitmap-factory-fd.patch

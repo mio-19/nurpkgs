@@ -97,8 +97,10 @@ and does not re-run that suite.
 `nix run .#hanga-dev` opens a main menu (Play / Multiplayer / Room / Game / Language / Controls / Quit).
 The Game row cycles discovered `.game` files. Each game owns the menu title,
 panel, buttons, and clear/sky colors; switching Game reloads that collection's
-lead WASM and, on the next Play, respawns the world. Both shipped games and
-their mods install in `HANGA_GAMES` / `HANGA_MODS`.
+WASM (lead plus any extra packs) and, on the next Play, respawns the world and
+retires old voxel chunks. Lead owns terrain, gravity, and jobs; extra mods add
+voxels, vehicles, and agents. Sandbox is Urban Chaos plus the testbed pack.
+Both shipped games and their mods install in `HANGA_GAMES` / `HANGA_MODS`.
 Play is single-player and does **not** talk to Matchbox. Room cycles
 `hanga_room` / `hanga_heist` / `hanga_test` / off without starting a session.
 Multiplayer joins the selected room (default `ws://localhost:3536/hanga_room`);
@@ -144,4 +146,4 @@ under xvfb; `mods.nix` runs `urban_chaos` / `testbed` unit tests before the WASM
 
 1. Kani CI for engine + mods
 2. Fuller BeamNG node-beam (Urban Chaos still uses severity + detach, not a solver)
-3. Multi-mod collections (only the lead WASM loads) and voxel-chunk clear on game switch
+3. Clear `ModifiedVoxels` on game switch (chunk retire remeshes; edits can linger)

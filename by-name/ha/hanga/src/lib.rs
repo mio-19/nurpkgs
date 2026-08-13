@@ -130,6 +130,19 @@ pub fn catalog_name(catalog: &[String], index: i32) -> Option<&str> {
     catalog.get(index as usize).map(String::as_str)
 }
 
+/// Lead catalog first; later mods append names the lead does not already have.
+pub fn merge_name_catalogs(layers: &[Vec<String>]) -> Vec<String> {
+    let mut out = Vec::new();
+    for layer in layers {
+        for name in layer {
+            if !name.is_empty() && !out.iter().any(|existing| existing == name) {
+                out.push(name.clone());
+            }
+        }
+    }
+    out
+}
+
 /// Look up a catalog index by English name.
 pub fn catalog_index(catalog: &[String], name: &str) -> Option<u8> {
     catalog
@@ -724,6 +737,11 @@ mod tests {
         assert_eq!(catalog_index(&catalog, "glass"), Some(2));
         assert_eq!(catalog_index(&catalog, "rail"), None);
         assert!(parse_name_catalog("  ").is_empty());
+        let merged = merge_name_catalogs(&[
+            parse_name_catalog("air,concrete,asphalt"),
+            parse_name_catalog("air,concrete,glass"),
+        ]);
+        assert_eq!(merged, ["air", "concrete", "asphalt", "glass"]);
     }
 
     // ── is_connected_to_ground ────────────────────────────────────────────────

@@ -22,8 +22,8 @@ use hanga::{
     clamp_mod_state, clamp_voxel_type, clamp_wallet, contract_is_offered, fracture_offsets,
     inventory_add, inventory_craft_pair, inventory_selected, inventory_take,
     is_action_physically_possible, is_connected_to_ground, parse_name_catalog,
-    cycle_p2p_url, parse_p2p_url, p2p_room_name, resolve_wasm_path, should_skip_menu,
-    unpack_economy_params,
+    cycle_p2p_url, merge_name_catalogs, parse_p2p_url, p2p_room_name,
+    resolve_wasm_path, should_skip_menu, unpack_economy_params,
     verify_action_signature, voxel_has_support, DEFAULT_P2P_URL, INVENTORY_SLOTS, LOOK_SENSITIVITY,
 };
 use hanga::crash::{crumple_scale, impact_speed};
@@ -758,6 +758,50 @@ fn with_mod<T>(
     Some(f(ctx))
 }
 
+fn with_pack_mods(
+    mod_runtime: &ModRuntime,
+    mut f: impl FnMut(&str, &mut mod_manager::MainModContext),
+) {
+    for pack in &mod_runtime.packs {
+        if let Ok(mut guard) = pack.context.lock() {
+            if let Some(ctx) = guard.as_mut() {
+                f(&pack.name, ctx);
+            }
+        }
+    }
+}
+
+fn game_mod_paths(game: &GameSpec, search: &ModSearch) -> Vec<(String, PathBuf)> {
+    game.mods
+        .iter()
+        .filter_map(|name| {
+            let path = resolve_wasm_path(
+                name,
+                &search.cwd,
+                search.exe.as_deref(),
+                search.env.as_deref(),
+            );
+            if path.is_file() {
+                Some((name.clone(), path))
+            } else {
+                warn!(
+                    "WASM pack '{name}' not found at {} (set HANGA_MODS)",
+                    path.display()
+                );
+                None
+            }
+        })
+        .collect()
+}
+
+fn load_game_mods(runtime: &mut ModRuntime, game: &GameSpec, search: &ModSearch) {
+    let paths = game_mod_paths(game, search);
+    if paths.is_empty() {
+        return;
+    }
+    runtime.load_collection(&paths);
+}
+
 fn resolve_bindings_path(args: &[String]) -> PathBuf {
     if let Some(path) = bindings::parse_bindings_path(args) {
         return PathBuf::from(path);
@@ -948,41 +992,28 @@ fn ensure_play_world(
     mut mod_runtime: ResMut<ModRuntime>,
     mut offer: ResMut<ModOffer>,
     locale: Res<UiLocale>,
-    selected: Res<SelectedMod>,
     search: Res<ModSearch>,
     catalog: Res<GameCatalog>,
     selected_game: Res<SelectedGame>,
     mut world_for: ResMut<WorldFor>,
     play_world: Query<Entity, With<PlayWorld>>,
+    chunks: Query<Entity, With<Chunk<DefaultWorld>>>,
 ) {
-    let wasm_path = resolve_wasm_path(
-        &selected.0,
-        &search.cwd,
-        search.exe.as_deref(),
-        search.env.as_deref(),
-    );
-    if wasm_path.is_file() {
-        if mod_runtime.watch_path != wasm_path {
-            info!(
-                "Loading WASM mod '{}' from {} (locale {})",
-                selected.0,
-                wasm_path.display(),
-                locale.0.code()
-            );
-            mod_runtime.load_spec(&wasm_path);
-        }
-    } else {
-        warn!(
-            "WASM mod '{}' not found at {} (set HANGA_MODS or build --target wasm32-unknown-unknown)",
-            selected.0,
-            wasm_path.display()
-        );
-    }
     let game = current_game(&catalog, &selected_game);
+    let paths = game_mod_paths(&game, &search);
+    if paths.is_empty() {
+        warn!(
+            "WASM collection '{}' has no mods on disk (set HANGA_MODS)",
+            game.id
+        );
+    } else {
+        mod_runtime.load_collection(&paths);
+    }
     if world_for.0 == game.id {
         return;
     }
     despawn_play_world(&mut commands, &play_world);
+    retire_voxel_chunks(&mut commands, &chunks);
     *offer = ModOffer::default();
     spawn_play_world(
         &mut commands,
@@ -998,6 +1029,20 @@ fn ensure_play_world(
 fn despawn_play_world(commands: &mut Commands, worlds: &Query<Entity, With<PlayWorld>>) {
     for entity in worlds.iter() {
         commands.entity(entity).despawn();
+    }
+}
+
+fn retire_voxel_chunks(
+    commands: &mut Commands,
+    chunks: &Query<Entity, With<Chunk<DefaultWorld>>>,
+) {
+    let mut n = 0u32;
+    for entity in chunks.iter() {
+        commands.entity(entity).insert(NeedsDespawn);
+        n += 1;
+    }
+    if n > 0 {
+        info!("Retiring {n} voxel chunks for the new game");
     }
 }
 
@@ -1112,30 +1157,38 @@ fn spawn_play_world(
         },
     ));
 
-    let count = with_mod(&mod_runtime, |ctx| {
-        ctx.bindings
-            .hanga_engine_gameplay()
-            .call_vehicle_spawn_count(&mut ctx.store)
-            .unwrap_or(0)
-    })
-    .unwrap_or(0)
-    .max(0) as u32;
+    with_mod(mod_runtime, |ctx| {
+        spawn_mod_traffic(commands, meshes, materials, ctx);
+    });
+    with_pack_mods(mod_runtime, |name, ctx| {
+        info!("Spawning pack '{name}' vehicles and agents");
+        spawn_mod_traffic(commands, meshes, materials, ctx);
+    });
+}
 
+fn spawn_mod_traffic(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+    ctx: &mut mod_manager::MainModContext,
+) {
+    let count = ctx
+        .bindings
+        .hanga_engine_gameplay()
+        .call_vehicle_spawn_count(&mut ctx.store)
+        .unwrap_or(0)
+        .max(0) as u32;
     for i in 0..count {
-        let (x, y, z) = with_mod(&mod_runtime, |ctx| {
-            ctx.bindings
-                .hanga_engine_gameplay()
-                .call_vehicle_spawn(&mut ctx.store, i as i32)
-                .unwrap_or((500, 2, 495))
-        })
-        .unwrap_or((500, 2, 495));
-        let kit_text = with_mod(&mod_runtime, |ctx| {
-            ctx.bindings
-                .hanga_engine_gameplay()
-                .call_vehicle_kit(&mut ctx.store, i as i32)
-                .unwrap_or_default()
-        })
-        .unwrap_or_default();
+        let (x, y, z) = ctx
+            .bindings
+            .hanga_engine_gameplay()
+            .call_vehicle_spawn(&mut ctx.store, i as i32)
+            .unwrap_or((500, 2, 495));
+        let kit_text = ctx
+            .bindings
+            .hanga_engine_gameplay()
+            .call_vehicle_kit(&mut ctx.store, i as i32)
+            .unwrap_or_default();
         spawn_vehicle(
             commands,
             meshes,
@@ -1145,22 +1198,18 @@ fn spawn_play_world(
         );
     }
 
-    let ambient = with_mod(&mod_runtime, |ctx| {
-        ctx.bindings
-            .hanga_engine_gameplay()
-            .call_ambient_agent_count(&mut ctx.store)
-            .unwrap_or(0)
-    })
-    .unwrap_or(0)
-    .max(0);
+    let ambient = ctx
+        .bindings
+        .hanga_engine_gameplay()
+        .call_ambient_agent_count(&mut ctx.store)
+        .unwrap_or(0)
+        .max(0);
     for i in 0..ambient {
-        let (x, y, z, kind) = with_mod(&mod_runtime, |ctx| {
-            ctx.bindings
-                .hanga_engine_gameplay()
-                .call_ambient_agent_spawn(&mut ctx.store, i)
-                .unwrap_or((0, 2, 0, "pedestrian".into()))
-        })
-        .unwrap_or((0, 2, 0, "pedestrian".into()));
+        let (x, y, z, kind) = ctx
+            .bindings
+            .hanga_engine_gameplay()
+            .call_ambient_agent_spawn(&mut ctx.store, i)
+            .unwrap_or((0, 2, 0, "pedestrian".into()));
         spawn_agent(
             commands,
             meshes,
@@ -1172,14 +1221,24 @@ fn spawn_play_world(
 }
 
 fn load_voxel_catalog(mod_runtime: &ModRuntime) -> VoxelCatalog {
-    let csv = with_mod(mod_runtime, |ctx| {
+    let mut layers = Vec::new();
+    if let Some(csv) = with_mod(mod_runtime, |ctx| {
         ctx.bindings
             .hanga_engine_gameplay()
             .call_voxel_catalog(&mut ctx.store)
             .unwrap_or_default()
-    })
-    .unwrap_or_default();
-    VoxelCatalog(parse_name_catalog(&csv))
+    }) {
+        layers.push(parse_name_catalog(&csv));
+    }
+    with_pack_mods(mod_runtime, |_, ctx| {
+        let csv = ctx
+            .bindings
+            .hanga_engine_gameplay()
+            .call_voxel_catalog(&mut ctx.store)
+            .unwrap_or_default();
+        layers.push(parse_name_catalog(&csv));
+    });
+    VoxelCatalog(merge_name_catalogs(&layers))
 }
 
 fn mat(materials: &mut Assets<StandardMaterial>, rgb: [f32; 3]) -> Handle<StandardMaterial> {
@@ -3054,15 +3113,7 @@ fn sync_selected_game(
     selected_mod.0 = game.lead_mod().to_string();
     theme.0 = game.backdrop;
     hanga::palette::prepare_asset_dir(&game, &games.0);
-    let wasm_path = resolve_wasm_path(
-        &selected_mod.0,
-        &search.cwd,
-        search.exe.as_deref(),
-        search.env.as_deref(),
-    );
-    if wasm_path.is_file() {
-        runtime.load_spec(&wasm_path);
-    }
+    load_game_mods(&mut runtime, &game, &search);
 }
 
 fn play_fog(game: &GameSpec) -> DistanceFog {

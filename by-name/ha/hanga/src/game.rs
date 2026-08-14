@@ -136,9 +136,14 @@ pub fn implicit_game(spec: &str) -> GameSpec {
 pub fn resolve_game(catalog: &[GameSpec], spec: &str) -> GameSpec {
     catalog
         .iter()
-        .find(|game| {
-            game.id == spec || game.lead_mod() == spec || game.mods.iter().any(|m| m == spec)
+        .find(|game| game.id == spec)
+        .or_else(|| {
+            catalog
+                .iter()
+                .find(|game| game.lead_mod() == spec && game.mods.len() == 1)
         })
+        .or_else(|| catalog.iter().find(|game| game.lead_mod() == spec))
+        .or_else(|| catalog.iter().find(|game| game.mods.iter().any(|m| m == spec)))
         .cloned()
         .unwrap_or_else(|| implicit_game(spec))
 }
@@ -508,6 +513,17 @@ mod tests {
             ),
             "urban_chaos"
         );
+    }
+
+    #[test]
+    fn urban_chaos_id_is_not_the_sandbox_collection() {
+        let catalog = shipped_games();
+        let game = resolve_game(&catalog, "urban_chaos");
+        assert_eq!(game.id, "urban_chaos");
+        assert_eq!(game.mods, vec!["urban_chaos".to_string()]);
+        let sandbox = resolve_game(&catalog, "sandbox");
+        assert_eq!(sandbox.id, "sandbox");
+        assert_eq!(sandbox.mods.len(), 2);
     }
 
     #[test]

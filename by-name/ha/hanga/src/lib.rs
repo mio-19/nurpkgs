@@ -970,6 +970,34 @@ mod tests {
         assert_eq!(missing, mods.join("testbed.wasm"));
         let _ = fs::remove_dir_all(&root);
     }
+
+    #[test]
+    fn kani_replay_fingerprint_and_wallet() {
+        for kind in 0u8..4 {
+            let kind_name = match kind {
+                0 => "break",
+                1 => "place",
+                2 => "explode",
+                _ => "craft",
+            };
+            for extra in 0u8..3 {
+                let extra_name = match extra {
+                    0 => "",
+                    1 => "concrete",
+                    _ => "glass",
+                };
+                for (x, y, z) in [(0, 0, 0), (i32::MAX, -3, 9), (i32::MIN, 4, -1)] {
+                    let fp = action_fingerprint(kind_name, x, y, z, extra_name);
+                    assert!(verify_action_signature(kind_name, x, y, z, extra_name, fp));
+                    assert!(!verify_action_signature(kind_name, x, y, z, extra_name, fp ^ 1));
+                }
+            }
+        }
+        for value in [i32::MIN, -1, 0, 1, 1_000_000, 1_000_001, i32::MAX] {
+            let clamped = clamp_wallet(value);
+            assert!((0..=1_000_000).contains(&clamped));
+        }
+    }
 }
 
 #[cfg(kani)]

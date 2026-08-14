@@ -26,7 +26,7 @@ use hanga::{
     resolve_wasm_path, should_skip_menu, unpack_economy_params,
     verify_action_signature, voxel_has_support, DEFAULT_P2P_URL, INVENTORY_SLOTS, LOOK_SENSITIVITY,
 };
-use hanga::crash::{crumple_scale, impact_speed};
+use hanga::crash::{crumple_axes, crumple_node_shift, impact_speed};
 use hanga::figure::{figure_palette, figure_salt, yaw_toward};
 use hanga::gravity::{
     avian_accel, can_jump_from, jump_needs_floor, parse_gravity, point_accel, set_jump,
@@ -71,52 +71,68 @@ impl VoxelWorldConfig for DefaultWorld {
     }
 
     fn voxel_lookup_delegate(&self) -> VoxelLookupDelegate<Self::MaterialIndex> {
-        Box::new(|_chunk_pos, _lod, _chunk_data| {
-            Box::new(|pos, _voxel| {
-                WASM_INSTANCE.with(|instance_ref| {
-                    let mut instance_opt = instance_ref.borrow_mut();
-                    let wanted_gen = SHARED_WASM
-                        .read()
-                        .ok()
-                        .and_then(|shared| shared.as_ref().map(|(rev, _, _)| *rev));
-                    let stale = match (instance_opt.as_ref(), wanted_gen) {
-                        (Some((rev, _, _)), Some(want)) => *rev != want,
-                        (None, Some(_)) => true,
-                        _ => false,
-                    };
-                    if stale {
-                        if let Ok(shared) = SHARED_WASM.read() {
-                            if let Some((rev, engine, component)) = shared.as_ref() {
-                                let mut store = Store::new(engine, ());
-                                if let Ok(instance) = mod_manager::Plugin::instantiate(
-                                    &mut store,
-                                    component,
-                                    &Linker::new(engine),
-                                ) {
-                                    *instance_opt = Some((*rev, store, instance));
-                                }
-                            }
-                        }
-                    }
+        Box::new(|_chunk_pos, _lod, _chunk_data| Box::new(|pos, _voxel| query_lead_voxel(pos)))
+    }
+}
 
-                    if let Some((_, store, func)) = instance_opt.as_mut() {
-                        if let Ok(voxel_type) = func.hanga_engine_gameplay().call_query_voxel(store, pos.x, pos.y, pos.z) {
-                            if voxel_type == 0 {
-                                return WorldVoxel::Unset;
-                            } else {
-                                return WorldVoxel::Solid(voxel_type as u8);
-                            }
-                        }
+fn query_lead_voxel(pos: IVec3) -> WorldVoxel<u8> {
+    WASM_INSTANCE.with(|instance_ref| {
+        let mut instance_opt = instance_ref.borrow_mut();
+        let wanted_gen = SHARED_WASM
+            .read()
+            .ok()
+            .and_then(|shared| shared.as_ref().map(|(rev, _, _)| *rev));
+        let stale = match (instance_opt.as_ref(), wanted_gen) {
+            (Some((rev, _, _)), Some(want)) => *rev != want,
+            (None, Some(_)) => true,
+            _ => false,
+        };
+        if stale {
+            if let Ok(shared) = SHARED_WASM.read() {
+                if let Some((rev, engine, component)) = shared.as_ref() {
+                    let mut store = Store::new(engine, ());
+                    if let Ok(instance) = mod_manager::Plugin::instantiate(
+                        &mut store,
+                        component,
+                        &Linker::new(engine),
+                    ) {
+                        *instance_opt = Some((*rev, store, instance));
                     }
+                }
+            }
+        }
 
-                    // Fallback if WASM module fails or isn't loaded
-                    if pos.y < 0 {
-                        return WorldVoxel::Solid(1); // Concrete base
-                    }
-                    WorldVoxel::Unset // Air
-                })
-            })
-        })
+        if let Some((_, store, func)) = instance_opt.as_mut() {
+            if let Ok(voxel_type) =
+                func.hanga_engine_gameplay()
+                    .call_query_voxel(store, pos.x, pos.y, pos.z)
+            {
+                if voxel_type == 0 {
+                    return WorldVoxel::Unset;
+                }
+                return WorldVoxel::Solid(voxel_type as u8);
+            }
+        }
+
+        if pos.y < 0 {
+            return WorldVoxel::Solid(1);
+        }
+        WorldVoxel::Unset
+    })
+}
+
+#[derive(Resource, Default)]
+struct VoxelEdits(Vec<IVec3>);
+
+fn note_voxel_edit(edits: &mut VoxelEdits, pos: IVec3) {
+    if !edits.0.iter().any(|existing| *existing == pos) {
+        edits.0.push(pos);
+    }
+}
+
+fn rebake_voxel_edits(voxel_world: &mut VoxelWorld<DefaultWorld>, edits: &VoxelEdits) {
+    for pos in &edits.0 {
+        voxel_world.set_voxel(*pos, query_lead_voxel(*pos));
     }
 }
 
@@ -424,6 +440,7 @@ fn main() {
         .init_resource::<ModOffer>()
         .init_resource::<VoxelCatalog>()
         .init_resource::<WorldFor>()
+        .init_resource::<VoxelEdits>()
         .init_resource::<SkyFor>()
         .init_resource::<WorldGravity>()
         .insert_resource(Gravity(Vec3::ZERO))
@@ -479,6 +496,7 @@ fn main() {
             Update,
             (
                 sync_selected_game,
+                rebake_voxels_on_switch,
                 ensure_clouds,
                 apply_menu_chrome,
                 menu_keyboard,
@@ -1032,6 +1050,22 @@ fn despawn_play_world(commands: &mut Commands, worlds: &Query<Entity, With<PlayW
     }
 }
 
+fn rebake_voxels_on_switch(
+    world_for: Res<WorldFor>,
+    mut last: Local<String>,
+    mut voxel_world: VoxelWorld<DefaultWorld>,
+    edits: Res<VoxelEdits>,
+) {
+    if world_for.0.is_empty() || world_for.0 == *last {
+        return;
+    }
+    *last = world_for.0.clone();
+    if edits.0.is_empty() {
+        return;
+    }
+    rebake_voxel_edits(&mut voxel_world, &edits);
+}
+
 fn retire_voxel_chunks(
     commands: &mut Commands,
     chunks: &Query<Entity, With<Chunk<DefaultWorld>>>,
@@ -1406,6 +1440,7 @@ fn teardown_fracture(
     action: &str,
     catalog: &VoxelCatalog,
     mod_runtime: &ModRuntime,
+    edits: &mut VoxelEdits,
 ) {
     let Some(origin_type) = voxel_type_of(voxel_world.get_voxel(origin)) else {
         return;
@@ -1436,6 +1471,7 @@ fn teardown_fracture(
     .unwrap_or(0);
 
     voxel_world.set_voxel(origin, WorldVoxel::Unset);
+    note_voxel_edit(edits, origin);
     if can > 0 {
         spawn_debris(
             commands,
@@ -1479,6 +1515,7 @@ fn teardown_fracture(
     }
     for (npos, dx, dy, dz) in collapse {
         voxel_world.set_voxel(npos, WorldVoxel::Unset);
+        note_voxel_edit(edits, npos);
         let n_out = Vec3::new(dx as f32, dy as f32 + 1.0, dz as f32).normalize_or_zero() * impulse;
         spawn_debris(
             commands,
@@ -1663,6 +1700,7 @@ fn validate_incoming_actions(
     mut offer: ResMut<ModOffer>,
     catalog: Res<VoxelCatalog>,
     mod_runtime: Res<ModRuntime>,
+    mut edits: ResMut<VoxelEdits>,
 ) {
     for action in events.read() {
         match action {
@@ -1722,6 +1760,7 @@ fn validate_incoming_actions(
                     ACTION_BREAK,
                     &catalog,
                     &mod_runtime,
+                    &mut edits,
                 );
                 apply_mod_action(
                     &mut commands,
@@ -1777,6 +1816,7 @@ fn validate_incoming_actions(
                                     ACTION_EXPLODE,
                                     &catalog,
                                     &mod_runtime,
+                                    &mut edits,
                                 );
                             }
                         }
@@ -1836,6 +1876,7 @@ fn validate_incoming_actions(
                 }
                 info!("Action Verified! Placing {voxel} at {:?}", voxel_pos);
                 voxel_world.set_voxel(voxel_pos, WorldVoxel::Solid(clamp_voxel_type(index as i32)));
+                note_voxel_edit(&mut edits, voxel_pos);
                 apply_mod_action(
                     &mut commands,
                     &mut meshes,
@@ -2427,7 +2468,8 @@ fn vehicle_crash_system(
                 .unwrap_or(0)
         })
         .unwrap_or(0);
-        let scale = crumple_scale(crumple);
+        let dir = [velocity.x, velocity.y, velocity.z];
+        let axes = crumple_axes(crumple, dir);
         let mut detach = Vec::new();
         for child in children.iter() {
             let Ok((part_entity, part, mut local)) = parts.get_mut(child) else {
@@ -2444,7 +2486,9 @@ fn vehicle_crash_system(
             if should_drop {
                 detach.push((part_entity, part.size, *local));
             } else {
-                local.scale = Vec3::new(1.0, 1.0, scale);
+                local.scale = Vec3::from_array(axes);
+                let shifted = crumple_node_shift(local.translation.to_array(), dir, crumple);
+                local.translation = Vec3::from_array(shifted);
             }
         }
         let impulse = with_mod(&mod_runtime, |ctx| {
@@ -3791,6 +3835,23 @@ mod tests {
             ledger.penalize(entity, penalty);
             let final_score = ledger.peer_scores.get(&entity).unwrap();
             prop_assert_eq!(*final_score, initial_score - penalty);
+        }
+    }
+
+    #[test]
+    fn kani_replay_possible_action_stays_inside_axes() {
+        let max = 10.0;
+        for (px, py, pz, tx, ty, tz) in [
+            (0.0, 0.0, 0.0, 3.0, 4.0, 0.0),
+            (0.0, 0.0, 0.0, 10.0, 0.0, 0.0),
+            (5.0, -2.0, 1.0, 5.0, 7.0, 1.0),
+            (0.0, 0.0, 0.0, 7.0, 7.0, 7.0),
+        ] {
+            if is_action_physically_possible(px, py, pz, tx, ty, tz, max) {
+                assert!((px - tx).abs() <= max);
+                assert!((py - ty).abs() <= max);
+                assert!((pz - tz).abs() <= max);
+            }
         }
     }
 }

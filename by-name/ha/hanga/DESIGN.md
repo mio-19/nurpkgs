@@ -98,7 +98,7 @@ and does not re-run that suite.
 The Game row cycles discovered `.game` files. Each game owns the menu title,
 panel, buttons, and clear/sky colors; switching Game reloads that collection's
 WASM (lead plus any extra packs) and, on the next Play, respawns the world and
-retires old voxel chunks. Lead owns terrain, gravity, and jobs; extra mods add
+retires old voxel chunks and rebakes player edits from the new lead WASM. Lead owns terrain, gravity, and jobs; extra mods add
 voxels, vehicles, and agents. Sandbox is Urban Chaos plus the testbed pack.
 Both shipped games and their mods install in `HANGA_GAMES` / `HANGA_MODS`.
 Play is single-player and does **not** talk to Matchbox. Room cycles
@@ -141,9 +141,11 @@ under xvfb; `mods.nix` runs `urban_chaos` / `testbed` unit tests before the WASM
 - `cargo test --lib` — pure engine predicates (anti-cheat, fracture, economy pack)
 - `cargo test -p urban_chaos` / `-p testbed` — mod rules
 - `cargo test --test '*'` — agent-client integration (needs a display / xvfb)
+- Kani proofs stay behind `cfg(kani)` for `cargo kani`; the same properties replay as
+  `kani_replay_*` tests in `.#hanga-dev`
 
 ## Next
 
-1. Kani CI for engine + mods
-2. Fuller BeamNG node-beam (Urban Chaos still uses severity + detach, not a solver)
-3. Clear `ModifiedVoxels` on game switch (chunk retire remeshes; edits can linger)
+1. Package `cargo-kani` so proofs run as CBMC, not only replay tests
+2. True node-beam / tire deformation (host now folds along the impact axis)
+3. Camera-without-render-graph warning from voxel-world internals

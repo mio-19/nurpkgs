@@ -21,7 +21,7 @@
  
              // Although `App.Dispose()` is invoked from `Program.Main(...)`, on some platforms
              // it may be called too late in the shutdown lifecycle. Attach an exit
-@@ -121,6 +129,79 @@
+@@ -121,6 +129,74 @@
          base.OnFrameworkInitializationCompleted();
      }
  

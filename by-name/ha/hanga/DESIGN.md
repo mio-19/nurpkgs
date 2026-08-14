@@ -40,7 +40,8 @@ The host knows nothing about cops, wanted levels, cities, or quests.
 - Teardown *execution*: unset voxels, spawn debris, collapse voxels not connected to ground
 - Vehicle *execution*: any rideable that can carry a player. The host builds boxes
   from a kit, moves occupants, crumples/detaches named parts, and scales fold by
-  `stiffness`. Crash and fire kits come from the pack that spawned the rideable.
+  `stiffness`. Named `tire=` parts squash on the local up axis when grounded.
+  Crash and fire kits come from the pack that spawned the rideable.
 - Gravity *execution*: apply a field the game named (`none`, constant vector, or
   point attractor). Walk/jump stay on the anti-gravity plane at the kit's
   `walk=` / `jump=` speeds. The host does not invent Earth.
@@ -57,8 +58,8 @@ Anti-cheat is mathematical: `is_action_physically_possible` plus ranges the **mo
 - Economy / storyteller
 - Spawn positions
 - What can shatter (`fracture-kit`: can / spread / impulse)
-- Rideable kit (`vehicle-kit`): kind, traffic, speed, stiffness 0–100, collider, named box parts.
-  Urban Chaos ships a soft car; Testbed ships a stiff platform (and a stiff cart when packed with Urban Chaos).
+- Rideable kit (`vehicle-kit`): kind, traffic, speed, stiffness 0–100, `tire=` names, collider, named box parts.
+  Urban Chaos ships a soft car with squashing wheels; Testbed ships a stiff platform (and a stiff cart when packed with Urban Chaos).
 - Gravity (`gravity`): `none`, `constant`/`down`, or `point` (optional inv-sq),
   plus `jump=` and `walk=`. Urban Chaos is Earth; Testbed is a zero-g lab.
 - Vehicle crash (`crash-kit`): one impact string (severity, crumple, wrecks,
@@ -175,4 +176,4 @@ under xvfb; `mods.nix` runs `urban_chaos` / `testbed` unit tests before the WASM
 ## Next
 
 1. Package `cargo-kani` so proofs run as CBMC, not only replay tests
-2. True node-beam / tire deformation (host now folds along the impact axis)
+2. True node-beam (host now folds along impact and squashes named tires)

@@ -38,7 +38,7 @@ use hanga::gravity::{
     set_planar_velocity, walk_up, GravityKit,
 };
 use hanga::heist::{contract_context, mark_reached, parse_contract_mark, ContractMark};
-use hanga::vehicle::{parse_vehicle_kit, traffic_ahead_blocks, VehicleKit};
+use hanga::vehicle::{is_tire, parse_vehicle_kit, tire_squash, traffic_ahead_blocks, VehicleKit};
 use hanga::game::{
     cycle_game, game_search_dirs, load_game_catalog, resolve_game, selected_game_id, GameSpec,
     MenuBackdrop, DEFAULT_GAME,
@@ -664,6 +664,8 @@ struct VehicleMod(String);
 struct VehiclePart {
     name: String,
     size: Vec3,
+    tire: bool,
+    rest_scale: Vec3,
 }
 
 #[derive(Component)]
@@ -1450,6 +1452,8 @@ fn spawn_vehicle(
                 VehiclePart {
                     name: part.name.clone(),
                     size,
+                    tire: is_tire(kit, &part.name),
+                    rest_scale: Vec3::ONE,
                 },
             ));
         }
@@ -2444,6 +2448,7 @@ impl Plugin for CitySimPlugin {
                 agent_ai_tick,
                 wanted_decay,
                 vehicle_crash_system,
+                tire_deform_system,
                 vehicle_traffic_system,
                 fire_spread_system,
                 flicker_ignition,
@@ -2488,7 +2493,7 @@ fn vehicle_crash_system(
         ),
         With<Vehicle>,
     >,
-    mut parts: Query<(Entity, &VehiclePart, &mut Transform), Without<Vehicle>>,
+    mut parts: Query<(Entity, &mut VehiclePart, &mut Transform), Without<Vehicle>>,
     mut players: Query<(Entity, Option<&InVehicle>), With<Player>>,
     voxel_world: VoxelWorld<DefaultWorld>,
     mod_runtime: Res<ModRuntime>,
@@ -2522,13 +2527,14 @@ fn vehicle_crash_system(
         let axes = crumple_axes(crumple, dir);
         let mut detach = Vec::new();
         for child in children.iter() {
-            let Ok((part_entity, part, mut local)) = parts.get_mut(child) else {
+            let Ok((part_entity, mut part, mut local)) = parts.get_mut(child) else {
                 continue;
             };
             if crash_kit_detaches(&outcome, &part.name) {
                 detach.push((part_entity, part.size, *local));
             } else {
-                local.scale = Vec3::from_array(axes);
+                part.rest_scale = Vec3::from_array(axes);
+                local.scale = part.rest_scale;
                 let shifted = crumple_node_shift(local.translation.to_array(), dir, crumple);
                 local.translation = Vec3::from_array(shifted);
             }
@@ -2581,6 +2587,37 @@ fn vehicle_crash_system(
             if into_solid {
                 events.write(signed_break(player_entity, pos + IVec3::new(0, 0, -2)));
             }
+        }
+    }
+}
+
+fn tire_deform_system(
+    vehicles: Query<
+        (&Transform, &LinearVelocity, &VehicleStiffness, &Children),
+        (With<Vehicle>, Without<Wrecked>),
+    >,
+    mut parts: Query<(&VehiclePart, &mut Transform), Without<Vehicle>>,
+    voxel_world: VoxelWorld<DefaultWorld>,
+) {
+    for (transform, velocity, stiff, children) in vehicles.iter() {
+        let feet = transform.translation - Vec3::Y * 0.6;
+        let grounded = voxel_is_solid(
+            &voxel_world,
+            [
+                feet.x.round() as i32,
+                feet.y.round() as i32,
+                feet.z.round() as i32,
+            ],
+        );
+        let squash = tire_squash(velocity.length(), stiff.0, grounded);
+        for child in children.iter() {
+            let Ok((part, mut local)) = parts.get_mut(child) else {
+                continue;
+            };
+            if !part.tire {
+                continue;
+            }
+            local.scale = part.rest_scale * Vec3::new(1.0, squash, 1.0);
         }
     }
 }

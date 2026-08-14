@@ -1,3 +1,4 @@
+# Vendored from nixpkgs 044bfe75bfe4 (2026-08-14). See README.md.
 {
   lib,
   stdenv,
@@ -33,7 +34,7 @@ buildDotnetModule (finalAttrs: {
   dotnet-sdk = dotnetCorePackages.sdk_10_0;
   dotnet-runtime = dotnetCorePackages.runtime_10_0;
 
-  # Same csharpier workaround as discordchatexporter-cli (needed on some Darwin SDKs).
+  # Same csharpier workaround as nixpkgs discordchatexporter-cli.
   dotnetBuildFlags = [
     "-p:FirstTargetFrameworks=workaround-for-csharpier-pr-1696"
   ];
@@ -52,7 +53,6 @@ buildDotnetModule (finalAttrs: {
   ]
   ++ lib.optionals stdenv.hostPlatform.isDarwin [ desktopToDarwinBundle ];
 
-  # Avalonia/Skia native deps. Darwin uses NuGet NativeAssets.macOS + AppKit.
   runtimeDeps = lib.optionals stdenv.hostPlatform.isLinux [
     fontconfig
     libICE
@@ -87,12 +87,18 @@ buildDotnetModule (finalAttrs: {
     ln -s $out/bin/DiscordChatExporter $out/bin/discordchatexporter
   '';
 
+  passthru.updateScript = ./updater.sh;
+
   meta = {
     changelog = "https://github.com/Tyrrrz/DiscordChatExporter/releases/tag/${finalAttrs.version}";
     description = "Tool to export Discord chat logs to a file (GUI, HiDPI + Darwin)";
     homepage = "https://github.com/Tyrrrz/DiscordChatExporter";
     license = lib.licenses.gpl3Plus;
     mainProgram = "discordchatexporter";
+    maintainers = with lib.maintainers; [
+      phanirithvij
+      willow
+    ];
     platforms = [
       "x86_64-linux"
       "aarch64-linux"

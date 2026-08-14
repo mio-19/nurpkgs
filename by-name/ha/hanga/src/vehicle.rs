@@ -15,6 +15,8 @@ pub struct VehicleKit {
     pub traffic: bool,
     pub speed: f32,
     pub collider: [f32; 3],
+    /// 0 = crumple as the crash kit says; 100 = almost no fold.
+    pub stiffness: i32,
     pub parts: Vec<VehiclePartSpec>,
 }
 
@@ -25,6 +27,7 @@ impl Default for VehicleKit {
             traffic: false,
             speed: 12.0,
             collider: [2.0, 1.0, 3.0],
+            stiffness: 50,
             parts: vec![VehiclePartSpec {
                 name: "body".into(),
                 size: [2.0, 0.8, 3.0],
@@ -73,6 +76,11 @@ pub fn parse_vehicle_kit(text: &str) -> VehicleKit {
             "collider" => {
                 if let Some(v) = parse_n(value, 3) {
                     kit.collider = [v[0].max(0.1), v[1].max(0.1), v[2].max(0.1)];
+                }
+            }
+            "stiffness" | "stiff" => {
+                if let Ok(v) = value.trim().parse::<i32>() {
+                    kit.stiffness = v.clamp(0, 100);
                 }
             }
             _ => {}
@@ -168,6 +176,7 @@ mod tests {
         );
         assert_eq!(kit.kind, "car");
         assert!(kit.traffic);
+        assert_eq!(kit.stiffness, 50);
         assert!((kit.speed - 25.0).abs() < 1e-5);
         assert_eq!(kit.parts.len(), 2);
         assert_eq!(kit.parts[0].name, "hull");
@@ -179,6 +188,8 @@ mod tests {
         let kit = parse_vehicle_kit("part=deck,1,1,1,0,0,0,255,128,0");
         assert!((kit.parts[0].rgb[0] - 1.0).abs() < 1e-5);
         assert!((kit.parts[0].rgb[1] - 128.0 / 255.0).abs() < 1e-5);
+        let kit = parse_vehicle_kit("kind=platform;stiffness=95;part=deck,1,1,1,0,0,0,1,1,1");
+        assert_eq!(kit.stiffness, 95);
     }
 
     #[test]

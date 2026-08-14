@@ -27,18 +27,14 @@ To refresh: copy those four files from a newer nixpkgs commit, update this table
 
 ### Linux HiDPI (`hidpi-scale.patch`)
 
-Avalonia on X11/XWayland often keeps `RenderScaling = 1` on HiDPI (e.g. Framework 13 2880×1920). `AVALONIA_GLOBAL_SCALE_FACTOR` / `AVALONIA_SCREEN_SCALE_FACTORS` did not take effect here.
-
-On window open, wrap content in `LayoutTransformControl` (detach first). Do **not** also multiply `Width`/`Height` — that stacked with the transform and clipped the Token help text. The window uses `SizeToContent` so it grows once with the transform.
+Avalonia stays on **X11/XWayland**. `LayoutTransform` only stretches a 1× Skia buffer (blurry, easy to clip). The patch instead sets `AVALONIA_GLOBAL_SCALE_FACTOR` in `Program.Main` **before** the X11 backend starts, and sets `AVALONIA_SCREEN_SCALE_IGNORE_QT=1` so Plasma’s `QT_SCREEN_SCALE_FACTORS=1` does not pin scale to 1×.
 
 **KDE Plasma Wayland — Legacy X11 apps:**
 
-- *Apply scaling themselves* (`kdeglobals`/`kwinrc` `XwaylandClientsScale=true`): KWin does **not** magnify X11. We guess scale as `screenWidth / 1920` (2880 → 1.5×) so Avalonia matches the Plasma output scale.
-- *Scaled by the system* (`XwaylandClientsScale=false`): KWin already magnifies XWayland. Auto layout-scale is skipped so the window is not double-sized.
+- *Apply scaling themselves* (`XwaylandClientsScale=true`): set scale from `kwinoutputconfig.json` if present, else **1.5×** on typical HiDPI (Framework 13). Rendering stays sharp.
+- *Scaled by the system* (`false`): leave Avalonia at 1×; KWin magnifies (blurry by design).
 
-**Other Wayland (GNOME, …):** auto layout-scale is skipped (compositor scales XWayland).
-
-Override with `DISCORDCHATEXPORTER_SCALE`. Do **not** use `AVALONIA_GLOBAL_SCALE_FACTOR` here.
+Override: `DISCORDCHATEXPORTER_SCALE`.
 
 ### Darwin
 

@@ -22,7 +22,7 @@
  
              // Although `App.Dispose()` is invoked from `Program.Main(...)`, on some platforms
              // it may be called too late in the shutdown lifecycle. Attach an exit
-@@ -121,6 +130,144 @@
+@@ -121,6 +130,143 @@
          base.OnFrameworkInitializationCompleted();
      }
  
@@ -49,10 +49,9 @@
 +            };
 +        }
 +
-+        window.MinWidth *= scale;
-+        window.MinHeight *= scale;
-+        window.Width *= scale;
-+        window.Height *= scale;
++        window.Width = double.NaN;
++        window.Height = double.NaN;
++        window.SizeToContent = SizeToContent.WidthAndHeight;
 +    }
 +
 +    private static double ResolveLinuxUiScale(Window window)

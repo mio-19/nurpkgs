@@ -29,7 +29,7 @@ To refresh: copy those four files from a newer nixpkgs commit, update this table
 
 Avalonia on X11/XWayland often keeps `RenderScaling = 1` on HiDPI (e.g. Framework 13 2880×1920). `AVALONIA_GLOBAL_SCALE_FACTOR` / `AVALONIA_SCREEN_SCALE_FACTORS` did not take effect here.
 
-On window open, if Linux scale is still ~1×, wrap the window content in `LayoutTransformControl` (detach `Content` first so Avalonia does not throw “The Control already has a parent”).
+On window open, wrap content in `LayoutTransformControl` (detach first). Do **not** also multiply `Width`/`Height` — that stacked with the transform and clipped the Token help text. The window uses `SizeToContent` so it grows once with the transform.
 
 **KDE Plasma Wayland — Legacy X11 apps:**
 

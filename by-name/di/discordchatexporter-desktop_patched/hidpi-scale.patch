@@ -21,7 +21,7 @@
  
              // Although `App.Dispose()` is invoked from `Program.Main(...)`, on some platforms
              // it may be called too late in the shutdown lifecycle. Attach an exit
-@@ -121,6 +129,81 @@
+@@ -121,6 +129,82 @@
          base.OnFrameworkInitializationCompleted();
      }
  
@@ -40,6 +40,7 @@
 +
 +        if (window.Content is Control child)
 +        {
++            window.Content = null;
 +            window.Content = new LayoutTransformControl
 +            {
 +                LayoutTransform = new ScaleTransform(scale, scale),

@@ -1121,6 +1121,10 @@ impl ModRuntime {
         node_from_wire(&self.ask_any(method, args))
     }
 
+    pub fn ask_any_node_ok(&self, method: &str, args: &Wire) -> Option<::hanga::kit::Node> {
+        node_from_reply(&self.ask_any(method, args))
+    }
+
     pub fn wake_all(&mut self) {
         let mut missed = false;
         match self.context.try_lock() {

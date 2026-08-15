@@ -65,8 +65,10 @@ drive-by edit. Live ABI is **6** (`wit/world.wit`). Gate: `nix build .#hanga-dev
   `fail`/empty instead of stacking at a fallback point. Ambient agent
   spawn skips `fail`/empty instead of pedestrians at the origin. Voxel
   labels keep the voxel name on `fail` (`unknown` only when the method
-  is missing). Story `event-label` `fail` keeps the event id. The host
-  bus no longer has
+  is missing). Story `event-label` `fail` keeps the event id. Economy
+  ticks skip `fail`/empty instead of logging `$100`. Crash and fracture
+  kits skip `fail` (no invented crumple or chain). Contract marks skip
+  `fail`. The host bus no longer has
   CSV `bus_kit` / `fields_from_wire` callers.
 - **Two value types.** `hanga::kit::Atom` is a flat scalar; `Node` is the tree;
   WIT `cell` is the arena encoding.

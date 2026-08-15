@@ -13,12 +13,13 @@ drive-by edit. Live ABI is **6** (`wit/world.wit`). Gate: `nix build .#hanga-dev
   held-mutex call/cast split are unit-tested. A full LiveBus with WASM packs is
   still not in `cargo test --lib`.
 - **No supervision.** A guest trap returns `fail("trap")`, `emit` treats fail as
-  veto, and the host reinstantiates that pack from disk (OTP restart). Guest
-  statics reset. If reload fails, the store stays dead.
+  veto, and the host reinstantiates that pack from disk (OTP restart) at most
+  once per 2s. Guest statics reset. If reload fails, the store stays dead.
 - **`empty` vs empty text.** Both mean “not mine”, so a pack cannot return a
   real empty string. Use `text` only for non-empty names; keep `empty` for skip.
-- **Name replies vs kits.** Loot, craft, and labels use `ask_any_text` (plain
-  `text` only). `ask_any_kit` still stringifies trees for leftover CSV callers.
+- **Name replies vs kits.** Loot, craft, labels, story events, and agent names
+  use `ask_any_text` / `bus_text_payload`. `ask_any_kit` / `bus_kit` remain for
+  leftover CSV callers.
 - **Selective receive / priorities.** OTP can skip mailbox items. We FIFO only.
   Not needed until a pack both `send`s to self and must handle `on-step` first.
 

@@ -847,6 +847,7 @@ pub struct MainModContext {
     pub topics: HashSet<String>,
     wasm_path: PathBuf,
     is_lead: bool,
+    last_restart: Option<Instant>,
 }
 
 impl MainModContext {
@@ -883,6 +884,14 @@ impl MainModContext {
 
     fn restart_after_trap(&mut self) {
         let name = self.store.data().name.clone();
+        let now = Instant::now();
+        if self
+            .last_restart
+            .is_some_and(|at| now.duration_since(at).as_millis() < 2000)
+        {
+            warn!("mod {name} trapped again; waiting before another restart");
+            return;
+        }
         let bus = Arc::clone(&self.store.data().bus);
         let path = self.wasm_path.clone();
         let lead = self.is_lead;
@@ -890,9 +899,13 @@ impl MainModContext {
         match ModRuntime::instantiate(&path, &name, bus, lead) {
             Some(mut fresh) => {
                 fresh.wake();
+                fresh.last_restart = Some(now);
                 *self = fresh;
             }
-            None => error!("mod {name} trapped and failed to restart"),
+            None => {
+                self.last_restart = Some(now);
+                error!("mod {name} trapped and failed to restart");
+            }
         }
     }
 
@@ -1208,6 +1221,7 @@ impl ModRuntime {
             topics,
             wasm_path: path.to_path_buf(),
             is_lead: publish_shared,
+            last_restart: None,
         })
     }
 

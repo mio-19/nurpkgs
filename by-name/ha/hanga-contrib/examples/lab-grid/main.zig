@@ -285,8 +285,12 @@ export fn exports_hanga_engine_guest_invoke(
         var names: [8][]const u8 = undefined;
         const n = hangamod.catalog.parse(catalog_csv, &names);
         const voxel = hangamod.catalog.catalogName(names[0..n], @intCast(queryVoxel(x, y, z)));
-        payloadText(ret, "grid");
-        dupSlice(&ret.*.cells.ptr[0].val.text, voxel);
+        const cells = allocCells(1);
+        cells[0].tag = c.HANGA_ENGINE_HOST_CELL_TEXT;
+        dupSlice(&cells[0].val.text, voxel);
+        ret.*.cells.ptr = cells;
+        ret.*.cells.len = 1;
+        ret.*.root = 0;
         return;
     }
     if (topicEql(name, "fracture-kit")) {

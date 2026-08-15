@@ -1717,7 +1717,7 @@ fn apply_mod_action(
             ]),
             mod_state.0 as i32,
         );
-        let agent = ctx.bus_kit(
+        let agent = ctx.bus_text_payload(
             "should-spawn-agent",
             &wire_bag(vec![
                 ("action", Wire::Text(action.to_string())),
@@ -3271,11 +3271,11 @@ fn update_storyteller(
     let player_state = players.iter().next().map(|s| s.0 as i32).unwrap_or(0);
     let lang = locale.0.code();
     if let Some((event_id, label)) = with_mod(&mod_runtime, |ctx| {
-        let event_id = ctx.bus_kit("story-event", &wire_int(player_state as i64));
+        let event_id = ctx.bus_text_payload("story-event", &wire_int(player_state as i64));
         if event_id.is_empty() {
             return None;
         }
-        let label = ctx.bus_kit(
+        let label = ctx.bus_text_payload(
             "event-label",
             &wire_bag(vec![
                 ("event", Wire::Text(event_id.clone())),

@@ -17,7 +17,8 @@ drive-by edit. Live ABI is **6** (`wit/world.wit`). Gate: `nix build .#hanga-dev
   `query-voxel` / catalog names, gravity, guest `fail("busy")` via `refuse`,
   and emit veto (`veto` vs `ping`). Testbed `selfie` returns the host `player()`
   snapshot. `live_wasm_urban_chaos_query_voxel` loads
-  the city lead and checks a catalog name at `(0,0,0)`. Two-pack live tests
+  the city lead and checks a catalog name at `(0,0,0)`, loot/craft names,
+  gravity, fracture-kit, and evaluate-action. Two-pack live tests
   also probe lead `voxel()` and guest `voxel-set` (`paint`). Testbed `later`
   covers host `after` (flushed in-process); `who` / `see` cover `id` and
   `has-mod`; `clock` / `crew` / `yell` cover `now-ms`, `peers`, and guest

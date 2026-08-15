@@ -1723,6 +1723,52 @@ mod tests {
         assert!(names.contains(&"asphalt".to_string()));
         let index = ctx.query_voxel(0, 0, 0);
         assert!(::hanga::catalog_name(&names, index).is_some());
+        assert_eq!(
+            ctx.bus_text_payload("loot-item", &wire_text("glass")),
+            "glass"
+        );
+        assert!(ctx
+            .bus_text_payload("loot-item", &wire_text("asphalt"))
+            .is_empty());
+        assert_eq!(
+            ctx.bus_text_payload(
+                "craft-result",
+                &wire_bag(vec![
+                    ("a", wire_text("concrete")),
+                    ("b", wire_text("glass")),
+                ])
+            ),
+            "tile"
+        );
+        let gravity = ctx.bus_node("gravity", &wire_empty());
+        assert_eq!(
+            gravity.get("kind").map(::hanga::kit::Node::text).as_deref(),
+            Some("constant")
+        );
+        assert_eq!(gravity.get("y").and_then(::hanga::kit::Node::as_f32), Some(-9.81));
+        let fracture = ctx.bus_node(
+            "fracture-kit",
+            &wire_bag(vec![
+                ("voxel", wire_text("glass")),
+                ("action", wire_text("break")),
+            ]),
+        );
+        assert!(fracture.get("can").is_some_and(::hanga::kit::Node::as_flag));
+        assert_eq!(
+            fracture.get("spread").and_then(::hanga::kit::Node::as_i32),
+            Some(3)
+        );
+        assert_eq!(
+            ctx.bus_i32(
+                "evaluate-action",
+                &wire_bag(vec![
+                    ("action", wire_text("explode")),
+                    ("state", Wire::Int(0)),
+                ]),
+                -1
+            ),
+            5
+        );
         *slot.lock().unwrap() = Some(ctx);
     }
 }

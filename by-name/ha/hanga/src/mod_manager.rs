@@ -1673,6 +1673,40 @@ mod tests {
             )),
             "pong"
         );
+        assert!(matches!(
+            bus.invoke(
+                "host",
+                "testbed",
+                "ask",
+                wire_bag(vec![
+                    ("peer", wire_text("gone")),
+                    ("method", wire_text("ping")),
+                ])
+            ),
+            Wire::Fail(reason) if reason == "noproc"
+        ));
+        assert!(matches!(
+            bus.invoke(
+                "host",
+                "testbed",
+                "ask",
+                wire_bag(vec![
+                    ("peer", wire_text("testbed")),
+                    ("method", wire_text("ping")),
+                ])
+            ),
+            Wire::Fail(reason) if reason == "self"
+        ));
+        assert!(wire_is_empty(&bus.invoke(
+            "host",
+            "testbed",
+            "toss",
+            wire_bag(vec![
+                ("peer", wire_text("urban_chaos")),
+                ("method", wire_text("ping")),
+            ])
+        )));
+        assert!(bus.pending.lock().unwrap().is_empty());
         assert_eq!(
             wire_as_text(&bus.invoke(
                 "host",

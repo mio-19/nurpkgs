@@ -1194,17 +1194,41 @@ impl ModRuntime {
             };
             pack_locks.push(guard);
         }
-        if !keep_fresh(&mut *lead, new_lead) {
+        let lead_ok = keep_fresh(&mut *lead, new_lead);
+        if !lead_ok {
             error!("Failed to reload lead WASM mod");
         }
+        let mut pack_ok = Vec::new();
         for (pack, (guard, fresh)) in self.packs.iter().zip(pack_locks.iter_mut().zip(new_packs)) {
-            if !keep_fresh(guard, fresh) {
+            let ok = keep_fresh(guard, fresh);
+            if !ok {
                 error!("Failed to reload pack '{}'", pack.name);
             }
+            pack_ok.push(ok);
         }
         drop(lead);
         drop(pack_locks);
-        self.wake_all();
+        if lead_ok {
+            if let Ok(mut guard) = self.context.try_lock() {
+                if let Some(ctx) = guard.as_mut() {
+                    ctx.wake();
+                }
+            }
+        }
+        for (pack, ok) in self.packs.iter().zip(pack_ok.iter().copied()) {
+            if !ok {
+                continue;
+            }
+            if let Ok(mut guard) = pack.context.try_lock() {
+                if let Some(ctx) = guard.as_mut() {
+                    ctx.wake();
+                }
+            }
+        }
+        if lead_ok || pack_ok.iter().any(|ok| *ok) {
+            self.notify_all("on-mods-loaded", &wire_empty());
+            self.woken = true;
+        }
         true
     }
 

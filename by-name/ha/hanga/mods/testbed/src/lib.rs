@@ -22,7 +22,7 @@ include!("../../mod_kit.rs");
 struct TestbedMod;
 
 fn testbed_topics() -> String {
-    format!("{BUS_TOPICS},refuse,veto,selfie")
+    format!("{BUS_TOPICS},refuse,veto,selfie,paint")
 }
 
 pub const ACTION_BREAK: &str = "break";
@@ -393,6 +393,15 @@ pub fn on_message(from: &str, topic: &str, payload: &hanga::engine::host::Value)
         "refuse" => wire_fail("busy"),
         "veto" => wire_flag(true),
         "selfie" => host_player(),
+        "paint" => {
+            host_voxel_set(
+                payload_i64(payload, "x") as i32,
+                payload_i64(payload, "y") as i32,
+                payload_i64(payload, "z") as i32,
+                payload_str(payload, "name"),
+            );
+            wire_empty()
+        }
         _ => wire_empty(),
     }
 }

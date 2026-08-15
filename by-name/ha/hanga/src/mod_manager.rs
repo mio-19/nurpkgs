@@ -1589,6 +1589,46 @@ mod tests {
             bus.invoke("host", "", "refuse", wire_empty()),
             Wire::Fail(reason) if reason == "busy"
         ));
+        let at = wire_bag(vec![
+            ("x", Wire::Int(0)),
+            ("y", Wire::Int(0)),
+            ("z", Wire::Int(0)),
+        ]);
+        let world = node_from_wire(&bus.invoke("host", "testbed", "probe", at));
+        assert_eq!(
+            world.get("name").map(::hanga::kit::Node::text).as_deref(),
+            Some("concrete")
+        );
+        assert!(!world.get("edit").is_some_and(::hanga::kit::Node::as_flag));
+        let painted = wire_bag(vec![
+            ("x", Wire::Int(99)),
+            ("y", Wire::Int(1)),
+            ("z", Wire::Int(99)),
+            ("name", wire_text("glass")),
+        ]);
+        assert!(wire_is_empty(&bus.invoke(
+            "host",
+            "testbed",
+            "paint",
+            painted
+        )));
+        let overlay = node_from_wire(&bus.invoke(
+            "host",
+            "testbed",
+            "probe",
+            wire_bag(vec![
+                ("x", Wire::Int(99)),
+                ("y", Wire::Int(1)),
+                ("z", Wire::Int(99)),
+            ]),
+        ));
+        assert_eq!(
+            overlay.get("name").map(::hanga::kit::Node::text).as_deref(),
+            Some("glass")
+        );
+        assert!(overlay.get("edit").is_some_and(::hanga::kit::Node::as_flag));
+        ::hanga::overlay_clear();
+        let _ = ::hanga::take_voxel_writes();
     }
 
     #[test]

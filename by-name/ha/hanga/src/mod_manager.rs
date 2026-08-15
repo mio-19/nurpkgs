@@ -66,6 +66,30 @@ fn queue_after(pack: String, ms: i32, method: String, args: Wire) {
     }
 }
 
+fn due_after_jobs() -> Vec<AfterJob> {
+    let now = host_now_ms();
+    let Ok(mut jobs) = AFTER_JOBS.lock() else {
+        return Vec::new();
+    };
+    let mut keep = Vec::new();
+    let mut due = Vec::new();
+    for job in std::mem::take(&mut *jobs) {
+        if job.at_ms <= now {
+            due.push(job);
+        } else {
+            keep.push(job);
+        }
+    }
+    *jobs = keep;
+    due
+}
+
+pub fn flush_after_bus(bus: &dyn EngineBus) {
+    for job in due_after_jobs() {
+        bus.send("host", &job.pack, &job.method, job.args);
+    }
+}
+
 /// JSON tree on the host. WIT carries the same tree as a cell arena
 /// (`value.cells` + indexes) because WIT types cannot recurse.
 #[derive(Clone, Debug)]
@@ -982,26 +1006,7 @@ impl ModRuntime {
     }
 
     pub fn flush_after(&self) {
-        let now = host_now_ms();
-        let due = {
-            let Ok(mut jobs) = AFTER_JOBS.lock() else {
-                return;
-            };
-            let mut keep = Vec::new();
-            let mut due = Vec::new();
-            for job in std::mem::take(&mut *jobs) {
-                if job.at_ms <= now {
-                    due.push(job);
-                } else {
-                    keep.push(job);
-                }
-            }
-            *jobs = keep;
-            due
-        };
-        for job in due {
-            self.bus.send("host", &job.pack, &job.method, job.args);
-        }
+        flush_after_bus(&*self.bus);
     }
 
     /// OTP `gen_event:notify`. No reply, no veto. Mailbox if a pack is in a call.
@@ -1536,6 +1541,33 @@ mod tests {
             Some(40)
         );
         ::hanga::clear_player_snap();
+        assert_eq!(
+            wire_as_text(&bus.invoke("host", "testbed", "who", wire_empty())),
+            "testbed"
+        );
+        assert!(matches!(
+            bus.invoke("host", "testbed", "see", Wire::Text("testbed".into())),
+            Wire::Flag(true)
+        ));
+        assert!(matches!(
+            bus.invoke("host", "testbed", "see", Wire::Text("missing".into())),
+            Wire::Flag(false)
+        ));
+        assert_eq!(
+            payload_i64(&bus.invoke("host", "testbed", "count", wire_empty()), "value"),
+            0
+        );
+        assert!(wire_is_empty(&bus.invoke(
+            "host",
+            "testbed",
+            "later",
+            wire_empty()
+        )));
+        flush_after_bus(&*bus);
+        assert_eq!(
+            payload_i64(&bus.invoke("host", "testbed", "count", wire_empty()), "value"),
+            1
+        );
         assert!(matches!(
             bus.invoke("testbed", "testbed", "ping", wire_empty()),
             Wire::Fail(reason) if reason == "self"

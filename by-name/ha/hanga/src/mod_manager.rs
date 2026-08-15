@@ -1568,6 +1568,14 @@ mod tests {
             payload_i64(&bus.invoke("host", "testbed", "count", wire_empty()), "value"),
             1
         );
+        assert!(matches!(
+            bus.invoke("host", "testbed", "boom", wire_empty()),
+            Wire::Fail(reason) if reason == "trap"
+        ));
+        assert_eq!(
+            payload_i64(&bus.invoke("host", "testbed", "count", wire_empty()), "value"),
+            0
+        );
         let t0 = payload_i64(&bus.invoke("host", "testbed", "clock", wire_empty()), "value");
         let t1 = payload_i64(&bus.invoke("host", "testbed", "clock", wire_empty()), "value");
         assert!(t0 >= 0 && t1 >= t0);
@@ -1637,6 +1645,18 @@ mod tests {
                 .map(::hanga::kit::Node::text)
                 .collect::<Vec<_>>(),
             vec!["urban_chaos".to_string()]
+        );
+        assert_eq!(
+            wire_as_text(&bus.invoke(
+                "host",
+                "testbed",
+                "ask",
+                wire_bag(vec![
+                    ("peer", wire_text("urban_chaos")),
+                    ("method", wire_text("ping")),
+                ])
+            )),
+            "pong"
         );
         let at = wire_bag(vec![
             ("x", Wire::Int(0)),

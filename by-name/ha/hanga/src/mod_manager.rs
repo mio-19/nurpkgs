@@ -813,7 +813,9 @@ fn sample_lead_worldgen(x: i32, y: i32, z: i32) -> String {
         return "air".into();
     };
     let gp = bindings.hanga_engine_guest();
-    let index = gp.call_query_voxel(&mut store, x, y, z).unwrap_or(0);
+    let Ok(index) = gp.call_query_voxel(&mut store, x, y, z) else {
+        return "air".into();
+    };
     let names = gp.call_voxel_catalog(&mut store).unwrap_or_default();
     ::hanga::catalog_name(&names, index)
         .unwrap_or("air")
@@ -1072,17 +1074,31 @@ impl MainModContext {
     }
 
     pub fn query_voxel(&mut self, x: i32, y: i32, z: i32) -> i32 {
-        self.bindings
+        match self
+            .bindings
             .hanga_engine_guest()
             .call_query_voxel(&mut self.store, x, y, z)
-            .unwrap_or(0)
+        {
+            Ok(index) => index,
+            Err(_) => {
+                self.restart_after_trap();
+                0
+            }
+        }
     }
 
     pub fn voxel_catalog(&mut self) -> Vec<String> {
-        self.bindings
+        match self
+            .bindings
             .hanga_engine_guest()
             .call_voxel_catalog(&mut self.store)
-            .unwrap_or_default()
+        {
+            Ok(names) => names,
+            Err(_) => {
+                self.restart_after_trap();
+                Vec::new()
+            }
+        }
     }
 }
 

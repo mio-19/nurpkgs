@@ -1721,6 +1721,59 @@ mod tests {
     }
 
     #[test]
+    fn live_wasm_testbed_hello_name_has_methods() {
+        let Some((bus, slot, ctx)) = instantiate_live("testbed") else {
+            return;
+        };
+        *slot.lock().unwrap() = Some(ctx);
+        assert_eq!(
+            wire_as_text(&bus.invoke("host", "testbed", "hello", wire_empty())),
+            "hello host"
+        );
+        assert_eq!(
+            wire_as_text(&bus.invoke("host", "testbed", "name", wire_empty())),
+            "testbed"
+        );
+        assert!(matches!(
+            bus.invoke("host", "testbed", "has", Wire::Text("ping".into())),
+            Wire::Flag(true)
+        ));
+        assert!(matches!(
+            bus.invoke("host", "testbed", "has", Wire::Text("nope".into())),
+            Wire::Flag(false)
+        ));
+        let methods = parse_topics(&bus.invoke("host", "testbed", "methods", wire_empty()));
+        assert!(methods.contains("ping") && methods.contains("hello"));
+    }
+
+    #[test]
+    fn live_wasm_two_packs_ready_greets_peer() {
+        let Some((bus, lead, pack)) = instantiate_live_pair("testbed", "urban_chaos") else {
+            return;
+        };
+        {
+            let hold = pack.lock().unwrap();
+            {
+                let mut guard = lead.lock().unwrap();
+                guard.as_mut().expect("testbed").wake();
+            }
+            assert!(
+                bus.pending
+                    .lock()
+                    .unwrap()
+                    .iter()
+                    .any(|queued| queued.topic == "hello" && queued.from == "testbed")
+            );
+            drop(hold);
+        }
+        bus.flush_deferred();
+        assert!(bus.pending.lock().unwrap().is_empty());
+        assert!(bus.logs.lock().unwrap().iter().any(|(from, level, message)| {
+            from == "testbed" && level == "info" && message == "testbed ready"
+        }));
+    }
+
+    #[test]
     fn live_wasm_two_packs_empty_peer_ping() {
         let Some((bus, _lead, _pack)) = instantiate_live_pair("testbed", "urban_chaos") else {
             return;
@@ -1820,6 +1873,12 @@ mod tests {
             Some("concrete")
         );
         assert!(!world.get("edit").is_some_and(::hanga::kit::Node::as_flag));
+        let lead_voxel = node_from_wire(&bus.voxel(0, 0, 0));
+        assert_eq!(
+            lead_voxel.get("name").map(::hanga::kit::Node::text).as_deref(),
+            Some("concrete")
+        );
+        assert!(!lead_voxel.get("edit").is_some_and(::hanga::kit::Node::as_flag));
         let painted = wire_bag(vec![
             ("x", Wire::Int(99)),
             ("y", Wire::Int(1)),
@@ -1847,6 +1906,15 @@ mod tests {
             Some("glass")
         );
         assert!(overlay.get("edit").is_some_and(::hanga::kit::Node::as_flag));
+        let host_overlay = node_from_wire(&bus.voxel(99, 1, 99));
+        assert_eq!(
+            host_overlay
+                .get("name")
+                .map(::hanga::kit::Node::text)
+                .as_deref(),
+            Some("glass")
+        );
+        assert!(host_overlay.get("edit").is_some_and(::hanga::kit::Node::as_flag));
         ::hanga::overlay_clear();
         let _ = ::hanga::take_voxel_writes();
     }

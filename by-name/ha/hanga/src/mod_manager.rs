@@ -1658,6 +1658,18 @@ mod tests {
             )),
             "pong"
         );
+        assert_eq!(
+            wire_as_text(&bus.invoke(
+                "host",
+                "",
+                "craft-result",
+                wire_bag(vec![
+                    ("a", wire_text("concrete")),
+                    ("b", wire_text("glass")),
+                ])
+            )),
+            "tile"
+        );
         let at = wire_bag(vec![
             ("x", Wire::Int(0)),
             ("y", Wire::Int(0)),
@@ -1935,6 +1947,43 @@ mod tests {
             ]),
         );
         assert_eq!(steer.get("vx").and_then(::hanga::kit::Node::as_f32), Some(8.0));
+        assert_eq!(
+            ctx.bus_xyz("vehicle-spawn", &wire_int(0), (0, 0, 0)),
+            (500, 2, 495)
+        );
+        let locales = ctx.bus_node("supported-locales", &wire_empty());
+        assert!(locales.get("en").is_some_and(::hanga::kit::Node::as_flag));
+        assert!(locales.get("mi").is_some_and(::hanga::kit::Node::as_flag));
+        assert_eq!(
+            ctx.bus_text_payload(
+                "contract-label",
+                &wire_bag(vec![
+                    ("locale", wire_text("en")),
+                    ("kind", wire_text("smash-and-grab")),
+                ])
+            ),
+            "smash-and-grab"
+        );
+        assert_eq!(
+            ctx.bus_text_payload(
+                "item-label",
+                &wire_bag(vec![
+                    ("locale", wire_text("mi")),
+                    ("item", wire_text("glass")),
+                ])
+            ),
+            "karaihe"
+        );
+        assert_eq!(
+            ctx.bus_text_payload(
+                "event-label",
+                &wire_bag(vec![
+                    ("locale", wire_text("mi")),
+                    ("event", wire_text("quiet-streets")),
+                ])
+            ),
+            "ngā huarahi mārie"
+        );
         *slot.lock().unwrap() = Some(ctx);
     }
 }

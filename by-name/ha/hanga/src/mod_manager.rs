@@ -328,7 +328,7 @@ pub fn payload_f32(payload: &Wire, key: &str) -> f32 {
 }
 
 pub fn payload_xyz(payload: &Wire, fallback: (i32, i32, i32)) -> (i32, i32, i32) {
-    if matches!(payload, Wire::Empty) {
+    if wire_is_fail(payload) || wire_is_empty(payload) {
         return fallback;
     }
     (
@@ -394,6 +394,16 @@ pub fn reply_range(reply: &Wire, fallback: f32) -> f32 {
         return fallback;
     }
     payload_f32(reply, "value")
+}
+
+/// Missing method uses `fallback`. `fail` also keeps `fallback` (current state,
+/// wallet, tick) instead of parsing 0 from an empty shape.
+pub fn reply_i32(reply: &Wire, fallback: i32) -> i32 {
+    if wire_is_fail(reply) || wire_is_empty(reply) {
+        fallback
+    } else {
+        payload_i64(reply, "value") as i32
+    }
 }
 
 fn emit_blocks(reply: Result<&Wire, ()>) -> bool {
@@ -925,10 +935,7 @@ impl MainModContext {
     }
 
     pub fn bus_i32(&mut self, topic: &str, payload: &Wire, fallback: i32) -> i32 {
-        match self.bus(topic, payload) {
-            Wire::Empty | Wire::Fail(_) => fallback,
-            other => payload_i64(&other, "value") as i32,
-        }
+        reply_i32(&self.bus(topic, payload), fallback)
     }
 
     pub fn bus_xyz(&mut self, topic: &str, payload: &Wire, fallback: (i32, i32, i32)) -> (i32, i32, i32) {
@@ -1428,6 +1435,20 @@ mod tests {
         assert_eq!(reply_range(&Wire::Text(String::new()), 10.0), 10.0);
         assert_eq!(reply_range(&wire_fail("busy"), 10.0), 0.0);
         assert_eq!(reply_range(&Wire::Float(30.0), 10.0), 30.0);
+    }
+
+    #[test]
+    fn reply_i32_and_xyz_empty_shapes_use_fallback() {
+        assert_eq!(reply_i32(&wire_empty(), 7), 7);
+        assert_eq!(reply_i32(&Wire::Text(String::new()), 7), 7);
+        assert_eq!(reply_i32(&wire_fail("busy"), 7), 7);
+        assert_eq!(reply_i32(&Wire::Int(4), 7), 4);
+        assert_eq!(payload_xyz(&wire_empty(), (1, 2, 3)), (1, 2, 3));
+        assert_eq!(
+            payload_xyz(&Wire::Text(String::new()), (1, 2, 3)),
+            (1, 2, 3)
+        );
+        assert_eq!(payload_xyz(&wire_fail("busy"), (1, 2, 3)), (1, 2, 3));
     }
 
     #[test]

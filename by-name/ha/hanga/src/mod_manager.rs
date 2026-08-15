@@ -820,6 +820,8 @@ impl hanga::engine::host::Host for HostData {
     }
 
     fn player(&mut self) -> AbiValue {
+        // Snapshot is engine-shaped: pose plus wanted `state` and `wallet`.
+        // Packs that do not use wanted still see those keys.
         lower_wire(&match ::hanga::player_snap() {
             Some(snap) => wire_bag(vec![
                 ("x", Wire::Float(snap.x as f64)),

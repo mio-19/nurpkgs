@@ -30,19 +30,19 @@ drive-by edit. Live ABI is **6** (`wit/world.wit`). Gate: `nix build .#hanga-dev
   callers (`ask_any_fields` / `bus_fields`).
 - **Two value types.** `hanga::kit::Atom` is a flat scalar; `Node` is the tree;
   WIT `cell` is the arena encoding. Flattened `Fields` remain for CSV fallback.
-- **`key=value;` fallback.** Keep until contrib examples and tests stop sending
-  CSV `methods` / kit strings. Zig `methodsBag` still returns topic CSV text.
+- **`key=value;` fallback.** Keep until leftover CSV callers go away. Zig
+  `methods` is now a list of topic names.
 
 ## Engine vs mods
 
 - **Lead WASM for terrain.** Documented: workers clone the lead for
   `query-voxel`. Extra packs overlay loot/kits. Multi-lead merge is still unset.
-- **`player` snapshot is engine-shaped.** Wallet and wanted `state` live on the
-  host player. Fine for Urban Chaos; a pack that does not use wanted still sees
-  those keys. Optional: omit keys the lead did not advertise.
-- **P2P is not the mod bus.** Matchbox carries signed player actions. Mods do
-  not message across peers. Documented in `DESIGN.md`; a collection checksum in
-  the handshake is still optional.
+- **`player` snapshot is engine-shaped.** Wallet and wanted `state` are always
+  on the snapshot (documented on the host import). Optional: omit keys the lead
+  did not advertise.
+- **P2P is not the mod bus.** Matchbox carries signed player actions. The signed
+  envelope includes `collection_key` (`id:mod+mod`); mismatched peers drop the
+  action. Not a WASM content hash.
 
 ## Contrib / languages
 

@@ -385,6 +385,17 @@ pub fn wire_is_veto(value: &Wire) -> bool {
     matches!(value, Wire::Flag(true) | Wire::Int(1))
 }
 
+/// Missing method uses `fallback`. `fail` is closed (range 0), not a skip.
+pub fn reply_range(reply: &Wire, fallback: f32) -> f32 {
+    if wire_is_fail(reply) {
+        return 0.0;
+    }
+    if wire_is_empty(reply) {
+        return fallback;
+    }
+    payload_f32(reply, "value")
+}
+
 fn emit_blocks(reply: Result<&Wire, ()>) -> bool {
     match reply {
         Ok(value) => wire_is_veto(value) || wire_is_fail(value),
@@ -1412,6 +1423,14 @@ mod tests {
     }
 
     #[test]
+    fn reply_range_empty_fallback_and_fail_closed() {
+        assert_eq!(reply_range(&wire_empty(), 10.0), 10.0);
+        assert_eq!(reply_range(&Wire::Text(String::new()), 10.0), 10.0);
+        assert_eq!(reply_range(&wire_fail("busy"), 10.0), 0.0);
+        assert_eq!(reply_range(&Wire::Float(30.0), 10.0), 30.0);
+    }
+
+    #[test]
     fn nested_wire_becomes_a_node_tree() {
         let wire = Wire::Dict(vec![WireField {
             key: "tires".into(),
@@ -1963,6 +1982,18 @@ mod tests {
         assert!(runtime.emit_all("veto", &wire_empty()));
         assert!(runtime.emit_all("refuse", &wire_empty()));
         assert!(!runtime.emit_all("ping", &wire_empty()));
+        assert_eq!(
+            reply_range(
+                &runtime.ask_any("action-range", &wire_text("explode")),
+                10.0
+            ),
+            30.0
+        );
+        assert_eq!(reply_range(&runtime.ask_any("nope", &wire_empty()), 10.0), 10.0);
+        assert_eq!(
+            reply_range(&runtime.ask_any("refuse", &wire_empty()), 10.0),
+            0.0
+        );
         runtime.notify_all("hello", &wire_empty());
     }
 

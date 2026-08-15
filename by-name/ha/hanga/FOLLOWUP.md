@@ -60,10 +60,9 @@ drive-by edit. Live ABI is **6** (`wit/world.wit`). Gate: `nix build .#hanga-dev
   is fixed. Native hangamod tests still use nlvm (x86_64-linux only).
 - **Koka wasm is emcc in upstream.** Contrib uses `--target=c32` + Zig WASI
   instead of Emscripten so the guest is a WIT component.
-- **Guests still rarely `send` or return `fail`.** lab_tile / lab_slab / lab_grid
-  `ready` now `send` `hello` to peers. Testbed `refuse` returns `fail("busy")`
-  so live empty-peer `invoke` stops on a guest error. `ask_any` / empty-peer
-  `invoke` stop on `fail` (`first_override`); they no longer skip it as “not mine”.
+- **Guests still rarely `send` or return `fail`.** Lab packs `send` `hello` on
+  `ready`. Testbed and contrib labs (`refuse`) return `fail("busy")`. `ask_any`
+  / empty-peer `invoke` stop on `fail` (`first_override`).
 - **lab floors** use hangamod `checkerFloor` (Kotlin/Go/Zig/Nim/Koka/Scheme).
   Underground cells are catalog index 2.
 - **Go/Zig arena helpers** live in `lib/go/hangamod/arena.go` (Pack/Unpack) and

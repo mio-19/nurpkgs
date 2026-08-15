@@ -124,15 +124,12 @@ fn query_lead_voxel(pos: IVec3) -> WorldVoxel<u8> {
         }
 
         if let Some((_, store, func)) = instance_opt.as_mut() {
-            if let Ok(voxel_type) =
-                func.hanga_engine_guest()
-                    .call_query_voxel(store, pos.x, pos.y, pos.z)
+            return match func.hanga_engine_guest().call_query_voxel(store, pos.x, pos.y, pos.z)
             {
-                if voxel_type == 0 {
-                    return WorldVoxel::Unset;
-                }
-                return WorldVoxel::Solid(voxel_type as u8);
-            }
+                Ok(0) => WorldVoxel::Unset,
+                Ok(voxel_type) => WorldVoxel::Solid(voxel_type as u8),
+                Err(_) => WorldVoxel::Unset,
+            };
         }
 
         if pos.y < 0 {
@@ -3090,16 +3087,22 @@ fn wanted_decay(
     *timer = 0.0;
     let mut wanted = 0i32;
     for mut state in players.iter_mut() {
+        wanted = state.0 as i32;
         if let Some(new_state) = with_mod(&mod_runtime, |ctx| {
-            ctx.bus_i32(
+            let reply = ctx.bus(
                 "tick",
                 &wire_bag(vec![
                     ("state", Wire::Int(state.0 as i64)),
                     ("dt", Wire::Int(dt_ms as i64)),
                 ]),
-                state.0 as i32,
-            )
+            );
+            if wire_is_fail(&reply) {
+                None
+            } else {
+                Some(reply_i32(&reply, state.0 as i32))
+            }
         })
+        .flatten()
         {
             let clamped = clamp_mod_state(new_state, 0, 5) as u32;
             if clamped != state.0 {

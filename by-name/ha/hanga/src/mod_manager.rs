@@ -1034,12 +1034,12 @@ impl ModRuntime {
         self.bus.send("host", "", method, args.clone());
     }
 
-    /// OTP `gen_event:call` to every pack. Any veto flag stops the engine action.
+    /// OTP `gen_event:call` to every pack. Veto flag or `fail` stops the engine action.
     pub fn emit_all(&self, method: &str, args: &Wire) -> bool {
         let mut veto = false;
         if let Ok(mut guard) = self.context.lock() {
             if let Some(ctx) = guard.as_mut() {
-                if wire_is_veto(&ctx.call("host", method, args)) {
+                if emit_blocks(Ok(&ctx.call("host", method, args))) {
                     veto = true;
                 }
             }
@@ -1047,7 +1047,7 @@ impl ModRuntime {
         for pack in &self.packs {
             if let Ok(mut guard) = pack.context.lock() {
                 if let Some(ctx) = guard.as_mut() {
-                    if wire_is_veto(&ctx.call("host", method, args)) {
+                    if emit_blocks(Ok(&ctx.call("host", method, args))) {
                         veto = true;
                     }
                 }
@@ -1949,6 +1949,7 @@ mod tests {
             Wire::Fail(reason) if reason == "busy"
         ));
         assert!(runtime.emit_all("veto", &wire_empty()));
+        assert!(runtime.emit_all("refuse", &wire_empty()));
         assert!(!runtime.emit_all("ping", &wire_empty()));
         runtime.notify_all("hello", &wire_empty());
     }

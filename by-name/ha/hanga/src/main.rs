@@ -1382,17 +1382,20 @@ fn load_voxel_catalog(mod_runtime: &ModRuntime) -> VoxelCatalog {
         ctx.bindings
             .hanga_engine_guest()
             .call_voxel_catalog(&mut ctx.store)
-            .unwrap_or_default()
-    }) {
+            .ok()
+    })
+    .flatten()
+    {
         layers.push(names);
     }
     with_pack_mods(mod_runtime, |_, ctx| {
-        let names = ctx
+        if let Ok(names) = ctx
             .bindings
             .hanga_engine_guest()
             .call_voxel_catalog(&mut ctx.store)
-            .unwrap_or_default();
-        layers.push(names);
+        {
+            layers.push(names);
+        }
     });
     VoxelCatalog(merge_name_catalogs(&layers))
 }
@@ -1749,15 +1752,18 @@ fn apply_mod_action(
     spawn_hint: Vec3,
 ) {
     if let Some((new_state, agent, new_wallet)) = with_mod(mod_runtime, |ctx| {
-        let new_state = ctx.bus_i32(
+        let eval = ctx.bus(
             "evaluate-action",
             &wire_bag(vec![
                 ("action", Wire::Text(action.to_string())),
                 ("state", Wire::Int(mod_state.0 as i64)),
             ]),
-            mod_state.0 as i32,
         );
-        let agent = ctx.bus_text_payload(
+        if wire_is_fail(&eval) {
+            return None;
+        }
+        let new_state = reply_i32(&eval, mod_state.0 as i32);
+        let spawn = ctx.bus(
             "should-spawn-agent",
             &wire_bag(vec![
                 ("action", Wire::Text(action.to_string())),
@@ -1765,16 +1771,24 @@ fn apply_mod_action(
                 ("new", Wire::Int(new_state as i64)),
             ]),
         );
-        let new_wallet = ctx.bus_i32(
+        let agent = if wire_is_fail(&spawn) {
+            String::new()
+        } else {
+            wire_as_text(&spawn)
+        };
+        let wallet_reply = ctx.bus(
             "wallet-after",
             &wire_bag(vec![
                 ("action", Wire::Text(action.to_string())),
                 ("wallet", Wire::Int(wallet.0 as i64)),
                 ("extra", Wire::Int(extra as i64)),
             ]),
-            wallet.0,
         );
-        Some((new_state, agent, new_wallet))
+        if wire_is_fail(&wallet_reply) {
+            Some((new_state, agent, wallet.0))
+        } else {
+            Some((new_state, agent, reply_i32(&wallet_reply, wallet.0)))
+        }
     })
     .flatten()
     {

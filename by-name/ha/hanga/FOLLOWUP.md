@@ -9,7 +9,8 @@ drive-by edit. Live ABI is **6** (`wit/world.wit`). Gate: `nix build .#hanga-dev
 - **Mailbox bound.** Casts cap at 256; oldest is dropped with a warning. Drain
   requeues a message if the pack is still locked instead of dropping it as empty.
   Drain still stops after 32 rounds and warns if work remains. Guest `after`
-  timers cap at 256 the same way. `LiveBus` OTP
+  timers cap at 256 the same way. Guest `voxel-set` mesh flushes cap at 256
+  (oldest dropped; overlay still records the write). `LiveBus` OTP
   errors (`self` / `noproc` / `busy`) and mailbox requeue are covered in
   `cargo test --bin hanga`. Live WASM `live_wasm_testbed_mailbox_cap_and_drain`
   fills a loaded testbed slot to the 256 cap (oldest `note` dropped) and

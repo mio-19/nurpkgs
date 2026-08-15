@@ -1337,7 +1337,9 @@ fn spawn_mod_traffic(
         .bus_i32("vehicle-spawn-count", &wire_empty(), 0)
         .max(0) as u32;
     for i in 0..count {
-        let (x, y, z) = ctx.bus_xyz("vehicle-spawn", &wire_int(i as i64), (500, 2, 495));
+        let Some((x, y, z)) = ctx.bus_xyz_ok("vehicle-spawn", &wire_int(i as i64)) else {
+            continue;
+        };
         let Some(node) = ctx.bus_node_ok("vehicle-kit", &wire_int(i as i64)) else {
             continue;
         };
@@ -3304,21 +3306,30 @@ fn update_storyteller(
     let player_state = players.iter().next().map(|s| s.0 as i32).unwrap_or(0);
     let lang = locale.0.code();
     if let Some((event_id, label)) = with_mod(&mod_runtime, |ctx| {
-        let event_id = ctx.bus_text_payload("story-event", &wire_int(player_state as i64));
+        let event = ctx.bus("story-event", &wire_int(player_state as i64));
+        if wire_is_fail(&event) {
+            return None;
+        }
+        let event_id = wire_as_text(&event);
         if event_id.is_empty() {
             return None;
         }
-        let label = ctx.bus_text_payload(
+        let labeled = ctx.bus(
             "event-label",
             &wire_bag(vec![
                 ("event", Wire::Text(event_id.clone())),
                 ("locale", Wire::Text(lang.to_string())),
             ]),
         );
-        let label = if label.is_empty() {
-            "event".into()
+        let label = if wire_is_fail(&labeled) {
+            event_id.clone()
         } else {
-            label
+            let text = wire_as_text(&labeled);
+            if text.is_empty() {
+                "event".into()
+            } else {
+                text
+            }
         };
         Some((event_id, label))
     })
@@ -3329,6 +3340,9 @@ fn update_storyteller(
     if !contract_is_offered(&offer.kind) {
         if let Some((kind, payout, danger)) = with_mod(&mod_runtime, |ctx| {
             let reply = ctx.bus("offer-contract", &wire_int(player_state as i64));
+            if wire_is_fail(&reply) {
+                return None;
+            }
             let kind = payload_text(&reply, "kind").to_string();
             if kind.is_empty() {
                 return None;

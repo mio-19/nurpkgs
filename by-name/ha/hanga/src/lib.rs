@@ -1300,3 +1300,60 @@ mod kani_verification {
         }
     }
 }
+
+#[cfg(kani)]
+mod anti_cheat_verification {
+    use super::*;
+
+    #[kani::proof]
+    fn verify_trust_score_penalization() {
+        let mut ledger = TrustLedger::default();
+        let peer: u64 = kani::any();
+        let penalty: f32 = kani::any();
+        
+        kani::assume(penalty >= 0.0 && penalty <= 1.0);
+        
+        ledger.penalize(peer, penalty);
+        
+        let score = ledger.score(peer);
+        kani::assert((score - (1.0 - penalty)).abs() < 1e-5, "score correctly reflects penalty");
+        
+        if penalty <= 1.0 {
+            kani::assert(ledger.is_trusted(peer), "peer is trusted until score drops below 0");
+        }
+    }
+
+    #[kani::proof]
+    fn verify_action_physically_possible() {
+        let px: f32 = kani::any();
+        let py: f32 = kani::any();
+        let pz: f32 = kani::any();
+        let tx: f32 = kani::any();
+        let ty: f32 = kani::any();
+        let tz: f32 = kani::any();
+        let max_dist: f32 = kani::any();
+        
+        kani::assume(px.is_finite() && py.is_finite() && pz.is_finite());
+        kani::assume(tx.is_finite() && ty.is_finite() && tz.is_finite());
+        kani::assume(max_dist.is_finite() && max_dist >= 0.0);
+        
+        // Prevent huge float precision loss or overflow
+        kani::assume(px.abs() < 1000.0 && py.abs() < 1000.0 && pz.abs() < 1000.0);
+        kani::assume(tx.abs() < 1000.0 && ty.abs() < 1000.0 && tz.abs() < 1000.0);
+        kani::assume(max_dist < 1000.0);
+        
+        let possible = is_action_physically_possible(px, py, pz, tx, ty, tz, max_dist);
+        
+        if px == tx && py == ty && pz == tz {
+            kani::assert(possible, "same point is always possible");
+        }
+        
+        let dx = px - tx;
+        let dy = py - ty;
+        let dz = pz - tz;
+        let dist_sq = dx * dx + dy * dy + dz * dz;
+        if dist_sq > max_dist * max_dist {
+            kani::assert(!possible, "points outside max dist are impossible");
+        }
+    }
+}

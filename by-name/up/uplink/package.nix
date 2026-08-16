@@ -137,7 +137,7 @@ lib.overrideDerivation (buildFlutterApp {
     wrapGAppsHook3
   ] ++ lib.optionals stdenv.hostPlatform.isDarwin [
     writableTmpDirAsHomeHook
-  ] ++ [
+  ] ++ lib.optionals stdenv.hostPlatform.isLinux [
     copyDesktopItems
   ];
 
@@ -193,7 +193,7 @@ lib.overrideDerivation (buildFlutterApp {
 
   dontUseCmakeConfigure = true;
 
-  desktopItems = [
+  desktopItems = lib.optionals stdenv.hostPlatform.isLinux [
     (makeDesktopItem {
       name = "uplink";
       exec = "uplink";
@@ -209,7 +209,7 @@ lib.overrideDerivation (buildFlutterApp {
     })
   ];
 
-  postInstall = ''
+  postInstall = lib.optionalString stdenv.hostPlatform.isLinux ''
     install -Dm644 assets/icon.png $out/share/icons/hicolor/512x512/apps/uplink.png
   '';
 

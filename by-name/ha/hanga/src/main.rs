@@ -1346,6 +1346,12 @@ fn spawn_mod_traffic(
             continue;
         }
         let kit = parse_vehicle_kit_node(&node);
+        if kit.parts.is_empty() {
+            continue;
+        }
+        if kit.collider.iter().any(|edge| *edge < 0.1) {
+            continue;
+        }
         spawn_vehicle(
             commands,
             meshes,

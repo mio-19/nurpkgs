@@ -70,6 +70,10 @@ pub fn parse_vehicle_kit_node(node: &crate::kit::Node) -> VehicleKit {
 fn parse_vehicle_kit_tree(node: &crate::kit::Node) -> VehicleKit {
     use crate::kit::Node;
     let mut kit = VehicleKit::default();
+    kit.speed = 0.0;
+    kit.stiffness = 0;
+    kit.parts.clear();
+    kit.collider = [0.0, 0.0, 0.0];
     if let Some(kind) = node.get("kind") {
         let kind = kind.text();
         if !kind.is_empty() {
@@ -154,24 +158,29 @@ fn parse_part_node(node: &crate::kit::Node) -> Option<VehiclePartSpec> {
     if name.is_empty() {
         return None;
     }
+    let sx = node.get("sx").and_then(Node::as_f32)?;
+    let sy = node.get("sy").and_then(Node::as_f32)?;
+    let sz = node.get("sz").and_then(Node::as_f32)?;
     Some(VehiclePartSpec {
         name,
-        size: [
-            node.f32("sx", 1.0).max(0.05),
-            node.f32("sy", 1.0).max(0.05),
-            node.f32("sz", 1.0).max(0.05),
-        ],
+        size: [sx.max(0.05), sy.max(0.05), sz.max(0.05)],
         offset: [node.f32("ox", 0.0), node.f32("oy", 0.0), node.f32("oz", 0.0)],
         rgb: [
-            scale_rgb(node.f32("r", 0.5)),
-            scale_rgb(node.f32("g", 0.5)),
-            scale_rgb(node.f32("b", 0.5)),
+            scale_rgb(node.get("r").and_then(Node::as_f32).unwrap_or(0.0)),
+            scale_rgb(node.get("g").and_then(Node::as_f32).unwrap_or(0.0)),
+            scale_rgb(node.get("b").and_then(Node::as_f32).unwrap_or(0.0)),
         ],
     })
 }
 
 pub fn parse_vehicle_kit_fields(fields: &crate::kit::Fields) -> VehicleKit {
     let mut kit = VehicleKit::default();
+    if !fields.is_empty() {
+        kit.speed = 0.0;
+        kit.stiffness = 0;
+        kit.parts.clear();
+        kit.collider = [0.0, 0.0, 0.0];
+    }
     let mut saw_part = false;
     let mut indexed_parts: std::collections::BTreeMap<usize, VehiclePartSpec> =
         std::collections::BTreeMap::new();
@@ -181,9 +190,9 @@ pub fn parse_vehicle_kit_fields(fields: &crate::kit::Fields) -> VehicleKit {
         if let Some((i, field)) = indexed_field(key, &["parts.", "part."]) {
             let part = indexed_parts.entry(i).or_insert_with(|| VehiclePartSpec {
                 name: String::new(),
-                size: [1.0, 1.0, 1.0],
+                size: [0.0, 0.0, 0.0],
                 offset: [0.0, 0.0, 0.0],
-                rgb: [0.5, 0.5, 0.5],
+                rgb: [0.0, 0.0, 0.0],
             });
             match field {
                 "name" => part.name = cell.text(),
@@ -328,7 +337,9 @@ pub fn parse_vehicle_kit_fields(fields: &crate::kit::Fields) -> VehicleKit {
     if !indexed_parts.is_empty() {
         kit.parts = indexed_parts
             .into_values()
-            .filter(|part| !part.name.is_empty())
+            .filter(|part| {
+                !part.name.is_empty() && part.size.iter().all(|edge| *edge >= 0.05)
+            })
             .collect();
     }
     for (a, b) in indexed_beams.into_values() {
@@ -531,6 +542,10 @@ mod tests {
             parse_vehicle_kit_node(&crate::kit::Node::Dict(vec![])),
             VehicleKit::default()
         );
+        assert!(parse_vehicle_kit("kind=car").parts.is_empty());
+        assert_eq!(parse_vehicle_kit("kind=car").collider, [0.0, 0.0, 0.0]);
+        use crate::kit::Node;
+        assert!(parse_part_node(&Node::Dict(vec![("name".into(), Node::Text("hull".into()))])).is_none());
     }
 
     #[test]
@@ -585,7 +600,7 @@ mod tests {
         );
         assert_eq!(kit.kind, "car");
         assert!(kit.traffic);
-        assert_eq!(kit.stiffness, 50);
+        assert_eq!(kit.stiffness, 0);
         assert!((kit.speed - 25.0).abs() < 1e-5);
         assert_eq!(kit.parts.len(), 2);
         assert_eq!(kit.parts[0].name, "hull");

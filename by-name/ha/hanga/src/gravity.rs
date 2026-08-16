@@ -65,7 +65,7 @@ pub fn parse_gravity_node(node: &crate::kit::Node) -> GravityKit {
     let mut g = 9.81;
     let mut saw_axis = false;
     let mut saw_g = false;
-    let mut strength = 20.0;
+    let mut strength = 0.0;
     let mut inv_sq = false;
     for (key, cell) in node.entries() {
         let value = cell.text();
@@ -117,7 +117,7 @@ pub fn parse_gravity_node(node: &crate::kit::Node) -> GravityKit {
             "up" => {
                 if let Node::Dict(_) = &cell {
                     kit.up = unit(
-                        [cell.f32("x", 0.0), cell.f32("y", 1.0), cell.f32("z", 0.0)],
+                        [cell.f32("x", 0.0), cell.f32("y", 0.0), cell.f32("z", 0.0)],
                         [0.0, 1.0, 0.0],
                     );
                 } else if let Some(v) = parse_n(&value, 3) {
@@ -152,8 +152,10 @@ pub fn parse_gravity_node(node: &crate::kit::Node) -> GravityKit {
         "down" | "earth" => {
             let accel = if saw_axis {
                 [x, y, z]
-            } else {
+            } else if saw_g {
                 [0.0, -g, 0.0]
+            } else {
+                [0.0, 0.0, 0.0]
             };
             GravityKind::Constant { accel }
         }
@@ -348,6 +350,10 @@ mod tests {
         let inv = parse_gravity("kind=point;x=0;y=0;z=0;strength=40;falloff=invsq");
         let b = point_accel(&inv, [2.0, 0.0, 0.0]);
         assert!((b[0] + 10.0).abs() < 1e-4);
+        let bare = parse_gravity("kind=point;x=0;y=0;z=0");
+        assert_eq!(point_accel(&bare, [10.0, 0.0, 0.0]), [0.0, 0.0, 0.0]);
+        let down = parse_gravity("kind=down");
+        assert_eq!(avian_accel(&down), [0.0, 0.0, 0.0]);
     }
 
     #[test]
@@ -384,5 +390,14 @@ mod tests {
                 accel: [0.0, -9.81, 0.0]
             }
         );
+        let tilted = parse_gravity_node(&crate::kit::Node::Dict(vec![
+            ("kind".into(), crate::kit::Node::Text("none".into())),
+            (
+                "up".into(),
+                crate::kit::Node::Dict(vec![("x".into(), crate::kit::Node::Float(1.0))]),
+            ),
+        ]));
+        assert!((tilted.up[0] - 1.0).abs() < 1e-5);
+        assert!(tilted.up[1].abs() < 1e-5);
     }
 }

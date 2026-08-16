@@ -51,9 +51,35 @@ lib.overrideDerivation (buildFlutterApp {
     ln -s /Applications/Xcode.app/Contents/Info.plist "$FAKE_XCODE/Contents/"
     ln -s /Applications/Xcode.app/Contents/version.plist "$FAKE_XCODE/Contents/"
     
-    # Symlink all contents of the real developer dir
+    # Symlink all contents of the real developer dir and recreate Toolchains bin dir
     for file in "$REAL_DEV_DIR"/*; do
-        if [[ "$(basename "$file")" != "usr" ]]; then
+        if [[ "$(basename "$file")" == "Toolchains" ]]; then
+            mkdir -p "$FAKE_DEV_DIR/Toolchains"
+            for tc in "$REAL_DEV_DIR/Toolchains"/*; do
+                if [[ "$(basename "$tc")" == "XcodeDefault.xctoolchain" ]]; then
+                    mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain"
+                    for d in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain"/*; do
+                        if [[ "$(basename "$d")" == "usr" ]]; then
+                            mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr"
+                            for ud in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr"/*; do
+                                if [[ "$(basename "$ud")" == "bin" ]]; then
+                                    mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"
+                                    for b in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"/*; do
+                                        ln -s "$b" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
+                                    done
+                                else
+                                    ln -s "$ud" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/"
+                                fi
+                            done
+                        else
+                            ln -s "$d" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/"
+                        fi
+                    done
+                else
+                    ln -s "$tc" "$FAKE_DEV_DIR/Toolchains/"
+                fi
+            done
+        elif [[ "$(basename "$file")" != "usr" ]]; then
             ln -s "$file" "$FAKE_DEV_DIR/"
         fi
     done
@@ -106,6 +132,10 @@ lib.overrideDerivation (buildFlutterApp {
     mkdir -p "$(pwd)/custom_bin"
     echo "$LIPO_SCRIPT" > "$(pwd)/custom_bin/lipo"
     chmod +x "$(pwd)/custom_bin/lipo"
+    
+    # OVERRIDE LIPO IN FAKE_DEV_DIR
+    rm -f "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
+    cp "$(pwd)/custom_bin/lipo" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
     
     cat << 'EOF_XCRUN' > "$(pwd)/custom_bin/xcrun"
     #!/bin/bash

@@ -10,6 +10,7 @@
   flutter,
   pkg-config,
   buildPackages,
+  stdenv,
 }:
 
 # absolutely no mac support for now

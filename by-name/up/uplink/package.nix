@@ -193,6 +193,8 @@ lib.overrideDerivation (buildFlutterApp {
 
   dontUseCmakeConfigure = true;
 
+  dontFixup = stdenv.hostPlatform.isDarwin;
+
   desktopItems = lib.optionals stdenv.hostPlatform.isLinux [
     (makeDesktopItem {
       name = "uplink";

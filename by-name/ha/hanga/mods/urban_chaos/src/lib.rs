@@ -1004,6 +1004,9 @@ impl exports::hanga::engine::guest::Guest for UrbanChaosMod {
         args: hanga::engine::host::Value,
     ) -> hanga::engine::host::Value {
         crate::on_message(&caller, &method, &args)
+    }
+}
+
 // ─── Soft-Body Solver (BeamNG-style) ──────────────────────────────────────────
 
 #[derive(Clone, Copy)]

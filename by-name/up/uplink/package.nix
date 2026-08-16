@@ -9,16 +9,16 @@
   cmake,
   ninja,
   clang,
-  gtk3,
-  glib,
-  pcre2,
   cocoapods,
   cacert,
-  wrapGAppsHook3,
   writableTmpDirAsHomeHook,
   callPackage,
   copyDesktopItems,
   makeDesktopItem,
+  wrapGAppsHook3,
+  gtk3,
+  glib,
+  pcre2,
 }:
 
 let
@@ -134,14 +134,14 @@ lib.overrideDerivation (buildFlutterApp {
     ninja
     rustPlatform.cargoSetupHook
     clang
-    wrapGAppsHook3
   ] ++ lib.optionals stdenv.hostPlatform.isDarwin [
     writableTmpDirAsHomeHook
   ] ++ lib.optionals stdenv.hostPlatform.isLinux [
     copyDesktopItems
+    wrapGAppsHook3
   ];
 
-  buildInputs = [
+  buildInputs = lib.optionals stdenv.hostPlatform.isLinux [
     gtk3
     glib
     pcre2

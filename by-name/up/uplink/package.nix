@@ -51,35 +51,9 @@ lib.overrideDerivation (buildFlutterApp {
     ln -s /Applications/Xcode.app/Contents/Info.plist "$FAKE_XCODE/Contents/"
     ln -s /Applications/Xcode.app/Contents/version.plist "$FAKE_XCODE/Contents/"
     
-    # Symlink all contents of the real developer dir and recreate Toolchains bin dir
+    # Symlink all contents of the real developer dir
     for file in "$REAL_DEV_DIR"/*; do
-        if [[ "$(basename "$file")" == "Toolchains" ]]; then
-            mkdir -p "$FAKE_DEV_DIR/Toolchains"
-            for tc in "$REAL_DEV_DIR/Toolchains"/*; do
-                if [[ "$(basename "$tc")" == "XcodeDefault.xctoolchain" ]]; then
-                    mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain"
-                    for d in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain"/*; do
-                        if [[ "$(basename "$d")" == "usr" ]]; then
-                            mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr"
-                            for ud in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr"/*; do
-                                if [[ "$(basename "$ud")" == "bin" ]]; then
-                                    mkdir -p "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"
-                                    for b in "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin"/*; do
-                                        ln -s "$b" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
-                                    done
-                                else
-                                    ln -s "$ud" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/"
-                                fi
-                            done
-                        else
-                            ln -s "$d" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/"
-                        fi
-                    done
-                else
-                    ln -s "$tc" "$FAKE_DEV_DIR/Toolchains/"
-                fi
-            done
-        elif [[ "$(basename "$file")" != "usr" ]]; then
+        if [[ "$(basename "$file")" != "usr" ]]; then
             ln -s "$file" "$FAKE_DEV_DIR/"
         fi
     done
@@ -104,49 +78,22 @@ lib.overrideDerivation (buildFlutterApp {
     EOF2
     chmod +x "$FAKE_DEV_DIR/usr/bin/xcodebuild"
 
-    LIPO_SCRIPT=$(cat << 'EOF3'
-    #!/bin/bash
-    echo "LIPO WRAPPER CALLED WITH: $@" >&2
-    for i in "$@"; do
-        if [[ "$next_is_out" == "1" ]]; then
-            out_file="$i"
-            break
-        elif [[ "$i" == "-o" || "$i" == "-output" ]]; then
-            next_is_out=1
-        fi
-    done
-    echo "LIPO WRAPPER out_file: $out_file" >&2
-    if [[ -n "$out_file" ]]; then
-        dir_to_fix="$(dirname "$out_file")"
-        echo "LIPO WRAPPER dir_to_fix: $dir_to_fix" >&2
-        ls -ld "$dir_to_fix" >&2
-        chmod -R +w "$dir_to_fix" 2>&1 | sed 's/^/CHMOD: /' >&2
-        chmod -R +w "$dir_to_fix/.." 2>&1 | sed 's/^/CHMOD: /' >&2
-        chmod -R +w "$dir_to_fix/../.." 2>&1 | sed 's/^/CHMOD: /' >&2
-        ls -ld "$dir_to_fix" >&2
-    fi
-    exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
-    EOF3
-    )
-    
     mkdir -p "$(pwd)/custom_bin"
-    echo "$LIPO_SCRIPT" > "$(pwd)/custom_bin/lipo"
-    chmod +x "$(pwd)/custom_bin/lipo"
-    
-    # OVERRIDE LIPO IN FAKE_DEV_DIR
-    rm -f "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
-    cp "$(pwd)/custom_bin/lipo" "$FAKE_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo"
-    
-    cat << 'EOF_XCRUN' > "$(pwd)/custom_bin/xcrun"
+    cat << 'EOF3' > "$(pwd)/custom_bin/rsync"
     #!/bin/bash
-    if [[ "$1" == "lipo" ]]; then
-        shift
-        exec "$(pwd)/custom_bin/lipo" "$@"
-    else
-        exec /usr/bin/xcrun "$@"
+    /usr/bin/rsync "$@"
+    status=$?
+    if [[ "$status" == 0 ]]; then
+        for arg in "$@"; do
+            last_arg="$arg"
+        done
+        if [[ -d "$last_arg" ]]; then
+            chmod -R u+w "$last_arg" || true
+        fi
     fi
-    EOF_XCRUN
-    chmod +x "$(pwd)/custom_bin/xcrun"
+    exit $status
+    EOF3
+    chmod +x "$(pwd)/custom_bin/rsync"
     
     export DEVELOPER_DIR="$FAKE_DEV_DIR"
     export PATH="$(pwd)/custom_bin:$PATH"

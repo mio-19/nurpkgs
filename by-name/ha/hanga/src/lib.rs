@@ -1198,6 +1198,27 @@ mod kani_verification {
             verify_action_signature(kind_name, x, y, z, extra_name, fp),
             "fingerprint must verify against its own payload",
         );
+        
+        let bad_fp = action_fingerprint(kind_name, x.wrapping_add(1), y, z, extra_name);
+        kani::assert(
+            fp != bad_fp,
+            "fingerprint must change if coordinates are different",
+        );
+        kani::assert(
+            !verify_action_signature(kind_name, x.wrapping_add(1), y, z, extra_name, fp),
+            "modified packet must fail signature verification",
+        );
+        
+        let different_extra = if extra_name == "" { "concrete" } else { "" };
+        let extra_fp = action_fingerprint(kind_name, x, y, z, different_extra);
+        kani::assert(
+            fp != extra_fp,
+            "fingerprint must change if extra string is different",
+        );
+        kani::assert(
+            !verify_action_signature(kind_name, x, y, z, different_extra, fp),
+            "modified packet with different extra data must fail signature verification",
+        );
     }
 
     #[kani::proof]

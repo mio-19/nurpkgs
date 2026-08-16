@@ -65,7 +65,8 @@ drive-by edit. Live ABI is **6** (`wit/world.wit`). Gate: `nix build .#hanga-dev
   fire, fracture, planar, and contract-mark parse trees. `key=value;` text is
   only a fallback inside those parsers (lib tests). Gravity, crash, and
   vehicle kits treat empty text/dict like `Empty`. Fracture empty is
-  `FractureKit::default()` (no invented impulse). `node_from_reply` /
+  `FractureKit::default()` (no invented impulse). Missing `impulse` on a
+  non-empty kit is 0, not 5. `node_from_reply` /
   `bus_node_ok` drop `fail` so fire does not treat busy as `out`. Empty
   fire-kit still means extinguish. `with_mod` uses `try_lock` like
   `ask_any`. Hot reload `try_lock`s every slot and retries next frame

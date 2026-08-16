@@ -3,6 +3,8 @@
   art-standalone_patched,
   cacert,
   webp-pixbuf-loader,
+  gdk-pixbuf,
+  librsvg,
   fetchpatch,
   wrapGAppsHook4,
 }:
@@ -19,7 +21,7 @@
     ];
     patches = (old.patches or [ ]) ++ [
       ./android-translation-layer-bitmap-unlock.patch
-      ./android-translation-layer-debug.patch
+      ./android-translation-layer-bitmapfactory-logs.patch
       ./android-translation-layer-kotatsu-stub.patch
       (fetchpatch {
         url = "https://gitlab.com/android_translation_layer/android_translation_layer/-/merge_requests/290.patch";
@@ -39,10 +41,20 @@
       ./android-translation-layer-system-app-certs.patch
       ./android-translation-layer-gtk-measure.patch
       ./android-translation-layer-wrapper-measure-fix.patch
+      ./android-translation-layer-imagebutton-scale.patch
       ./android-translation-layer-view-fullscreen-fix.patch
       ./android-translation-layer-gtk-native-check.patch
       ./android-translation-layer-media-data-source.patch
       ./android-translation-layer-drawlines-bounds.patch
+      ./android-translation-layer-concat-2d.patch
+      ./android-translation-layer-display-getmode.patch
+      ./android-translation-layer-audiomanager-getdevices.patch
+      ./android-translation-layer-mediadescription-setmediauri.patch
+      ./android-translation-layer-audiodevicecallback.patch
+      ./android-translation-layer-networkcapabilities.patch
+      ./android-translation-layer-path-op.patch
+      ./android-translation-layer-surfacetexture.patch
+      ./android-translation-layer-build-base-os.patch
       ./android-translation-layer-bitmap-pixels-fix.patch
       ./android-translation-layer-bitmap-factory-null-pixbuf.patch
       ./android-translation-layer-bitmap-factory-fd.patch
@@ -62,8 +74,16 @@
       mkdir -p $out/etc/security
       ln -s ${cacert.unbundled}/etc/ssl/certs $out/etc/security/cacerts
     '';
-    postFixup = (old.postFixup or "") + ''
-      wrapProgram $out/bin/android-translation-layer \
+    preFixup = (old.preFixup or "") + ''
+      mkdir -p $out/lib/gdk-pixbuf-2.0/2.10.0
+      GDK_PIXBUF_MODULEDIR=${gdk-pixbuf}/lib/gdk-pixbuf-2.0/2.10.0/loaders ${gdk-pixbuf.dev}/bin/gdk-pixbuf-query-loaders > $out/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      cat ${librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache >> $out/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      GDK_PIXBUF_MODULEDIR=${webp-pixbuf-loader}/lib/gdk-pixbuf-2.0/2.10.0/loaders ${gdk-pixbuf.dev}/bin/gdk-pixbuf-query-loaders >> $out/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+
+      gappsWrapperArgs+=(
         --set ANDROID_ROOT $out
+        --set GDK_PIXBUF_MODULE_FILE $out/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache
+      )
     '';
+    postFixup = (old.postFixup or "") + "";
   })

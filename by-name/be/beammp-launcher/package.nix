@@ -20,10 +20,10 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "beammp-launcher";
-  version = if stdenv.isDarwin then "2.7.0-unstable-20260111" else "2.8.0";
+  version = if stdenv.hostPlatform.isDarwin then "2.7.0-unstable-20260111" else "2.8.1";
 
   src = fetchFromGitHub (
-    if stdenv.isDarwin then
+    if stdenv.hostPlatform.isDarwin then
       {
         # Darwin support from https://github.com/BeamMP/BeamMP-Launcher/pull/221
         owner = "enzofrnt";
@@ -37,14 +37,24 @@ stdenv.mkDerivation (finalAttrs: {
         owner = "BeamMP";
         repo = "BeamMP-Launcher";
         tag = "v${finalAttrs.version}";
-        hash = "sha256-xg6lHsfIYRC9OxrI+A7MXYCxGbZrGHb/9gR7Dno6Pwk=";
+        hash = "sha256-9zfagbDUyhUBLtZ18QNztaf1A5GMqqSa7fLAGih4y8k=";
       }
   );
 
   strictDeps = true;
 
+  # Darwin fork's debug dump calls httplib::Client::get_openssl_verify_result(),
+  # which was removed in cpp-httplib 0.53 (nixpkgs). Drop the debug field only.
+  postPatch = lib.optionalString stdenv.hostPlatform.isDarwin ''
+    substituteInPlace src/Network/Http.cpp \
+      --replace-fail '{ "openssl_verify_result", client.get_openssl_verify_result() },' ""
+    substituteInPlace CMakeLists.txt \
+      --replace-fail 'ZLIB::ZLIB OpenSSL::SSL OpenSSL::Crypto CURL::libcurl)' \
+        'ZLIB::ZLIB OpenSSL::SSL OpenSSL::Crypto CURL::libcurl httplib::httplib)'
+  '';
+
   nativeBuildInputs =
-    lib.optionals (!stdenv.isDarwin) [
+    lib.optionals (!stdenv.hostPlatform.isDarwin) [
       copyDesktopItems
       installShellFiles
     ]
@@ -62,7 +72,7 @@ stdenv.mkDerivation (finalAttrs: {
     openssl
   ];
 
-  desktopItems = lib.optionals (!stdenv.isDarwin) [
+  desktopItems = lib.optionals (!stdenv.hostPlatform.isDarwin) [
     (makeDesktopItem {
       categories = [ "Game" ];
       comment = "Launcher for the BeamMP mod for BeamNG.drive";
@@ -77,7 +87,7 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preInstall
   ''
   + (
-    if stdenv.isDarwin then
+    if stdenv.hostPlatform.isDarwin then
       ''
         mkdir -p $out/Applications/BeamMP-Launcher.app/Contents/{MacOS,Resources}
         cp BeamMP-Launcher $out/Applications/BeamMP-Launcher.app/Contents/MacOS/
@@ -113,12 +123,12 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   postFixup =
-    lib.optionalString stdenv.isDarwin ''
+    lib.optionalString stdenv.hostPlatform.isDarwin ''
       mkdir -p $out/bin
       makeWrapper $out/Applications/BeamMP-Launcher.app/Contents/MacOS/BeamMP-Launcher $out/bin/BeamMP-Launcher \
         --set SSL_CERT_FILE "${cacert_3108}/etc/ssl/certs/ca-bundle.crt"
     ''
-    + lib.optionalString (!stdenv.isDarwin) ''
+    + lib.optionalString (!stdenv.hostPlatform.isDarwin) ''
       wrapProgram $out/bin/BeamMP-Launcher \
         --set SSL_CERT_FILE "${cacert_3108}/etc/ssl/certs/ca-bundle.crt"
     '';

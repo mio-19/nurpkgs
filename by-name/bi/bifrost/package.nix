@@ -45,7 +45,6 @@ stdenv.mkDerivation (finalAttrs: {
   version = "2.1.3";
 
   strictDeps = true;
-  __structuredAttrs = true;
 
   src = fetchFromGitHub {
     owner = "zacharee";
@@ -57,17 +56,17 @@ stdenv.mkDerivation (finalAttrs: {
   patches = [
     ./0001-fix-gradle-plugin-and-desktop-toolchain.patch
     ./0002-remove-foojay-resolver.patch
+    ./0003-desktop-only-skip-android-ios.patch
   ];
 
   postPatch = ''
     echo "kotlin.native.ignoreDisabledTargets=true" >> local.properties
     substituteInPlace desktop/build.gradle.kts \
       --replace-fail 'nativeDistributions {' 'nativeDistributions { modules("java.sql");'
-  ''
-  + lib.optionalString stdenv.isLinux ''
-    # iOS Info.plist stamping needs macOS plutil; no-op on Linux.
-    substituteInPlace common/build.gradle.kts \
-      --replace-fail '"/usr/bin/plutil"' '"${lib.getExe' coreutils "true"}"'
+    substituteInPlace gradle.properties \
+      --replace-fail 'org.gradle.jvmargs=-Xmx8192M -Dkotlin.daemon.jvm.options\="-Xmx2048M"' \
+      'org.gradle.jvmargs=-Dfile.encoding=UTF-8'
+    echo 'org.gradle.vfs.watch=false' >> gradle.properties
   '';
 
   gradleBuildTask = ":desktop:createReleaseDistributable";
@@ -84,13 +83,31 @@ stdenv.mkDerivation (finalAttrs: {
     gradle :desktop:nixDownloadDeps -PskipAndroid=true -Dos.name='Mac OS X' -Dos.arch=aarch64
   '';
 
+  # Gradle MITM + daemon need loopback IPC. Darwin sandbox treats Java
+  # dual-stack ::ffff:127.0.0.1 as remote (NixOS/nix#11270). Unused on Linux.
+  __darwinAllowLocalNetworking = true;
+  sandboxProfile = lib.optionalString stdenv.hostPlatform.isDarwin ''
+    (allow network-inbound (local ip "*:*"))
+    (allow network-outbound (local ip "*:*"))
+    (allow network-outbound (remote ip "*:*"))
+    (allow network-outbound (remote ip6 "*:*"))
+  '';
+
   env.JAVA_HOME = jdk21;
-  env.ANDROID_USER_HOME = "$TMPDIR/android";
-  env.GRADLE_USER_HOME = "$TMPDIR/gradle";
+  env.JAVA_TOOL_OPTIONS = lib.optionalString stdenv.hostPlatform.isDarwin "-Djava.net.preferIPv4Stack=true";
+
+  preConfigure = ''
+    export ANDROID_USER_HOME="$TMPDIR/android"
+    export GRADLE_USER_HOME="$TMPDIR/gradle"
+  '';
 
   gradleFlags = [
     "-Dorg.gradle.java.home=${jdk21}"
     "-PskipAndroid=true"
+    "-Dorg.gradle.native=false"
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
+    "-Djava.net.preferIPv4Stack=true"
   ];
 
   nativeBuildInputs = [
@@ -99,14 +116,14 @@ stdenv.mkDerivation (finalAttrs: {
     copyDesktopItems
     makeWrapper
   ]
-  ++ lib.optionals stdenv.isLinux [
+  ++ lib.optionals stdenv.hostPlatform.isLinux [
     autoPatchelfHook
   ]
-  ++ lib.optionals stdenv.isDarwin [
+  ++ lib.optionals stdenv.hostPlatform.isDarwin [
     desktopToDarwinBundle
   ];
 
-  buildInputs = lib.optionals stdenv.isLinux [
+  buildInputs = lib.optionals stdenv.hostPlatform.isLinux [
     fontconfig
     libxinerama
     libxrandr
@@ -133,7 +150,7 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   installPhase =
-    if stdenv.isDarwin then
+    if stdenv.hostPlatform.isDarwin then
       ''
         runHook preInstall
 
@@ -168,7 +185,7 @@ stdenv.mkDerivation (finalAttrs: {
                 dpkg
                 rpm
               ]
-              ++ lib.optionals stdenv.isLinux [
+              ++ lib.optionals stdenv.hostPlatform.isLinux [
                 kreadconfig5Shim
                 kdePackages.kconfig
               ]

@@ -17,6 +17,8 @@
   wrapGAppsHook3,
   writableTmpDirAsHomeHook,
   callPackage,
+  copyDesktopItems,
+  makeDesktopItem,
 }:
 
 let
@@ -153,6 +155,8 @@ lib.overrideDerivation (buildFlutterApp {
     wrapGAppsHook3
   ] ++ lib.optionals stdenv.hostPlatform.isDarwin [
     writableTmpDirAsHomeHook
+  ] ++ [
+    copyDesktopItems
   ];
 
   buildInputs = [
@@ -207,10 +211,31 @@ lib.overrideDerivation (buildFlutterApp {
 
   dontUseCmakeConfigure = true;
 
+  desktopItems = [
+    (makeDesktopItem {
+      name = "uplink";
+      exec = "uplink";
+      icon = "uplink";
+      desktopName = "Uplink";
+      genericName = "Pastebin";
+      comment = "Cross-platform pastebin GUI";
+      categories = [
+        "Network"
+        "Utility"
+      ];
+      startupWMClass = "com.example.uplink";
+    })
+  ];
+
+  postInstall = ''
+    install -Dm644 assets/icon.png $out/share/icons/hicolor/512x512/apps/uplink.png
+  '';
+
   meta = with lib; {
     description = "Uplink - Cross-platform pastebin GUI app";
     homepage = "https://github.com/example/uplink";
     license = licenses.mit;
+    mainProgram = "uplink";
     maintainers = [ ];
     platforms = platforms.unix;
   };

@@ -16,6 +16,9 @@ rec {
         wireguird
         razer-laptop-control
         local-ai
+        toshy
+        # toshy-hm is a Home Manager module (home.file / systemd.user).
+        # Import modules.toshy-hm from Home Manager, not from NixOS.
       ];
     }
   );
@@ -24,4 +27,6 @@ rec {
   wireguird = ./wireguird.nix;
   razer-laptop-control = ./razer-laptop-control.nix;
   local-ai = ../by-name/lo/local-ai/module.nix;
+  toshy = ../by-name/to/toshy/nixos-module.nix;
+  toshy-hm = ../by-name/to/toshy/hm-module.nix;
 }

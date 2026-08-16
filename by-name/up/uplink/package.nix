@@ -80,6 +80,7 @@ lib.overrideDerivation (buildFlutterApp {
 
     LIPO_SCRIPT=$(cat << 'EOF3'
     #!/bin/bash
+    echo "LIPO WRAPPER CALLED WITH: $@" >&2
     for i in "$@"; do
         if [[ "$next_is_out" == "1" ]]; then
             out_file="$i"
@@ -88,11 +89,15 @@ lib.overrideDerivation (buildFlutterApp {
             next_is_out=1
         fi
     done
+    echo "LIPO WRAPPER out_file: $out_file" >&2
     if [[ -n "$out_file" ]]; then
         dir_to_fix="$(dirname "$out_file")"
-        chmod -R +w "$dir_to_fix" || true
-        chmod -R +w "$dir_to_fix/.." || true
-        chmod -R +w "$dir_to_fix/../.." || true
+        echo "LIPO WRAPPER dir_to_fix: $dir_to_fix" >&2
+        ls -ld "$dir_to_fix" >&2
+        chmod -R +w "$dir_to_fix" 2>&1 | sed 's/^/CHMOD: /' >&2
+        chmod -R +w "$dir_to_fix/.." 2>&1 | sed 's/^/CHMOD: /' >&2
+        chmod -R +w "$dir_to_fix/../.." 2>&1 | sed 's/^/CHMOD: /' >&2
+        ls -ld "$dir_to_fix" >&2
     fi
     exec "$REAL_DEV_DIR/Toolchains/XcodeDefault.xctoolchain/usr/bin/lipo" "$@"
     EOF3

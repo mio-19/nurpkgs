@@ -100,6 +100,17 @@ lib.overrideDerivation (buildFlutterApp {
     echo "$LIPO_SCRIPT" > "$(pwd)/custom_bin/lipo"
     chmod +x "$(pwd)/custom_bin/lipo"
     
+    cat << 'EOF_XCRUN' > "$(pwd)/custom_bin/xcrun"
+    #!/bin/bash
+    if [[ "$1" == "lipo" ]]; then
+        shift
+        exec "$(pwd)/custom_bin/lipo" "$@"
+    else
+        exec /usr/bin/xcrun "$@"
+    fi
+    EOF_XCRUN
+    chmod +x "$(pwd)/custom_bin/xcrun"
+    
     export DEVELOPER_DIR="$FAKE_DEV_DIR"
     export PATH="$(pwd)/custom_bin:$PATH"
     

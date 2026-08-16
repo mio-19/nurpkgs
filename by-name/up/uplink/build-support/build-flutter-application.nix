@@ -161,7 +161,7 @@ lib.extendMkDerivation {
     in
     {
       linux = universal // {
-        outputs = universal.outputs or [ ] ++ [ "debug" ];
+        outputs = universal.outputs or [ ] ++ lib.optionals stdenv.hostPlatform.isLinux [ "debug" ];
 
         nativeBuildInputs = (universal.nativeBuildInputs or [ ]) ++ lib.optionals stdenv.hostPlatform.isLinux [
           wrapGAppsHook3

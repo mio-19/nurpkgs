@@ -367,6 +367,31 @@ pub fn payload_i64(payload: &Wire, key: &str) -> i64 {
     }
 }
 
+fn payload_i64_at(payload: &Wire, key: &str) -> Option<i64> {
+    match payload {
+        Wire::Dict(fields) => fields.iter().find(|field| field.key == key).and_then(
+            |field| match &field.value {
+                Wire::Int(value) => Some(*value),
+                Wire::Float(value) => Some(*value as i64),
+                Wire::Text(text) => text.parse().ok(),
+                _ => None,
+            },
+        ),
+        _ => None,
+    }
+}
+
+fn reply_xyz_parts(reply: &Wire) -> Option<(i32, i32, i32)> {
+    if wire_is_fail(reply) || wire_is_empty(reply) {
+        return None;
+    }
+    Some((
+        payload_i64_at(reply, "x")? as i32,
+        payload_i64_at(reply, "y")? as i32,
+        payload_i64_at(reply, "z")? as i32,
+    ))
+}
+
 pub fn payload_f32(payload: &Wire, key: &str) -> f32 {
     match payload {
         Wire::Float(value) => *value as f32,
@@ -386,39 +411,22 @@ pub fn payload_f32(payload: &Wire, key: &str) -> f32 {
 }
 
 pub fn payload_xyz(payload: &Wire, fallback: (i32, i32, i32)) -> (i32, i32, i32) {
-    if wire_is_fail(payload) || wire_is_empty(payload) {
-        return fallback;
-    }
-    (
-        payload_i64(payload, "x") as i32,
-        payload_i64(payload, "y") as i32,
-        payload_i64(payload, "z") as i32,
-    )
+    reply_xyz_parts(payload).unwrap_or(fallback)
 }
 
-/// Spawn xyz: `fail` / empty skip this index (do not invent a pile-up point).
+/// Spawn xyz: `fail` / empty / missing x,y,z skip this index (do not invent a pile-up point).
 pub fn reply_xyz(reply: &Wire) -> Option<(i32, i32, i32)> {
-    if wire_is_fail(reply) || wire_is_empty(reply) {
-        None
-    } else {
-        Some((
-            payload_i64(reply, "x") as i32,
-            payload_i64(reply, "y") as i32,
-            payload_i64(reply, "z") as i32,
-        ))
-    }
+    reply_xyz_parts(reply)
 }
 
-/// Named spawn: `fail` / empty skip this index. Missing `name` uses `fallback_name`.
+/// Named spawn: `fail` / empty / missing x,y,z skip this index. Missing `name` uses `fallback_name`.
 pub fn reply_xyz_name(reply: &Wire, fallback_name: &str) -> Option<(i32, i32, i32, String)> {
-    if wire_is_fail(reply) || wire_is_empty(reply) {
-        return None;
-    }
+    let (x, y, z) = reply_xyz_parts(reply)?;
     let name = payload_text(reply, "name");
     Some((
-        payload_i64(reply, "x") as i32,
-        payload_i64(reply, "y") as i32,
-        payload_i64(reply, "z") as i32,
+        x,
+        y,
+        z,
         if name.is_empty() {
             fallback_name.to_string()
         } else {
@@ -1100,15 +1108,7 @@ impl MainModContext {
         fallback: (i32, i32, i32, String),
     ) -> (i32, i32, i32, String) {
         let reply = self.bus(topic, payload);
-        if wire_is_empty(&reply) || wire_is_fail(&reply) {
-            return fallback;
-        }
-        (
-            payload_i64(&reply, "x") as i32,
-            payload_i64(&reply, "y") as i32,
-            payload_i64(&reply, "z") as i32,
-            payload_text(&reply, "name").to_string(),
-        )
+        reply_xyz_name(&reply, &fallback.3).unwrap_or(fallback)
     }
 
     pub fn bus_xyz_name_ok(
@@ -1765,6 +1765,12 @@ mod tests {
             ),
             Some((1, 2, 3, "pedestrian".into()))
         );
+        assert!(reply_xyz(&wire_bag(vec![("x", Wire::Int(4))])).is_none());
+        assert_eq!(
+            payload_xyz(&wire_bag(vec![("x", Wire::Int(4))]), (1, 2, 3)),
+            (1, 2, 3)
+        );
+        assert!(reply_xyz(&Wire::Int(4)).is_none());
     }
 
     #[test]

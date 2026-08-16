@@ -44,6 +44,7 @@ drive-by edit. Live ABI is **6** (`wit/world.wit`). Gate: `nix build .#hanga-dev
 - **`empty` vs empty text.** Both mean “not mine”, so a pack cannot return a
   real empty string. Empty dict and empty `items` are the same skip
   (`Node::is_empty`). Use `text` only for non-empty names; keep `empty` for skip.
+  A broken cell-arena index lifts as `fail("cell")`, not skip.
 - **Name replies vs kits.** Loot, craft, labels, story events, and agent names
   use `ask_any_text` / `bus_text_payload`. Kits use `ask_any_node` / `bus_node`.
   `action-range` uses `reply_range`: empty/empty-text is the engine fallback;

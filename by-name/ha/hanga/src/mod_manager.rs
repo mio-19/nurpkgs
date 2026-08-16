@@ -119,31 +119,36 @@ type AbiCell = hanga::engine::host::Cell;
 type AbiField = hanga::engine::host::Field;
 
 pub fn lift_wire(value: &AbiValue) -> Wire {
-    lift_cell(value, value.root)
+    lift_cell(value, value.root).unwrap_or_else(|| wire_fail("cell"))
 }
 
-fn lift_cell(value: &AbiValue, at: u32) -> Wire {
-    let Some(cell) = value.cells.get(at as usize) else {
-        return Wire::Empty;
-    };
-    match cell {
+fn lift_cell(value: &AbiValue, at: u32) -> Option<Wire> {
+    let cell = value.cells.get(at as usize)?;
+    Some(match cell {
         AbiCell::Empty => Wire::Empty,
         AbiCell::Flag(flag) => Wire::Flag(*flag),
         AbiCell::Int(n) => Wire::Int(*n),
         AbiCell::Float(n) => Wire::Float(*n),
         AbiCell::Text(text) => Wire::Text(text.clone()),
-        AbiCell::Items(idx) => Wire::Items(idx.iter().map(|child| lift_cell(value, *child)).collect()),
-        AbiCell::Dict(fields) => Wire::Dict(
-            fields
-                .iter()
-                .map(|field| WireField {
+        AbiCell::Items(idx) => {
+            let mut items = Vec::with_capacity(idx.len());
+            for child in idx {
+                items.push(lift_cell(value, *child)?);
+            }
+            Wire::Items(items)
+        }
+        AbiCell::Dict(fields) => {
+            let mut bag = Vec::with_capacity(fields.len());
+            for field in fields {
+                bag.push(WireField {
                     key: field.key.clone(),
-                    value: lift_cell(value, field.at),
-                })
-                .collect(),
-        ),
+                    value: lift_cell(value, field.at)?,
+                });
+            }
+            Wire::Dict(bag)
+        }
         AbiCell::Fail(reason) => Wire::Fail(reason.clone()),
-    }
+    })
 }
 
 pub fn lower_wire(value: &Wire) -> AbiValue {
@@ -1651,6 +1656,26 @@ mod tests {
         let lowered = lower_wire(&wire_fail("noproc"));
         match lift_wire(&lowered) {
             Wire::Fail(reason) => assert_eq!(reason, "noproc"),
+            other => panic!("{other:?}"),
+        }
+    }
+
+    #[test]
+    fn broken_arena_index_is_fail_not_skip() {
+        let mut lowered = lower_wire(&wire_int(1));
+        lowered.root = 99;
+        match lift_wire(&lowered) {
+            Wire::Fail(reason) => assert_eq!(reason, "cell"),
+            other => panic!("{other:?}"),
+        }
+        let mut nested = lower_wire(&wire_bag(vec![("x", wire_int(1))]));
+        if let Some(AbiCell::Dict(fields)) = nested.cells.last_mut() {
+            fields[0].at = 99;
+        } else {
+            panic!("expected dict root");
+        }
+        match lift_wire(&nested) {
+            Wire::Fail(reason) => assert_eq!(reason, "cell"),
             other => panic!("{other:?}"),
         }
     }

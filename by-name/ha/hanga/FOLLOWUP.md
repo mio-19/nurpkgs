@@ -68,7 +68,8 @@ drive-by edit. Live ABI is **6** (`wit/world.wit`). Gate: `nix build .#hanga-dev
   `FractureKit::default()` (no invented impulse). Missing `impulse` on a
   non-empty kit is 0, not 5. `node_from_reply` /
   `bus_node_ok` drop `fail` so fire does not treat busy as `out`. Empty
-  fire-kit still means extinguish. `with_mod` uses `try_lock` like
+  fire-kit still means extinguish. Missing `heat`/`range` on a burning kit
+  are 0, not 1/6. `with_mod` uses `try_lock` like
   `ask_any`. Hot reload `try_lock`s every slot and retries next frame
   if a pack is busy. `wake_all` leaves `woken` false if a slot is busy
   so load retries `ready`. Hot reload keeps a running pack if

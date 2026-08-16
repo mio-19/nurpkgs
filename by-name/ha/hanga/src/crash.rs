@@ -261,11 +261,7 @@ pub fn parse_fire_kit_node(node: &crate::kit::Node) -> FireKit {
             ..FireKit::default()
         };
     }
-    let mut kit = FireKit {
-        heat: 1.0,
-        range: 6.0,
-        ..FireKit::default()
-    };
+    let mut kit = FireKit::default();
     for (key, cell) in node.entries() {
         match key.as_str() {
             "heat" => {
@@ -380,6 +376,8 @@ mod tests {
         let fire = parse_fire_kit("heat=1.2;range=8;consume=1;jump=1;burst=0;out=0");
         assert!(fire.consume && fire.jump && !fire.out);
         assert!(parse_fire_kit("").out);
+        assert_eq!(parse_fire_kit("jump=1").heat, 0.0);
+        assert_eq!(parse_fire_kit("jump=1").range, 0.0);
         assert_eq!(apply_stiffness(80, 0), 80);
         assert_eq!(apply_stiffness(80, 100), 0);
         assert!(apply_stiffness(80, 50) < 80);

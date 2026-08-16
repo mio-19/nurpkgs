@@ -5,6 +5,9 @@
   ffmpeg,
 }:
 
+let
+  piano-transcription-inference = python3.pkgs.callPackage ./piano-transcription-inference.nix { };
+in
 python3.pkgs.buildPythonApplication (finalAttrs: {
   pname = "pianotrans";
   version = "1.0.1";
@@ -19,12 +22,13 @@ python3.pkgs.buildPythonApplication (finalAttrs: {
 
   build-system = with python3.pkgs; [ setuptools ];
 
-  dependencies = with python3.pkgs; [
+  dependencies = [
     piano-transcription-inference
+  ] ++ (with python3.pkgs; [
     resampy
     tkinter
     torch
-  ];
+  ]);
 
   # Project has no tests
   doCheck = false;

@@ -272,6 +272,10 @@ pub fn clear_player_snap() {
 }
 
 pub fn overlay_clear() {
+    if let Ok(mut queue) = VOXEL_WRITES.lock() {
+        queue.pending.clear();
+        queue.shed.clear();
+    }
     if let Ok(mut map) = VOXEL_OVERLAY.write() {
         map.clear();
     }
@@ -888,7 +892,6 @@ mod tests {
     #[test]
     fn voxel_write_queue_drops_oldest() {
         overlay_clear();
-        let _ = take_voxel_writes();
         for i in 0..=VOXEL_WRITE_CAP {
             queue_voxel_write(i as i32, 0, 0, "glass");
         }
@@ -897,6 +900,16 @@ mod tests {
         assert!(writes.iter().any(|write| write.x == 0));
         assert!(writes.iter().any(|write| write.x == VOXEL_WRITE_CAP as i32));
         overlay_clear();
+        assert!(take_voxel_writes().is_empty());
+    }
+
+    #[test]
+    fn overlay_clear_drops_pending_voxel_writes() {
+        overlay_clear();
+        queue_voxel_write(3, 1, 4, "glass");
+        overlay_clear();
+        assert_eq!(overlay_name(3, 1, 4), None);
+        assert!(take_voxel_writes().is_empty());
     }
 
     // ── is_connected_to_ground ────────────────────────────────────────────────

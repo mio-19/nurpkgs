@@ -119,6 +119,7 @@ pub const PART_LAMP: &str = "lamp";
 
 pub const AGENT_COP: &str = "cop";
 pub const AGENT_PEDESTRIAN: &str = "pedestrian";
+pub const AGENT_TRAIN: &str = "train";
 
 pub const CONTRACT_SMASH: &str = "smash-and-grab";
 pub const CONTRACT_SUBWAY: &str = "subway-pinch";
@@ -561,11 +562,15 @@ pub fn should_despawn_agent(agent: &str, current_state: i32) -> i32 {
 }
 
 pub fn ambient_agent_count() -> i32 {
-    6
+    8
 }
 
 pub fn ambient_agent_spawn(index: i32) -> (i32, i32, i32, String) {
     let i = index.max(0);
+    if i >= 6 {
+        let z = 400 + (i - 6) * 100;
+        return (400, -7, z, AGENT_TRAIN.into());
+    }
     (502 + i * 8, 2, 500, AGENT_PEDESTRIAN.into())
 }
 
@@ -947,6 +952,7 @@ pub fn compute_agent_vx(agent: &str, cx: f32, cz: f32, px: f32, pz: f32) -> f32 
                 3.0
             }
         }
+        AGENT_TRAIN => 0.0,
         _ => 0.0,
     }
 }
@@ -963,6 +969,7 @@ pub fn compute_agent_vz(agent: &str, cx: f32, cz: f32, px: f32, pz: f32) -> f32 
             (dz / len) * 8.0
         }
         AGENT_PEDESTRIAN => 0.0,
+        AGENT_TRAIN => 25.0,
         _ => 0.0,
     }
 }
@@ -1690,11 +1697,21 @@ mod tests {
 
     #[test]
     fn ambient_agents_are_pedestrians_on_the_street() {
-        assert_eq!(ambient_agent_count(), 6);
+        assert_eq!(ambient_agent_count(), 8);
         let (x, y, _z, kind) = ambient_agent_spawn(0);
         assert_eq!(kind, AGENT_PEDESTRIAN);
         assert!(y < 10, "pedestrians walk the street, not rooftops");
         assert!(x >= 500);
+    }
+
+    #[test]
+    fn train_agent_moves_fast_along_z_axis() {
+        let (x, y, _z, kind) = ambient_agent_spawn(6);
+        assert_eq!(kind, AGENT_TRAIN);
+        assert_eq!(y, -7);
+        assert_eq!(x, 400);
+        assert_eq!(compute_agent_vx(AGENT_TRAIN, 0.0, 0.0, 0.0, 0.0), 0.0);
+        assert_eq!(compute_agent_vz(AGENT_TRAIN, 0.0, 0.0, 0.0, 0.0), 25.0);
     }
 
     #[test]

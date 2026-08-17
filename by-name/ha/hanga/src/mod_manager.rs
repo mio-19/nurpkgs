@@ -2546,7 +2546,7 @@ mod tests {
         assert!(mark.get("take").is_some_and(::hanga::kit::Node::as_flag));
         assert_eq!(
             ctx.bus_i32("ambient-agent-count", &wire_empty(), 0),
-            6
+            8
         );
         assert_eq!(
             ctx.bus_xyz_name(

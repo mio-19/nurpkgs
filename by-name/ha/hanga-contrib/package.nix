@@ -179,12 +179,13 @@ stdenv.mkDerivation {
       --adapt wasi_snapshot_preview1=wasi_p1_stub.wasm \
       -o lab_slab.wasm
 
-    mkdir -p zig-c
-    ${wit-bindgen}/bin/wit-bindgen c --world plugin --out-dir zig-c wit
+    mkdir -p zig-bindings
+    python3 scripts/wit-bindgen-zig.py wit.json zig-bindings
+    cp zig-bindings/plugin.zig examples/lab-grid/plugin.zig
     cp -a lib/zig/hangamod examples/lab-grid/hangamod
-    zig build-exe examples/lab-grid/main.zig lib/c/hangamod/payload.c zig-c/plugin.c zig-c/plugin_component_type.o \
+    zig build-exe examples/lab-grid/main.zig \
       -target wasm32-wasi-musl -O ReleaseSmall -fno-entry -rdynamic -lc \
-      -I zig-c -I lib/c/hangamod -femit-bin=lab_grid.core.wasm
+      -femit-bin=lab_grid.core.wasm
     wasm-tools component embed wit lab_grid.core.wasm -o lab_grid.embedded.wasm
     wasm-tools component new lab_grid.embedded.wasm \
       --adapt wasi_snapshot_preview1=wasi_p1_stub.wasm \

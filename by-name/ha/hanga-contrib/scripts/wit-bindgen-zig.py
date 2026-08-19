@@ -3,7 +3,7 @@ import sys
 import os
 
 def generate_zig(wit_json, out_dir):
-    zig_code = """// Generated native Zig bindings
+    zig_code = """// Generated native Zig bindings wrapped around C bindings
 const std = @import("std");
 
 pub const string = extern struct {
@@ -65,27 +65,32 @@ pub const list_string = extern struct {
     len: usize,
 };
 
-pub extern "hanga:engine/host" fn log(level: *const string, message: *const string) void;
-pub extern "hanga:engine/host" fn @"now-ms"() i64;
-pub extern "hanga:engine/host" fn id(ret: *string) void;
-pub extern "hanga:engine/host" fn peers(ret: *list_string) void;
-pub extern "hanga:engine/host" fn @"has-mod"(name: *const string) bool;
-pub extern "hanga:engine/host" fn invoke(peer: *const string, method: *const string, args: *const value, ret: *value) void;
-pub extern "hanga:engine/host" fn send(peer: *const string, method: *const string, args: *const value) void;
-pub extern "hanga:engine/host" fn emit(method: *const string, args: *const value) bool;
-pub extern "hanga:engine/host" fn voxel(x: i32, y: i32, z: i32, ret: *value) void;
-pub extern "hanga:engine/host" fn @"voxel-set"(x: i32, y: i32, z: i32, name: *const string) void;
-pub extern "hanga:engine/host" fn player(ret: *value) void;
-pub extern "hanga:engine/host" fn after(ms: i32, method: *const string, args: *const value) void;
+extern fn hanga_engine_host_log(level: *const string, message: *const string) void;
+pub const log = hanga_engine_host_log;
+extern fn hanga_engine_host_now_ms() i64;
+pub const @"now-ms" = hanga_engine_host_now_ms;
+extern fn hanga_engine_host_id(ret: *string) void;
+pub const id = hanga_engine_host_id;
+extern fn hanga_engine_host_peers(ret: *list_string) void;
+pub const peers = hanga_engine_host_peers;
+extern fn hanga_engine_host_has_mod(name: *const string) bool;
+pub const @"has-mod" = hanga_engine_host_has_mod;
+extern fn hanga_engine_host_invoke(peer: *const string, method: *const string, args: *const value, ret: *value) void;
+pub const invoke = hanga_engine_host_invoke;
+extern fn hanga_engine_host_send(peer: *const string, method: *const string, args: *const value) void;
+pub const send = hanga_engine_host_send;
+extern fn hanga_engine_host_emit(method: *const string, args: *const value) bool;
+pub const emit = hanga_engine_host_emit;
+extern fn hanga_engine_host_voxel(x: i32, y: i32, z: i32, ret: *value) void;
+pub const voxel = hanga_engine_host_voxel;
+extern fn hanga_engine_host_voxel_set(x: i32, y: i32, z: i32, name: *const string) void;
+pub const @"voxel-set" = hanga_engine_host_voxel_set;
+extern fn hanga_engine_host_player(ret: *value) void;
+pub const player = hanga_engine_host_player;
+extern fn hanga_engine_host_after(ms: i32, method: *const string, args: *const value) void;
+pub const after = hanga_engine_host_after;
 
-pub export fn cabi_realloc(orig_ptr: ?*anyopaque, orig_size: usize, align_: usize, new_size: usize) ?*anyopaque {
-    _ = orig_ptr;
-    _ = orig_size;
-    _ = align_;
-    if (new_size == 0) return null;
-    const slice = std.heap.wasm_allocator.alloc(u8, new_size) catch return null;
-    return @ptrCast(slice.ptr);
-}
+pub extern fn cabi_realloc(orig_ptr: ?*anyopaque, orig_size: usize, align_: usize, new_size: usize) ?*anyopaque;
 """
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "plugin.zig"), "w") as f:

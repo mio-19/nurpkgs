@@ -10,9 +10,9 @@
 }:
 
 let
-  fenix_repo = builtins.fetchTarball {
+  fenix_repo = pkgs.fetchzip {
     url = "https://github.com/nix-community/fenix/archive/main.tar.gz";
-    sha256 = "sha256-u9KuJHihYSunSe+Z6TEhWevA4kDPq5fziV/D9W+Uz1k=";
+    hash = "sha256-37asD+JKFnedthzsuGP8mDgxCzjNePJVfMAVzYWIMfs=";
   };
   fenix = import fenix_repo { inherit pkgs; };
   toolchain_components = fenix.targets.x86_64-unknown-linux-gnu.toolchainOf {

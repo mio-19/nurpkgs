@@ -15,9 +15,19 @@ whitelist ${HOME}/.cache/bilibili
 whitelist ${HOME}/.config/bilibili
 whitelist ${HOME}/.local/share/bilibili
 
-# Allow D-Bus notifications/portal
+# Must come before include electron-common.profile (which sets netfilter, noinput, dbus-*).
+ignore netfilter
+ignore noinput
 ignore dbus-user none
 ignore dbus-system none
+
+# Allow HTTPS/TLS
+private-etc @tls-ca
+
+# NixOS: private-bin cannot resolve paths from the store; use system paths instead.
+ignore noroot
+whitelist /run/current-system
+whitelist /run/wrappers
 
 # Redirect
 include electron-common.profile

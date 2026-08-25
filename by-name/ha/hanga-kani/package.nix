@@ -75,7 +75,7 @@ rustPlatform.buildRustPackage {
     export CARGO_IGNORE_RUST_VERSION=1
 
     # Run tests on specific targets to avoid evaluating unreachable things if possible, but we run on all by default
-    cargo kani
+    cargo kani --default-unwind 3
   '';
 
   installPhase = ''

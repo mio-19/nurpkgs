@@ -3724,6 +3724,7 @@ fn sync_selected_game(
     let game = current_game(&catalog, &selected);
     selected_mod.0 = game.lead_mod().to_string();
     collection.0 = game.collection_key();
+    hanga::persistence::init_world_db(&collection.0);
     theme.0 = game.backdrop;
     hanga::palette::prepare_asset_dir(&game, &games.0);
     load_game_mods(&mut runtime, &game, &search);

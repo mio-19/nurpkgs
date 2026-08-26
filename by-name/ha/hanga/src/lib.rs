@@ -14,6 +14,7 @@ pub mod i18n;
 pub mod palette;
 pub mod sign;
 pub mod vehicle;
+pub mod persistence;
 
 // ─── Anti-cheat / Trust ──────────────────────────────────────────────────────
 
@@ -172,6 +173,7 @@ pub fn overlay_get(x: i32, y: i32, z: i32) -> Option<VoxelOverlay> {
 }
 
 pub fn overlay_set(x: i32, y: i32, z: i32, voxel: VoxelOverlay) {
+    crate::persistence::persist_overlay_set(x, y, z, voxel.clone());
     if let Ok(mut map) = VOXEL_OVERLAY.write() {
         map.insert((x, y, z), voxel);
     }

@@ -16,6 +16,7 @@ export '../serde/serde.dart';
 part 'trait_helpers.dart';
 part 'upload_file_request.dart';
 part 'upload_file_response.dart';
+part 'upload_progress.dart';
 part 'upload_text_request.dart';
 part 'upload_text_response.dart';
 part 'signal_handlers.dart';

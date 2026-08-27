@@ -10,6 +10,15 @@ final assignRustSignal = <String, void Function(Uint8List, Uint8List)>{
     _uploadFileResponseStreamController.add(rustSignal);
     UploadFileResponse.latestRustSignal = rustSignal;
   },
+  'UploadProgress': (Uint8List messageBytes, Uint8List binary) {
+    final message = UploadProgress.bincodeDeserialize(messageBytes);
+    final rustSignal = RustSignalPack(
+      message,
+      binary,
+    );
+    _uploadProgressStreamController.add(rustSignal);
+    UploadProgress.latestRustSignal = rustSignal;
+  },
   'UploadTextResponse': (Uint8List messageBytes, Uint8List binary) {
     final message = UploadTextResponse.bincodeDeserialize(messageBytes);
     final rustSignal = RustSignalPack(

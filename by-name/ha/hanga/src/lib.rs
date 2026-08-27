@@ -668,6 +668,41 @@ pub fn inventory_pick_stack(
     Some((item, count))
 }
 
+/// Merge/insert a whole stack into matching or empty slots. Returns leftover count.
+pub fn inventory_insert_stack(
+    items: &mut [String],
+    counts: &mut [u32],
+    item: &str,
+    mut count: u32,
+) -> u32 {
+    if item.is_empty() || count == 0 || items.len() != counts.len() {
+        return count;
+    }
+    for i in 0..items.len() {
+        if items[i] == item && counts[i] > 0 && counts[i] < 999 {
+            let space = 999u32.saturating_sub(counts[i]);
+            let moved = count.min(space);
+            counts[i] += moved;
+            count -= moved;
+            if count == 0 {
+                return 0;
+            }
+        }
+    }
+    for i in 0..items.len() {
+        if items[i].is_empty() || counts[i] == 0 {
+            let moved = count.min(999);
+            items[i] = item.to_string();
+            counts[i] = moved;
+            count -= moved;
+            if count == 0 {
+                return 0;
+            }
+        }
+    }
+    count
+}
+
 /// Parsed `container-kit` reply. Empty `kind` / zero slots = not a container.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ContainerKit {
@@ -1203,6 +1238,9 @@ mod tests {
             inventory_place_stack(&mut items, &mut counts, 0, "glass", 2);
         assert!(merged.is_empty() && m == 0);
         assert_eq!(counts[0], 5);
+        let left = inventory_insert_stack(&mut items, &mut counts, "brick", 4);
+        assert_eq!(left, 0);
+        assert_eq!((items[1].as_str(), counts[1]), ("brick", 4));
     }
 
     #[test]

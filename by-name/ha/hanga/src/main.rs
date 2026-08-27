@@ -24,8 +24,9 @@ use hanga::i18n::{self, Locale, TextCommand};
 use hanga::{
     action_fingerprint, apply_mouse_look, catalog_index, catalog_name, clamp_hotbar_index,
     clamp_mod_state, clamp_voxel_type, clamp_wallet, contract_is_offered, fracture_offsets,
-    inventory_add, inventory_craft_pair, inventory_pick_stack, inventory_place_stack,
-    inventory_selected, inventory_take, is_action_physically_possible, is_connected_to_ground,
+    inventory_add, inventory_craft_pair, inventory_insert_stack, inventory_pick_stack,
+    inventory_place_stack, inventory_selected, inventory_take, is_action_physically_possible,
+    is_connected_to_ground,
     overlay_get, overlay_set, parse_container_kit_node, take_voxel_writes, VoxelOverlay, PlayerSnap,
     set_player_snap, cycle_p2p_url, merge_name_catalogs, parse_p2p_url, p2p_room_name,
     resolve_wasm_path, should_skip_menu, unpack_economy_params, verify_action_signature,
@@ -383,6 +384,8 @@ struct InventoryUi {
     /// World cell currently linked as a container panel.
     container_pos: Option<IVec3>,
     drag: Option<InvDrag>,
+    /// Copied from UiLocale so open paths stay under the Bevy system-param limit.
+    locale: Locale,
 }
 
 #[derive(Clone, Debug)]
@@ -637,7 +640,19 @@ fn main() {
         )
         .add_systems(
             Update,
-            (pause_to_menu, toggle_inventory_ui, select_hotbar, player_look, update_hud, update_inv_slot_labels, inv_slot_clicks, drift_clouds)
+            (
+                pause_to_menu,
+                toggle_inventory_ui,
+                select_hotbar,
+                player_look,
+                update_hud,
+                sync_inv_ui_locale,
+                sync_hud_hotbar_visibility,
+                update_inv_slot_labels,
+                inv_slot_clicks,
+                update_inv_drag_ghost,
+                drift_clouds,
+            )
                 .run_if(in_state(GameMode::Playing)),
         )
         .add_message::<ProposedAction>()
@@ -2720,7 +2735,7 @@ fn player_interaction(
     mouse_input: Res<ButtonInput<MouseButton>>,
     keys: Res<ButtonInput<KeyCode>>,
     mut events: MessageWriter<ProposedAction>,
-    query: Query<(Entity, &Transform, &ModInventory), With<Player>>,
+    mut query: Query<(Entity, &Transform, &mut ModInventory), With<Player>>,
     cameras: Query<&GlobalTransform, With<VoxelWorldCamera<DefaultWorld>>>,
     vehicles: Query<(Entity, &Transform), (With<Vehicle>, Without<Player>, Without<Wrecked>)>,
     cheat_mode: Res<CheatMode>,
@@ -2774,7 +2789,7 @@ fn player_interaction(
     }
 
     if action_just_pressed(&keys, &mouse_input, &bindings.0, ACTION_PLACE) {
-        if let Some((player_entity, transform, inventory)) = query.iter().next() {
+        if let Some((player_entity, transform, mut inventory)) = query.iter_mut().next() {
             let (origin, forward) = aim_from(&cameras, transform);
             let forward_pos = origin + (*forward * 2.0);
             let voxel_pos = IVec3::new(
@@ -2787,7 +2802,7 @@ fn player_interaction(
                 &mut inv_ui,
                 &mut windows,
                 &panels,
-                inventory,
+                &mut inventory,
                 &mut containers,
                 &mod_runtime,
                 &voxel_world,
@@ -2843,7 +2858,7 @@ fn try_open_container_at(
     inv_ui: &mut InventoryUi,
     windows: &mut Query<&mut CursorOptions, With<PrimaryWindow>>,
     panels: &Query<Entity, With<InvPanelRoot>>,
-    inventory: &ModInventory,
+    inventory: &mut ModInventory,
     containers: &mut WorldContainers,
     mod_runtime: &ModRuntime,
     voxel_world: &VoxelWorld<DefaultWorld>,
@@ -3925,7 +3940,14 @@ fn despawn_hud(
     }
 }
 
-fn close_inventory_on_exit(mut inv_ui: ResMut<InventoryUi>) {
+fn close_inventory_on_exit(
+    mut inv_ui: ResMut<InventoryUi>,
+    mut players: Query<&mut ModInventory, With<Player>>,
+    mut containers: ResMut<WorldContainers>,
+) {
+    if let Some(mut inventory) = players.iter_mut().next() {
+        restore_inv_drag(&mut inv_ui, &mut inventory, &mut containers);
+    }
     *inv_ui = InventoryUi::default();
 }
 
@@ -3938,12 +3960,24 @@ fn pause_to_menu(
     mut commands: Commands,
     panels: Query<Entity, With<InvPanelRoot>>,
     mut windows: Query<&mut CursorOptions, With<PrimaryWindow>>,
+    mut players: Query<&mut ModInventory, With<Player>>,
+    mut containers: ResMut<WorldContainers>,
 ) {
     if !action_just_pressed(&keys, &mouse, &bindings.0, ACTION_PAUSE) {
         return;
     }
     if inv_ui.open {
-        close_inventory_panel(&mut commands, &mut inv_ui, &panels, &mut windows, true);
+        if let Some(mut inventory) = players.iter_mut().next() {
+            close_inventory_panel(
+                &mut commands,
+                &mut inv_ui,
+                &panels,
+                &mut windows,
+                &mut inventory,
+                &mut containers,
+                true,
+            );
+        }
         return;
     }
     info!("Paused to menu");
@@ -3954,31 +3988,103 @@ fn toggle_inventory_ui(
     keys: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
     bindings: Res<KeyBindings>,
+    locale: Res<UiLocale>,
     mut inv_ui: ResMut<InventoryUi>,
     mut commands: Commands,
     panels: Query<Entity, With<InvPanelRoot>>,
     mut windows: Query<&mut CursorOptions, With<PrimaryWindow>>,
-    players: Query<&ModInventory, With<Player>>,
-    containers: Res<WorldContainers>,
+    mut players: Query<&mut ModInventory, With<Player>>,
+    mut containers: ResMut<WorldContainers>,
 ) {
     if !action_just_pressed(&keys, &mouse, &bindings.0, ACTION_INVENTORY) {
         return;
     }
+    inv_ui.locale = locale.0;
+    let Some(mut inventory) = players.iter_mut().next() else {
+        return;
+    };
     if inv_ui.open {
-        close_inventory_panel(&mut commands, &mut inv_ui, &panels, &mut windows, true);
+        close_inventory_panel(
+            &mut commands,
+            &mut inv_ui,
+            &panels,
+            &mut windows,
+            &mut inventory,
+            &mut containers,
+            true,
+        );
     } else {
-        let Some(inventory) = players.iter().next() else {
-            return;
-        };
         open_inventory_panel(
             &mut commands,
             &mut inv_ui,
             &mut windows,
-            inventory,
-            containers.as_ref(),
+            &mut inventory,
+            &mut containers,
             None,
             &panels,
         );
+    }
+}
+
+fn restore_inv_drag(
+    inv_ui: &mut InventoryUi,
+    inventory: &mut ModInventory,
+    containers: &mut WorldContainers,
+) {
+    let Some(drag) = inv_ui.drag.take() else {
+        return;
+    };
+    match drag.kind {
+        InvSlotKind::Hotbar | InvSlotKind::Bag => {
+            let left = inventory_insert_stack(
+                &mut inventory.items,
+                &mut inventory.counts,
+                &drag.item,
+                drag.count,
+            );
+            if left > 0 {
+                warn!(
+                    "Inventory full while restoring drag stack ({} x{}); leftover {}",
+                    drag.item, drag.count, left
+                );
+            }
+        }
+        InvSlotKind::Container => {
+            let Some(pos) = inv_ui.container_pos else {
+                let left = inventory_insert_stack(
+                    &mut inventory.items,
+                    &mut inventory.counts,
+                    &drag.item,
+                    drag.count,
+                );
+                if left > 0 {
+                    warn!(
+                        "Lost container context; bag leftover {} x{}",
+                        drag.item, left
+                    );
+                }
+                return;
+            };
+            let Some(stored) = containers.by_pos.get_mut(&(pos.x, pos.y, pos.z)) else {
+                let _ = inventory_insert_stack(
+                    &mut inventory.items,
+                    &mut inventory.counts,
+                    &drag.item,
+                    drag.count,
+                );
+                return;
+            };
+            let left =
+                inventory_insert_stack(&mut stored.items, &mut stored.counts, &drag.item, drag.count);
+            if left > 0 {
+                let _ = inventory_insert_stack(
+                    &mut inventory.items,
+                    &mut inventory.counts,
+                    &drag.item,
+                    left,
+                );
+            }
+        }
     }
 }
 
@@ -3987,12 +4093,14 @@ fn close_inventory_panel(
     inv_ui: &mut InventoryUi,
     panels: &Query<Entity, With<InvPanelRoot>>,
     windows: &mut Query<&mut CursorOptions, With<PrimaryWindow>>,
+    inventory: &mut ModInventory,
+    containers: &mut WorldContainers,
     grab: bool,
 ) {
+    restore_inv_drag(inv_ui, inventory, containers);
     for entity in panels.iter() {
         commands.entity(entity).despawn();
     }
-    // Put drag stack back if any
     *inv_ui = InventoryUi::default();
     if grab {
         if let Some(mut cursor) = windows.iter_mut().next() {
@@ -4006,11 +4114,12 @@ fn open_inventory_panel(
     commands: &mut Commands,
     inv_ui: &mut InventoryUi,
     windows: &mut Query<&mut CursorOptions, With<PrimaryWindow>>,
-    inventory: &ModInventory,
-    containers: &WorldContainers,
+    inventory: &mut ModInventory,
+    containers: &mut WorldContainers,
     container_pos: Option<IVec3>,
     existing: &Query<Entity, With<InvPanelRoot>>,
 ) {
+    restore_inv_drag(inv_ui, inventory, containers);
     for entity in existing.iter() {
         commands.entity(entity).despawn();
     }
@@ -4021,6 +4130,7 @@ fn open_inventory_panel(
         cursor.grab_mode = CursorGrabMode::None;
         cursor.visible = true;
     }
+    let title = i18n::t(inv_ui.locale, "bind_inventory");
 
     commands
         .spawn((
@@ -4065,7 +4175,7 @@ fn open_inventory_panel(
                 }
             }
             root.spawn((
-                Text::new("Inventory"),
+                Text::new(title),
                 TextFont {
                     font_size: FontSize::Px(18.0),
                     ..default()
@@ -4096,6 +4206,23 @@ fn open_inventory_panel(
                     spawn_slot(row, InvSlotKind::Hotbar, i, i == inventory.selected);
                 }
             });
+            root.spawn((
+                InvDragGhost,
+                Text::new(""),
+                TextFont {
+                    font_size: FontSize::Px(14.0),
+                    ..default()
+                },
+                TextColor(Color::srgb(1.0, 0.95, 0.7)),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    ..default()
+                },
+                Visibility::Hidden,
+                ZIndex(30),
+            ));
         });
 }
 
@@ -4243,18 +4370,69 @@ fn container_place(
     inventory_place_stack(&mut stored.items, &mut stored.counts, index, item, count)
 }
 
+fn sync_inv_ui_locale(locale: Res<UiLocale>, mut inv_ui: ResMut<InventoryUi>) {
+    inv_ui.locale = locale.0;
+}
+
+fn sync_hud_hotbar_visibility(
+    inv_ui: Res<InventoryUi>,
+    mut rows: Query<&mut Visibility, With<HudHotbarRow>>,
+) {
+    let next = if inv_ui.open {
+        Visibility::Hidden
+    } else {
+        Visibility::Visible
+    };
+    for mut vis in &mut rows {
+        *vis = next;
+    }
+}
+
+fn update_inv_drag_ghost(
+    inv_ui: Res<InventoryUi>,
+    locale: Res<UiLocale>,
+    mod_runtime: Res<ModRuntime>,
+    windows: Query<&Window, With<PrimaryWindow>>,
+    mut ghosts: Query<(&mut Node, &mut Text, &mut Visibility), With<InvDragGhost>>,
+) {
+    let cursor = windows
+        .iter()
+        .next()
+        .and_then(|window| window.cursor_position());
+    for (mut node, mut text, mut vis) in &mut ghosts {
+        match (inv_ui.drag.as_ref(), cursor) {
+            (Some(drag), Some(pos)) => {
+                *vis = Visibility::Visible;
+                node.left = Val::Px(pos.x + 14.0);
+                node.top = Val::Px(pos.y + 14.0);
+                let name = item_label(&mod_runtime, locale.0, &drag.item);
+                *text = Text::new(format!("{name} x{}", drag.count));
+            }
+            _ => {
+                *vis = Visibility::Hidden;
+                *text = Text::new("");
+            }
+        }
+    }
+}
+
 fn inv_slot_clicks(
     mut inv_ui: ResMut<InventoryUi>,
     mut players: Query<&mut ModInventory, With<Player>>,
     mut containers: ResMut<WorldContainers>,
     interactions: Query<(&Interaction, &InvSlot), (Changed<Interaction>, With<Button>)>,
 ) {
-    if !inv_ui.open {
-        return;
-    }
     let Some(mut inventory) = players.iter_mut().next() else {
         return;
     };
+    if !inv_ui.open {
+        for (interaction, slot) in &interactions {
+            if *interaction == Interaction::Pressed && slot.kind == InvSlotKind::Hotbar {
+                inventory.selected = clamp_hotbar_index(slot.index as i32);
+            }
+        }
+        return;
+    }
     for (interaction, slot) in &interactions {
         if *interaction != Interaction::Pressed {
             continue;
@@ -5232,24 +5410,6 @@ fn held_status(locale: Locale, mod_runtime: &ModRuntime, inventory: &ModInventor
         ),
         None => i18n::t(locale, "hands_empty").to_string(),
     }
-}
-
-fn hotbar_line(locale: Locale, mod_runtime: &ModRuntime, inventory: &ModInventory) -> String {
-    let mut parts = Vec::with_capacity(INVENTORY_SLOTS);
-    for i in 0..INVENTORY_SLOTS {
-        let selected = i == inventory.selected;
-        let open = if selected { "[" } else { " " };
-        let close = if selected { "]" } else { " " };
-        let id = inventory.items[i].as_str();
-        let count = inventory.counts[i];
-        if !id.is_empty() && count > 0 {
-            let label = mod_item_label(mod_runtime, locale, id);
-            parts.push(format!("{open}{}:{label}×{count}{close}", i + 1));
-        } else {
-            parts.push(format!("{open}{}{close}", i + 1));
-        }
-    }
-    i18n::format_hotbar(locale, &parts.join(" "))
 }
 
 fn job_status_line(

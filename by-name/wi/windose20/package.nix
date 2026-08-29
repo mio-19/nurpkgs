@@ -62,7 +62,7 @@ stdenvNoCC.mkDerivation {
     done
     cp ${./windose20.plymouth} "$themeDir/windose20.plymouth"
     substituteInPlace "$themeDir/windose20.plymouth" \
-      --replace '@IMAGES@' "$imagesDir/"
+      --replace-fail '@IMAGES@' "$imagesDir/"
 
     mkdir -p "$out/share/fonts/truetype"
     unzip -jo "$font" "fusion-pixel-10px-proportional-latin.ttf" -d "$out/share/fonts/truetype"

@@ -52,6 +52,19 @@ stdenv.mkDerivation rec {
         "Engineering"
       ];
       startupNotify = true;
+      terminal = false;
+    })
+    (makeDesktopItem {
+      name = "autodesk-fusion-360-setup";
+      exec = "autodesk-fusion-360-setup";
+      icon = "autodesk-fusion-360";
+      desktopName = "Autodesk Fusion 360 Setup";
+      genericName = "CAD Application Setup Wizard";
+      categories = [
+        "Education"
+        "Engineering"
+      ];
+      startupNotify = true;
       terminal = true;
     })
   ];
@@ -99,11 +112,21 @@ stdenv.mkDerivation rec {
             ]
           }
 
+        cat > $out/bin/autodesk-fusion-360-setup << EOF
+    #!${runtimeShell}
+    exec $out/libexec/autodesk-fusion-installer --install
+    EOF
+        chmod +x $out/bin/autodesk-fusion-360-setup
+
         cat > $out/bin/autodesk-fusion-360 << EOF
     #!${runtimeShell}
     if [ ! -d "\$HOME/.autodesk_fusion/wineprefixes/default" ]; then
-        echo "First run detected, starting installer..."
-        exec $out/libexec/autodesk-fusion-installer --install
+        echo "First run detected. Please run 'autodesk-fusion-360-setup' from your application menu or terminal to install."
+        # If zenity is available on the system, show a popup
+        if command -v zenity >/dev/null 2>&1; then
+            zenity --info --text="First run detected. Please run 'Autodesk Fusion 360 Setup' from your application menu to install."
+        fi
+        exit 1
     else
         echo "Starting Autodesk Fusion 360..."
         exec $out/libexec/autodesk-fusion-launcher

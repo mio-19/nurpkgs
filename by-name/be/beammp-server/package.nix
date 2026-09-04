@@ -40,13 +40,13 @@ let
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "beammp-server";
-  version = "3.9.3";
+  version = "3.9.4";
 
   src = fetchFromGitHub {
     owner = "BeamMP";
     repo = "BeamMP-Server";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-XE87QHU8lmCzgZt/Ointt5SFL6TAxFVaN3ESnCBRe7Q=";
+    hash = "sha256-ESbShbsPqyNPsZmeUKE+GJZlQLwrlvIQOjLHumxR/Lk=";
   };
 
   strictDeps = true;

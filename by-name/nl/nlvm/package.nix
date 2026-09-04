@@ -32,7 +32,6 @@ stdenv.mkDerivation rec {
   };
 
   patches = [
-    ./0001-Fix-WebAssembly-LLVM-IR-generation-segfault.patch
     ./0002-Fix-genMain-nil-sym-dereference.patch
   ];
 

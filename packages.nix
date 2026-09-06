@@ -255,7 +255,7 @@ byName
       ++ pkgs.lib.optional pkgs.stdenv.hostPlatform.isDarwin pkgs.desktopToDarwinBundle;
   });
 
-  vscode = pkgs.callPackage ./pkgs/vscode/vscode.nix {
+  vscode1135 = pkgs.callPackage ./pkgs/vscode/vscode.nix {
     buildVscode = pkgs.callPackage ./pkgs/vscode/generic.nix { };
   };
 

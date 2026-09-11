@@ -137,7 +137,7 @@
    if (settings.hideEndScreenCards) rules.push('.ytp-fullscreen-grid, .ytp-ce-element { display: none !important; }');
    if (settings.hideShorts) rules.push('a#endpoint[title="Shorts"], ytd-shorts, grid-shelf-view-model, ytd-rich-shelf-renderer { display: none !important; }')
  
-@@ -65,22 +124,55 @@
+@@ -65,22 +124,54 @@
    }
  
    styleElement.textContent = rules.join('\n');
@@ -190,7 +190,6 @@
 +// YouTube SPA events (document fires before window). Back often skips these.
 +document.addEventListener('yt-navigate-start', onNavigate);
 +document.addEventListener('yt-navigate-finish', onNavigate);
-+document.addEventListener('yt-page-data-fetched', onNavigate);
 +
 +// Browser Back/Forward: yt-navigate-start often does not fire (known YT quirk).
 +window.addEventListener('popstate', onNavigate);

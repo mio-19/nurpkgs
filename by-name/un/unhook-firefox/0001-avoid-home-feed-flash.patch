@@ -18,16 +18,12 @@
  let styleElement = null;
 +let earlyHideElement = null;
 +let redirecting = false;
++let runId = 0;
  
 -function applyStyles(settings) {
 -  const path = window.location.pathname;
 +function isHomeOrTrending(path = window.location.pathname) {
 +  return path === '/' || path === '/feed/trending';
-+}
-+
-+function styleParent() {
-+  // document.head may be missing at document_start
-+  return document.head || document.documentElement;
 +}
  
 -  // Redirect homepage to subscriptions
@@ -35,6 +31,11 @@
 -    if (path === '/' || path === '/feed/trending') {
 -      window.location.replace('https://www.youtube.com/feed/subscriptions');
 -      return;
++function styleParent() {
++  // document.head may be missing at document_start
++  return document.head || document.documentElement;
++}
++
 +function setEarlyHide(enabled) {
 +  if (enabled) {
 +    document.documentElement.classList.add('unhook-hide-home');
@@ -67,8 +68,7 @@
 +  return true;
 +}
 +
-+// Sync only: hide home/trending until live storage decides.
-+// Never redirect here — cached guesses can be stale after toggling settings.
++// Sync only: hide home/trending until live storage decides. Never redirect here.
 +function prepareHomePath() {
 +  if (isHomeOrTrending()) {
 +    setEarlyHide(true);
@@ -106,7 +106,7 @@
    if (settings.hideEndScreenCards) rules.push('.ytp-fullscreen-grid, .ytp-ce-element { display: none !important; }');
    if (settings.hideShorts) rules.push('a#endpoint[title="Shorts"], ytd-shorts, grid-shelf-view-model, ytd-rich-shelf-renderer { display: none !important; }')
  
-@@ -65,15 +115,34 @@
+@@ -65,15 +115,30 @@
    }
  
    styleElement.textContent = rules.join('\n');
@@ -117,26 +117,21 @@
 +  } else {
 +    setEarlyHide(false);
 +  }
-+}
-+
-+let settingsPromise = null;
-+
-+function getSettings() {
-+  if (!settingsPromise) {
-+    settingsPromise = browserAPI.storage.local.get(null).finally(() => {
-+      settingsPromise = null;
-+    });
-+  }
-+  return settingsPromise;
  }
  
  async function main() {
 -  // Chrome/Firefox compatibility
--  const settings = await browserAPI.storage.local.get(null);
++  const id = ++runId;
 +  prepareHomePath();
-+  const settings = await getSettings();
+   const settings = await browserAPI.storage.local.get(null);
++  if (id !== runId) {
++    return;
++  }
 +  // Path may have changed while storage was in flight (SPA).
 +  prepareHomePath();
++  if (id !== runId) {
++    return;
++  }
    applyStyles(settings);
  }
  
@@ -144,14 +139,18 @@
  main();
  
  // Listen for storage changes and reapply all settings
-@@ -81,6 +150,12 @@
+@@ -81,6 +146,16 @@
    main();
  });
  
 -document.body.addEventListener("yt-navigate-start", function(event) {
 +// document.body is null at document_start; YouTube SPA events bubble on document.
 +function onNavigate() {
-+  redirecting = false;
++  // Only clear the redirect guard after leaving home/trending so overlapping
++  // navigate events cannot issue a second replace() mid-redirect.
++  if (!isHomeOrTrending()) {
++    redirecting = false;
++  }
 +  prepareHomePath();
    main();
 -});

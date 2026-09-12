@@ -33,6 +33,11 @@ stdenvNoCC.mkDerivation {
     hash = "sha256-PnWoHjM+NzX/8IwnXwDw+g3W9TX6gKCbAVvP6PsfegY=";
   };
 
+  fontMono = fetchurl {
+    url = "https://github.com/TakWolf/fusion-pixel-font/releases/download/${fontVersion}/fusion-pixel-font-10px-monospaced-ttf-v${fontVersion}.zip";
+    hash = "sha256-QZAwMDKYfbp8H9/NZYbyzhkWK/ruuYsmRgVvQGa2axI=";
+  };
+
   dontBuild = true;
 
   installPhase = ''
@@ -117,7 +122,10 @@ stdenvNoCC.mkDerivation {
       --replace-fail '@IMAGES@' "$imagesDir/"
 
     mkdir -p "$out/share/fonts/truetype"
+    # Prop for UI; Mono for terminals (kgx/Konsole). Family names are
+    # "Fusion Pixel 10px Prop latin" / "Fusion Pixel 10px Mono latin".
     unzip -jo "$font" "fusion-pixel-10px-proportional-latin.ttf" -d "$out/share/fonts/truetype"
+    unzip -jo "$fontMono" "fusion-pixel-10px-monospaced-latin.ttf" -d "$out/share/fonts/truetype"
 
     runHook postInstall
   '';

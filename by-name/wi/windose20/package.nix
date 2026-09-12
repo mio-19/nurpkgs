@@ -38,6 +38,12 @@ stdenvNoCC.mkDerivation {
     hash = "sha256-QZAwMDKYfbp8H9/NZYbyzhkWK/ruuYsmRgVvQGa2axI=";
   };
 
+  # Desktop wallpaper from the rice README (missing from ArThirtyFour fork we package).
+  wallpaper = fetchurl {
+    url = "https://raw.githubusercontent.com/Ar4ikTrirtyFour/windose20/main/pngs/bg.png";
+    hash = "sha256-OJyOQAh6S+UoHI7J3ZfavYHu0zMk9VrFphxyXP1DGEw=";
+  };
+
   dontBuild = true;
 
   installPhase = ''
@@ -45,6 +51,7 @@ stdenvNoCC.mkDerivation {
 
     mkdir -p "$out/share/windose20/pngs"
     cp -r "$src/pngs/"* "$out/share/windose20/pngs/"
+    cp "$wallpaper" "$out/share/windose20/pngs/bg.png"
 
     mkdir -p "$out/share/windose20/configs"
     cp "$src/configs/config.conf" "$out/share/windose20/configs/neofetch.conf"

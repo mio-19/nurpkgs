@@ -19,13 +19,13 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   };
 
   patches = [
-    # broken? # ./0001-avoid-home-feed-flash.patch
+    # broken? ./0001-avoid-home-feed-flash.patch
   ];
 
   # Network-level home/trending redirect (upstream #8 approach, sync in-memory).
-  #postPatch = ''
-  #  cp ${./background.js} background.js
-  #'';
+  postPatch = ''
+    cp ${./background.js} background.js
+  '';
 
   nativeBuildInputs = [ zip ];
 

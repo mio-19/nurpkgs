@@ -23,9 +23,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   ];
 
   # Network-level home/trending redirect (upstream #8 approach, sync in-memory).
-  postPatch = ''
-    cp ${./background.js} background.js
-  '';
+  #postPatch = ''
+  #  cp ${./background.js} background.js
+  #'';
 
   nativeBuildInputs = [ zip ];
 

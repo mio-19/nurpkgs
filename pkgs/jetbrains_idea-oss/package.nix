@@ -156,7 +156,7 @@ let
           chmod +w compose-compiler-plugin.jar
           mkdir compose-patch
           cd compose-patch
-          unzip -q ../compose-compiler-plugin.jar
+          jar xf ../compose-compiler-plugin.jar
           
           # Binary patch to redirect getInlineClassUnderlyingType calls
           find . -name "*.class" -type f -exec sed -i 's/org\/jetbrains\/kotlin\/ir\/util\/InlineClassesKt/androidx\/compose\/compiler\/plugins\/kotlin\/Fix/g' {} +

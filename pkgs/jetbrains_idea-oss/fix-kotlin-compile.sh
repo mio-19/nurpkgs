@@ -12,6 +12,8 @@ find platform/jewel -type f -name '*.iml' -exec sed -i \
   -e 's/arg="25"/arg="24"/g' \
   -e 's/JVM 25/JVM 24/g' \
   -e 's/JVM \[25\]/JVM [24]/g' \
+  -e 's/name="languageVersion" value="[0-9.]*"/name="languageVersion" value="1.9"/g' \
+  -e 's/name="apiVersion" value="[0-9.]*"/name="apiVersion" value="1.9"/g' \
   {} +
 
 # Kotlin 2.2.20 compiler crash on 0.toUShort().

@@ -3,7 +3,6 @@
   stdenvNoCC,
   fetchurl,
   unzip,
-  python3,
   callPackage,
   jetbrains,
   kotlin,
@@ -147,18 +146,7 @@ let
             platform/build-scripts/src/org/jetbrains/intellij/build/kotlin/KotlinCompilerDependencyDownloader.kt \
             --replace-fail '${kotlinNixpkgs}' '${kotlinDist}'
 
-          export COMPOSE_COMPILER_PLUGIN_ORIG="$repo/.m2/repository/org/jetbrains/kotlin/compose-compiler-plugin-for-ide/${kotlinDistVersion}/compose-compiler-plugin-for-ide-${kotlinDistVersion}.jar"
-          ${python3}/bin/python3 -c '
-import zipfile, re, sys
-with zipfile.ZipFile(sys.argv[1], "r") as zin, zipfile.ZipFile(sys.argv[2], "w") as zout:
-    for item in zin.infolist():
-        data = zin.read(item.filename)
-        if item.filename == "androidx/compose/compiler/plugins/kotlin/lower/ComposerParamTransformer.class":
-            data = re.sub(b"\x13..\x3A\x08\xBB..\x59\x19\x08\xB7..\xBF", b"\x00" * 15, data, flags=re.DOTALL)
-            data = re.sub(b"\x03\x3E\xBB..\x59\xB7..\x13..\xB6..\x2B\xB6..\x13..\xB6..\xB6..\x4E\xBB..\x59\x2D\xB7..\xBF", b"\x00" * 38, data, flags=re.DOTALL)
-        zout.writestr(item, data)
-          ' "$COMPOSE_COMPILER_PLUGIN_ORIG" "$PWD/patched_compose.jar"
-          export COMPOSE_COMPILER_PLUGIN="$PWD/patched_compose.jar"
+          export COMPOSE_COMPILER_PLUGIN="$repo/.m2/repository/org/jetbrains/kotlin/compose-compiler-plugin-for-ide/${kotlinDistVersion}/compose-compiler-plugin-for-ide-${kotlinDistVersion}.jar"
           export KOTLIN_IDE_NEW=${escapeShellArg kotlinDistVersion}
           ${bumpKotlinIdeArtifacts}
           # source (not bash) so stdenv's substituteInPlace is in scope

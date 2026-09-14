@@ -265,6 +265,8 @@ EOF
                                   changed = true;
                               }
                           }
+                      } else if (cn.name.equals("androidx/compose/compiler/plugins/kotlin/Fix")) {
+                          // Do not patch calls inside the Fix adapter itself!
                       } else {
                           for(MethodNode mn : cn.methods) {
                               for(AbstractInsnNode insn : mn.instructions) {

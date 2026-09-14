@@ -147,7 +147,7 @@ let
             platform/build-scripts/src/org/jetbrains/intellij/build/kotlin/KotlinCompilerDependencyDownloader.kt \
             --replace-fail '${kotlinNixpkgs}' '${kotlinDist}'
 
-          export COMPOSE_COMPILER_PLUGIN="$repo/.m2/repository/org/jetbrains/kotlin/compose-compiler-plugin-for-ide/${kotlinDistVersion}/compose-compiler-plugin-for-ide-${kotlinDistVersion}.jar"
+          export COMPOSE_COMPILER_PLUGIN="${kotlinDist}/lib/compose-compiler-plugin.jar"
           export KOTLIN_IDE_NEW=${escapeShellArg kotlinDistVersion}
           ${bumpKotlinIdeArtifacts}
           # source (not bash) so stdenv's substituteInPlace is in scope

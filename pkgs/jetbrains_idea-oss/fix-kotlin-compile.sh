@@ -35,8 +35,9 @@ substituteInPlace platform/util/multiplatform/src/com/intellij/util/JavaVersionS
   'internal fun currentJavaVersionPlatformSpecific(): JavaVersion = linkToActual()' \
   'internal fun currentJavaVersionPlatformSpecific(): JavaVersion = DefaultJavaVersion'
 
-# Remove $KOTLIN_COMPOSE_COMPILER_PLUGIN$ from iml files because JPS might be auto-injecting it, causing it to run twice and crash!
-find . -type f -name '*.iml' -exec sed -i '/\$KOTLIN_COMPOSE_COMPILER_PLUGIN\$/d' {} +
+# Point iml files at the store path of compose-compiler-plugin-for-ide.
+find . -type f -name '*.iml' -exec sed -i \
+  "s|\\\$KOTLIN_COMPOSE_COMPILER_PLUGIN\\\$|${COMPOSE_COMPILER_PLUGIN}|g" {} +
 
 # Kotlin compiler crash on Int.MAX_VALUE.toUInt().
 find platform/eel-impl-base -name EelReadFileImpl.kt -exec sed -i \

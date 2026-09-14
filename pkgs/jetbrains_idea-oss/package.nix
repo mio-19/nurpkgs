@@ -151,7 +151,38 @@ let
             platform/build-scripts/src/org/jetbrains/intellij/build/kotlin/KotlinCompilerDependencyDownloader.kt \
             --replace-fail '${kotlinNixpkgs}' '${kotlinDist}'
 
-          export COMPOSE_COMPILER_PLUGIN="${composeCompilerPlugin}"
+          # Patch compose-compiler-plugin 2.4.0 to fix ABI incompatibility with Kotlin 2.4.20-ij262-52
+          cp ${composeCompilerPlugin} compose-compiler-plugin.jar
+          chmod +w compose-compiler-plugin.jar
+          mkdir compose-patch
+          cd compose-patch
+          unzip -q ../compose-compiler-plugin.jar
+          
+          # Binary patch to redirect getInlineClassUnderlyingType calls
+          find . -name "*.class" -type f -exec sed -i 's/org\/jetbrains\/kotlin\/ir\/util\/InlineClassesKt/androidx\/compose\/compiler\/plugins\/kotlin\/Fix/g' {} +
+          
+          # Create Fix.java
+          cat << 'EOF' > androidx/compose/compiler/plugins/kotlin/Fix.java
+          package androidx.compose.compiler.plugins.kotlin;
+          import org.jetbrains.kotlin.ir.declarations.IrClass;
+          import org.jetbrains.kotlin.ir.types.IrSimpleType;
+          import org.jetbrains.kotlin.ir.util.InlineClassesKt;
+          public class Fix {
+              public static IrSimpleType getInlineClassUnderlyingType(IrClass c) {
+                  return InlineClassesKt.getInlineClassUnderlyingType(c, false);
+              }
+          }
+EOF
+          
+          # Compile Fix.java
+          javac -cp ${kotlinDist}/lib/kotlin-compiler.jar androidx/compose/compiler/plugins/kotlin/Fix.java
+          rm androidx/compose/compiler/plugins/kotlin/Fix.java
+          
+          # Repack JAR
+          jar cMf ../compose-compiler-plugin.jar .
+          cd ..
+          
+          export COMPOSE_COMPILER_PLUGIN="$PWD/compose-compiler-plugin.jar"
           export KOTLIN_IDE_NEW=${escapeShellArg kotlinDistVersion}
           ${bumpKotlinIdeArtifacts}
           # source (not bash) so stdenv's substituteInPlace is in scope

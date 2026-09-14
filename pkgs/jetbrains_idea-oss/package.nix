@@ -24,6 +24,11 @@ let
   kotlinDistVersion = "2.4.20-ij262-52";
   kotlinIdeOldVersion = "2.3.20";
 
+  composeCompilerPluginForIde34 = fetchurl {
+    url = "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/kotlin/compose-compiler-plugin-for-ide/2.4.20-ij262-34/compose-compiler-plugin-for-ide-2.4.20-ij262-34.jar";
+    hash = "sha256-HSaMO2m2BEI9y7tA0uW21TK2lPRIxALbtM22l1k8Iqk=";
+  };
+
   kotlinDist = stdenvNoCC.mkDerivation {
     pname = "kotlin-dist-for-ide";
     version = kotlinDistVersion;
@@ -145,7 +150,7 @@ let
             platform/build-scripts/src/org/jetbrains/intellij/build/kotlin/KotlinCompilerDependencyDownloader.kt \
             --replace-fail '${kotlinNixpkgs}' '${kotlinDist}'
 
-          export COMPOSE_COMPILER_PLUGIN="$repo/.m2/repository/org/jetbrains/kotlin/compose-compiler-plugin-for-ide/${kotlinDistVersion}/compose-compiler-plugin-for-ide-${kotlinDistVersion}.jar"
+          export COMPOSE_COMPILER_PLUGIN="${composeCompilerPluginForIde34}"
           export KOTLIN_IDE_NEW=${escapeShellArg kotlinDistVersion}
           ${bumpKotlinIdeArtifacts}
           # source (not bash) so stdenv's substituteInPlace is in scope
@@ -180,7 +185,7 @@ let
 
         buildPhase = ''
           runHook preBuild
-          java -Dorg.jetbrains.jps.incremental.dependencies.resolution.sha256.checksum.ignored=true -Djps.kotlin.home=${kotlinDist} -Dkotlin.compiler.execution.strategy=in-process "@java_argfile"
+          java -Dorg.jetbrains.jps.incremental.dependencies.resolution.sha256.checksum.ignored=true -Djps.kotlin.home=${kotlinDist} "@java_argfile"
           runHook postBuild
         '';
       });

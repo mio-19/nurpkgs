@@ -189,11 +189,16 @@ EOF
               public static String getName(IrFile f) {
                   return IrDeclarationsKt.getName(f);
               }
+              public static void copyAttributes_default(org.jetbrains.kotlin.ir.IrElement a, org.jetbrains.kotlin.ir.IrElement b, boolean c, int d, java.lang.Object e) {
+                  if ((d & 2) != 0) { c = false; }
+                  IrDeclarationsKt.copyAttributes(a, b, c);
+              }
           }
 EOF
           
           # Compile Fix.java and FixIrDecla__.java
           javac -cp ${kotlinDist}/lib/kotlin-compiler.jar androidx/compose/compiler/plugins/kotlin/Fix.java androidx/compose/compiler/plugins/kotlin/FixIrDecla__.java
+          sed -i 's/copyAttributes_default/copyAttributes$default/g' androidx/compose/compiler/plugins/kotlin/FixIrDecla__.class
           rm androidx/compose/compiler/plugins/kotlin/Fix.java androidx/compose/compiler/plugins/kotlin/FixIrDecla__.java
           
           # Repack JAR

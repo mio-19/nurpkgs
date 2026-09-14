@@ -24,6 +24,11 @@ let
   kotlinDistVersion = "2.4.20-ij262-52";
   kotlinIdeOldVersion = "2.3.20";
 
+  composeCompilerPlugin = fetchurl {
+    url = "https://repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-compose-compiler-plugin/2.4.0/kotlin-compose-compiler-plugin-2.4.0.jar";
+    hash = "sha256-9bN4dvo6XS0n7/L+0xidsOzh9Ufz6cY1tJ+WnmMdFcE=";
+  };
+
 
   kotlinDist = stdenvNoCC.mkDerivation {
     pname = "kotlin-dist-for-ide";
@@ -146,7 +151,7 @@ let
             platform/build-scripts/src/org/jetbrains/intellij/build/kotlin/KotlinCompilerDependencyDownloader.kt \
             --replace-fail '${kotlinNixpkgs}' '${kotlinDist}'
 
-          export COMPOSE_COMPILER_PLUGIN="$repo/.m2/repository/org/jetbrains/kotlin/compose-compiler-plugin-for-ide/${kotlinDistVersion}/compose-compiler-plugin-for-ide-${kotlinDistVersion}.jar"
+          export COMPOSE_COMPILER_PLUGIN="${composeCompilerPlugin}"
           export KOTLIN_IDE_NEW=${escapeShellArg kotlinDistVersion}
           ${bumpKotlinIdeArtifacts}
           # source (not bash) so stdenv's substituteInPlace is in scope

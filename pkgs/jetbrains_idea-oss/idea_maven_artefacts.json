@@ -4870,9 +4870,9 @@
         "path": "org/jetbrains/kotlin/kotlin-dataframe-compiler-plugin-for-ide/2.4.20-ij262-52/kotlin-dataframe-compiler-plugin-for-ide-2.4.20-ij262-52.jar"
     },
     {
-        "url": "org/jetbrains/kotlin/kotlin-dist-for-ide/2.3.20/kotlin-dist-for-ide-2.3.20.jar",
-        "hash": "74eabb16163c4575b5dc4b2038268026f389849200f466870714342ccc3792d3",
-        "path": "org/jetbrains/kotlin/kotlin-dist-for-ide/2.3.20/kotlin-dist-for-ide-2.3.20.jar"
+        "url": "org/jetbrains/kotlin/kotlin-dist-for-ide/2.4.20-ij262-52/kotlin-dist-for-ide-2.4.20-ij262-52.jar",
+        "hash": "1d1y29gpgfq0irshba2rb860v5bb2fxfb205wzkj9h1zczh38q8p",
+        "path": "org/jetbrains/kotlin/kotlin-dist-for-ide/2.4.20-ij262-52/kotlin-dist-for-ide-2.4.20-ij262-52.jar"
     },
     {
         "url": "org/jetbrains/kotlin/kotlin-gradle-plugin-idea-proto/1.9.20-dev-8162/kotlin-gradle-plugin-idea-proto-1.9.20-dev-8162.jar",
@@ -4895,24 +4895,24 @@
         "path": "org/jetbrains/kotlin/kotlin-jps-common-for-ide/2.4.20-ij262-52/kotlin-jps-common-for-ide-2.4.20-ij262-52.jar"
     },
     {
-        "url": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.2.0/kotlin-jps-plugin-classpath-2.2.0.jar",
-        "hash": "61002bb21cc3c512bd7c9d532f3932e33e019e58d554bc4d3c208ebec5c11284",
-        "path": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.2.0/kotlin-jps-plugin-classpath-2.2.0.jar"
-    },
-    {
-        "url": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.3.20/kotlin-jps-plugin-classpath-2.3.20.jar",
-        "hash": "0d6103ec6a0eb9c36e856c04d3478099ab86437dd5f19a22a69d9e80b4cff2cb",
-        "path": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.3.20/kotlin-jps-plugin-classpath-2.3.20.jar"
-    },
-    {
         "url": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.4.20-ij262-52/kotlin-jps-plugin-classpath-2.4.20-ij262-52.jar",
-        "hash": "ec89148981cb31e4a33712216db09eabc48c82acf0c01933d52cb8b23d6fa6f9",
+        "hash": "1yd6dwyv5f1cslrikh7hmj18ri5bksq6s88j6yiy8cfbh64i92gc",
         "path": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.4.20-ij262-52/kotlin-jps-plugin-classpath-2.4.20-ij262-52.jar"
     },
     {
-        "url": "org/jetbrains/kotlin/kotlin-jps-plugin-tests-for-ide/2.3.20/kotlin-jps-plugin-tests-for-ide-2.3.20.jar",
-        "hash": "fb351eeb8e11fae3096c43241611f686e8d1940d0f3b6ba6befe71ef908426ce",
-        "path": "org/jetbrains/kotlin/kotlin-jps-plugin-tests-for-ide/2.3.20/kotlin-jps-plugin-tests-for-ide-2.3.20.jar"
+        "url": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.4.20-ij262-52/kotlin-jps-plugin-classpath-2.4.20-ij262-52.jar",
+        "hash": "1yd6dwyv5f1cslrikh7hmj18ri5bksq6s88j6yiy8cfbh64i92gc",
+        "path": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.4.20-ij262-52/kotlin-jps-plugin-classpath-2.4.20-ij262-52.jar"
+    },
+    {
+        "url": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.4.20-ij262-52/kotlin-jps-plugin-classpath-2.4.20-ij262-52.jar",
+        "hash": "1yd6dwyv5f1cslrikh7hmj18ri5bksq6s88j6yiy8cfbh64i92gc",
+        "path": "org/jetbrains/kotlin/kotlin-jps-plugin-classpath/2.4.20-ij262-52/kotlin-jps-plugin-classpath-2.4.20-ij262-52.jar"
+    },
+    {
+        "url": "org/jetbrains/kotlin/kotlin-jps-plugin-tests-for-ide/2.4.20-ij262-52/kotlin-jps-plugin-tests-for-ide-2.4.20-ij262-52.jar",
+        "hash": "0y8r8gq0k72qzdzgvc3y61m5wijsvi4b890a6rqdvry1q50pnhyy",
+        "path": "org/jetbrains/kotlin/kotlin-jps-plugin-tests-for-ide/2.4.20-ij262-52/kotlin-jps-plugin-tests-for-ide-2.4.20-ij262-52.jar"
     },
     {
         "url": "org/jetbrains/kotlin/kotlin-metadata-jvm/2.2.0/kotlin-metadata-jvm-2.2.0.jar",

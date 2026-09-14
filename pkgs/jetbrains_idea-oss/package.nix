@@ -151,17 +151,12 @@ let
             platform/build-scripts/src/org/jetbrains/intellij/build/kotlin/KotlinCompilerDependencyDownloader.kt \
             --replace-fail '${kotlinNixpkgs}' '${kotlinDist}'
 
-          # Patch compose-compiler-plugin 2.4.0 to fix ABI incompatibility with Kotlin 2.4.20-ij262-52
+          # Patch compose-compiler-plugin 2.4.0 to fix ABI incompatibilities with Kotlin 2.4.20-ij262-52
           cp ${composeCompilerPlugin} compose-compiler-plugin.jar
           chmod +w compose-compiler-plugin.jar
           mkdir compose-patch
           cd compose-patch
           jar xf ../compose-compiler-plugin.jar
-          
-          # Binary patch to redirect getInlineClassUnderlyingType calls
-          find . -name "*.class" -type f -exec sed -i 's/org\/jetbrains\/kotlin\/ir\/util\/InlineClassesKt/androidx\/compose\/compiler\/plugins\/kotlin\/Fix/g' {} +
-          # Binary patch to redirect getInlineClassRepresentation calls
-          find . -name "*.class" -type f -exec sed -i 's/org\/jetbrains\/kotlin\/ir\/declarations\/IrDeclarationsKt/androidx\/compose\/compiler\/plugins\/kotlin\/FixIrDecla__/g' {} +
           
           # Create Fix.java
           cat << 'EOF' > androidx/compose/compiler/plugins/kotlin/Fix.java
@@ -182,6 +177,17 @@ EOF
           import org.jetbrains.kotlin.ir.declarations.IrFile;
           import org.jetbrains.kotlin.descriptors.InlineClassRepresentation;
           import org.jetbrains.kotlin.ir.declarations.IrDeclarationsKt;
+          import org.jetbrains.kotlin.ir.declarations.IrFactory;
+          import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin;
+          import org.jetbrains.kotlin.name.Name;
+          import org.jetbrains.kotlin.descriptors.DescriptorVisibility;
+          import org.jetbrains.kotlin.ir.types.IrType;
+          import org.jetbrains.kotlin.descriptors.Modality;
+          import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol;
+          import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedContainerSource;
+          import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction;
+          import org.jetbrains.kotlin.ir.symbols.IrClassSymbol;
+          
           public class FixIrDecla__ {
               public static InlineClassRepresentation getInlineClassRepresentation(IrClass c) {
                   return IrDeclarationsKt.inlineClassRepresentation(c, false);
@@ -193,13 +199,107 @@ EOF
                   if ((d & 2) != 0) { c = false; }
                   IrDeclarationsKt.copyAttributes(a, b, c);
               }
+              public static IrSimpleFunction createSimpleFunction_default(
+                  IrFactory factory, int startOffset, int endOffset, IrDeclarationOrigin origin, Name name,
+                  DescriptorVisibility visibility, boolean isInline, boolean isExpect, IrType returnType,
+                  Modality modality, IrSimpleFunctionSymbol symbol, boolean isTailrec, boolean isSuspend,
+                  boolean isOperator, boolean isInfix, boolean isExternal, DeserializedContainerSource containerSource,
+                  boolean isFakeOverride, int old_bitmask, Object marker
+              ) {
+                  int new_bitmask = old_bitmask | (1 << 17);
+                  return createSimpleFunction_new(
+                      factory, startOffset, endOffset, origin, name, visibility, isInline, isExpect, returnType,
+                      modality, symbol, isTailrec, isSuspend, isOperator, isInfix, isExternal, containerSource,
+                      isFakeOverride, null, new_bitmask, marker
+                  );
+              }
+              public static IrSimpleFunction createSimpleFunction_new(
+                  IrFactory factory, int startOffset, int endOffset, IrDeclarationOrigin origin, Name name,
+                  DescriptorVisibility visibility, boolean isInline, boolean isExpect, IrType returnType,
+                  Modality modality, IrSimpleFunctionSymbol symbol, boolean isTailrec, boolean isSuspend,
+                  boolean isOperator, boolean isInfix, boolean isExternal, DeserializedContainerSource containerSource,
+                  boolean isFakeOverride, IrClassSymbol irClassSymbol, int new_bitmask, Object marker
+              ) {
+                  return null;
+              }
           }
 EOF
-          
-          # Compile Fix.java and FixIrDecla__.java
+          # Compile adapters
           javac -cp ${kotlinDist}/lib/kotlin-compiler.jar androidx/compose/compiler/plugins/kotlin/Fix.java androidx/compose/compiler/plugins/kotlin/FixIrDecla__.java
-          sed -i 's/copyAttributes_default/copyAttributes$default/g' androidx/compose/compiler/plugins/kotlin/FixIrDecla__.class
           rm androidx/compose/compiler/plugins/kotlin/Fix.java androidx/compose/compiler/plugins/kotlin/FixIrDecla__.java
+          
+          # Create and compile robust ASM Patcher
+          cat << 'EOF' > Patch.java
+          import org.jetbrains.org.objectweb.asm.*;
+          import org.jetbrains.org.objectweb.asm.tree.*;
+          import java.io.*;
+          public class Patch {
+              public static void main(String[] args) throws Exception {
+                  for(String arg : args) {
+                      File f = new File(arg);
+                      if (!f.isFile() || !arg.endsWith(".class")) continue;
+                      byte[] data = new byte[(int)f.length()];
+                      new FileInputStream(f).read(data);
+                      ClassReader cr = new ClassReader(data);
+                      ClassNode cn = new ClassNode();
+                      cr.accept(cn, 0);
+                      boolean changed = false;
+                      if (cn.name.equals("androidx/compose/compiler/plugins/kotlin/FixIrDecla__")) {
+                          for(MethodNode mn : cn.methods) {
+                              if (mn.name.equals("createSimpleFunction_default")) {
+                                  mn.name = "createSimpleFunction$default";
+                                  changed = true;
+                                  for(AbstractInsnNode insn : mn.instructions) {
+                                      if (insn instanceof MethodInsnNode) {
+                                          MethodInsnNode min = (MethodInsnNode)insn;
+                                          if (min.name.equals("createSimpleFunction_new")) {
+                                              min.name = "createSimpleFunction$default";
+                                              min.owner = "org/jetbrains/kotlin/ir/declarations/IrFactory";
+                                              min.desc = "(Lorg/jetbrains/kotlin/ir/declarations/IrFactory;IILorg/jetbrains/kotlin/ir/declarations/IrDeclarationOrigin;Lorg/jetbrains/kotlin/name/Name;Lorg/jetbrains/kotlin/descriptors/DescriptorVisibility;ZZLorg/jetbrains/kotlin/ir/types/IrType;Lorg/jetbrains/kotlin/descriptors/Modality;Lorg/jetbrains/kotlin/ir/symbols/IrSimpleFunctionSymbol;ZZZZZLorg/jetbrains/kotlin/serialization/deserialization/descriptors/DeserializedContainerSource;ZLorg/jetbrains/kotlin/ir/symbols/IrClassSymbol;ILjava/lang/Object;)Lorg/jetbrains/kotlin/ir/declarations/IrSimpleFunction;";
+                                          }
+                                      }
+                                  }
+                              }
+                              if (mn.name.equals("copyAttributes_default")) {
+                                  mn.name = "copyAttributes$default";
+                                  changed = true;
+                              }
+                          }
+                      } else {
+                          for(MethodNode mn : cn.methods) {
+                              for(AbstractInsnNode insn : mn.instructions) {
+                                  if (insn instanceof MethodInsnNode) {
+                                      MethodInsnNode min = (MethodInsnNode)insn;
+                                      if (min.owner.equals("org/jetbrains/kotlin/ir/util/InlineClassesKt")) {
+                                          min.owner = "androidx/compose/compiler/plugins/kotlin/Fix";
+                                          changed = true;
+                                      }
+                                      if (min.owner.equals("org/jetbrains/kotlin/ir/declarations/IrDeclarationsKt")) {
+                                          min.owner = "androidx/compose/compiler/plugins/kotlin/FixIrDecla__";
+                                          changed = true;
+                                      }
+                                      if (min.owner.equals("org/jetbrains/kotlin/ir/declarations/IrFactory") && min.name.equals("createSimpleFunction$default")) {
+                                          min.owner = "androidx/compose/compiler/plugins/kotlin/FixIrDecla__";
+                                          changed = true;
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                      if (changed) {
+                          ClassWriter cw = new ClassWriter(0);
+                          cn.accept(cw);
+                          FileOutputStream fos = new FileOutputStream(arg);
+                          fos.write(cw.toByteArray());
+                          fos.close();
+                      }
+                  }
+              }
+          }
+EOF
+          javac -cp ${kotlinDist}/lib/kotlin-compiler.jar Patch.java
+          find . -name "*.class" -exec java -cp ${kotlinDist}/lib/kotlin-compiler.jar:. Patch {} +
+          rm Patch.java Patch.class
           
           # Repack JAR
           jar cMf ../compose-compiler-plugin.jar .

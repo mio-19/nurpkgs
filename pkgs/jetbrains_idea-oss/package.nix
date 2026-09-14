@@ -18,12 +18,12 @@ let
     hasSuffix
     ;
 
-  version = "2026.2.1";
-  buildNumber = "262.9437.185";
+  version = "2026.2.2";
+  buildNumber = "262.10315.125";
 
   # compose-compiler-plugin-for-ide 2.4.20-ij262-34 needs IR APIs from this
   # Kotlin-for-IDE snapshot (e.g. IrDeclarationsKt.isSingleFieldValueClass).
-  kotlinDistVersion = "2.4.20-ij262-34";
+  kotlinDistVersion = "2.4.20-ij262-52";
   kotlinIdeOldVersion = "2.3.20";
 
   kotlinDist = stdenvNoCC.mkDerivation {
@@ -32,7 +32,7 @@ let
 
     src = fetchurl {
       url = "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/kotlin/kotlin-dist-for-ide/${kotlinDistVersion}/kotlin-dist-for-ide-${kotlinDistVersion}.jar";
-      hash = "sha256-gzTs22ps2Em9Sp0l85EMjuFrLz5AuxXCxXB5JQMcROI=";
+      hash = "sha256-F2E04Gc/wCTn5wWI5boTa5UNDFpZqAV1jgC7d18SPrQ=";
     };
 
     nativeBuildInputs = [ unzip ];
@@ -75,6 +75,9 @@ let
   ];
 
   bumpKotlinIdeArtifacts = ''
+    find . -type f -name '*.xml' -exec sed -i \
+      -e "s|2.4.20-ij262-52|${kotlinDistVersion}|g" \
+      {} +
     for artefact in kotlin-dist-for-ide kotlin-jps-plugin-classpath kotlin-jps-plugin-tests-for-ide; do
       find . -type f -name '*.xml' -exec sed -i \
         -e "s|''${artefact}:${kotlinIdeOldVersion}|''${artefact}:${kotlinDistVersion}|g" \
@@ -106,15 +109,16 @@ let
     (mkJetBrainsSource {
       inherit version buildNumber;
       buildType = "idea";
-      ideaHash = "sha256-iwT2QqmLtsbNyQgoBY26pfxXVEzjSnQ99Ort63a9GXo=";
-      androidHash = "sha256-poTjTGR10Ne8VKDWApgu+XcCFMLiAacSFYpIp1tsgbk=";
+      ideaHash = "sha256-xu6T4+2D010fpb2N3Z07RW0lZeIfbD5Lh2FHv/biGQI=";
+      androidHash = "sha256-29qwKTbhFrMTDzcCikzqsc6SEKmKXTwNaf8aSMt/FPg=";
       jpsHash = "sha256-nxjoLBpiHYzeYwgjbCSSjTFQTFOtBJTqz1VkmPzXijs=";
       restarterHash = "sha256-acCmC58URd6p9uKZrm0qWgdZkqu9yqCs23v8qgxV2Ag=";
       mvnDeps = ./idea_maven_artefacts.json;
       kotlin-jps-plugin = {
         version = kotlinDistVersion;
-        hash = "sha256-o5R0gSzaSOkK4omBxNf9AsnD6bOsASS416fbqqOAPmE=";
+        hash = "sha256-7IkUiYHLMeSjNxIhbbCeq8SMgqzwwBkz1Sy4sj1vpvk=";
       };
+
       repositories = [
         "repo1.maven.org/maven2"
         "packages.jetbrains.team/maven/p/ij/intellij-dependencies"
@@ -161,6 +165,7 @@ let
 
           export JPS_BOOTSTRAP_COMMUNITY_HOME="$PWD"
           jps-bootstrap \
+            -Dorg.jetbrains.jps.incremental.dependencies.resolution.sha256.checksum.ignored=true \
             -Dbuild.number=${buildNumber} \
             -Djps.kotlin.home=${kotlinDist} \
             -Dintellij.build.target.os=linux \
@@ -177,7 +182,7 @@ let
 
         buildPhase = ''
           runHook preBuild
-          java -Djps.kotlin.home=${kotlinDist} "@java_argfile"
+          java -Dorg.jetbrains.jps.incremental.dependencies.resolution.sha256.checksum.ignored=true -Djps.kotlin.home=${kotlinDist} "@java_argfile"
           runHook postBuild
         '';
       });

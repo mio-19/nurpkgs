@@ -7,15 +7,17 @@ set -euo pipefail
 : "${COMPOSE_COMPILER_PLUGIN:?COMPOSE_COMPILER_PLUGIN is required}"
 
 # Nixpkgs Kotlin 2.2.20 does not support JVM 25.
-find . -type f -name '*.iml' -exec sed -i \
-  -e 's/arg="25"/arg="24"/g' \
-  -e 's/JVM 25/JVM 24/g' \
-  -e 's/JVM \[25\]/JVM \[24\]/g' \
-  {} +
-find . -type f -name '*.xml' -exec sed -i \
-  -e 's/jvmTarget="25"/jvmTarget="24"/g' \
-  -e 's/value="25"/value="24"/g' \
-  {} +
+# However, this downgrade breaks Compose Compiler Plugin in Jewel and causes inlining errors!
+# Let's try skipping it entirely since jps-bootstrap doesn't compile the IDE, it just runs JPS.
+# find platform/build-scripts jps platform/jps-bootstrap -type f -name '*.iml' -exec sed -i \
+#   -e 's/arg="25"/arg="24"/g' \
+#   -e 's/JVM 25/JVM 24/g' \
+#   -e 's/JVM \[25\]/JVM \[24\]/g' \
+#   {} +
+# find platform/build-scripts jps platform/jps-bootstrap -type f -name '*.xml' -exec sed -i \
+#   -e 's/jvmTarget="25"/jvmTarget="24"/g' \
+#   -e 's/value="25"/value="24"/g' \
+#   {} +
 
 # Kotlin 2.2.20 compiler crash on 0.toUShort().
 find platform/eel -name EelProxyImpl.kt -exec sed -i \

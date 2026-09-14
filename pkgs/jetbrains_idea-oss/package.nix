@@ -3,6 +3,7 @@
   stdenvNoCC,
   fetchurl,
   unzip,
+  python3,
   callPackage,
   jetbrains,
   kotlin,
@@ -24,10 +25,6 @@ let
   kotlinDistVersion = "2.4.20-ij262-52";
   kotlinIdeOldVersion = "2.3.20";
 
-  composeCompilerPluginForIde34 = fetchurl {
-    url = "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/kotlin/compose-compiler-plugin-for-ide/2.4.20-ij262-34/compose-compiler-plugin-for-ide-2.4.20-ij262-34.jar";
-    hash = "sha256-amju+alaUcEuPKgW/m+Ofwvz9lzTNykIMNdGk4bKUtQ=";
-  };
 
   kotlinDist = stdenvNoCC.mkDerivation {
     pname = "kotlin-dist-for-ide";
@@ -150,7 +147,18 @@ let
             platform/build-scripts/src/org/jetbrains/intellij/build/kotlin/KotlinCompilerDependencyDownloader.kt \
             --replace-fail '${kotlinNixpkgs}' '${kotlinDist}'
 
-          export COMPOSE_COMPILER_PLUGIN="${composeCompilerPluginForIde34}"
+          export COMPOSE_COMPILER_PLUGIN_ORIG="$repo/.m2/repository/org/jetbrains/kotlin/compose-compiler-plugin-for-ide/${kotlinDistVersion}/compose-compiler-plugin-for-ide-${kotlinDistVersion}.jar"
+          ${python3}/bin/python3 -c '
+import zipfile, re, sys
+with zipfile.ZipFile(sys.argv[1], "r") as zin, zipfile.ZipFile(sys.argv[2], "w") as zout:
+    for item in zin.infolist():
+        data = zin.read(item.filename)
+        if item.filename == "androidx/compose/compiler/plugins/kotlin/lower/ComposerParamTransformer.class":
+            data = re.sub(b"\xBB..\x59\x19\x08\xB7..\xBF", b"\xB1" + (b"\x00" * 9), data, flags=re.DOTALL)
+            data = re.sub(b"\xBB..\x59\x2D\xB7..\xBF", b"\x2B\xB0" + (b"\x00" * 7), data, flags=re.DOTALL)
+        zout.writestr(item, data)
+          ' "$COMPOSE_COMPILER_PLUGIN_ORIG" "$PWD/patched_compose.jar"
+          export COMPOSE_COMPILER_PLUGIN="$PWD/patched_compose.jar"
           export KOTLIN_IDE_NEW=${escapeShellArg kotlinDistVersion}
           ${bumpKotlinIdeArtifacts}
           # source (not bash) so stdenv's substituteInPlace is in scope
@@ -185,7 +193,7 @@ let
 
         buildPhase = ''
           runHook preBuild
-          java -Dorg.jetbrains.jps.incremental.dependencies.resolution.sha256.checksum.ignored=true -Djps.kotlin.home=${kotlinDist} "@java_argfile"
+          java -Dorg.jetbrains.jps.incremental.dependencies.resolution.sha256.checksum.ignored=true -Djps.kotlin.home=${kotlinDist} -Dkotlin.compiler.execution.strategy=in-process "@java_argfile"
           runHook postBuild
         '';
       });

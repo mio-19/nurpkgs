@@ -26,7 +26,7 @@ let
 
   composeCompilerPluginForIde34 = fetchurl {
     url = "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/kotlin/compose-compiler-plugin-for-ide/2.4.20-ij262-34/compose-compiler-plugin-for-ide-2.4.20-ij262-34.jar";
-    hash = "sha256-HSaMO2m2BEI9y7tA0uW21TK2lPRIxALbtM22l1k8Iqk=";
+    hash = "sha256-amju+alaUcEuPKgW/m+Ofwvz9lzTNykIMNdGk4bKUtQ=";
   };
 
   kotlinDist = stdenvNoCC.mkDerivation {

@@ -155,7 +155,7 @@ with zipfile.ZipFile(sys.argv[1], "r") as zin, zipfile.ZipFile(sys.argv[2], "w")
         data = zin.read(item.filename)
         if item.filename == "androidx/compose/compiler/plugins/kotlin/lower/ComposerParamTransformer.class":
             data = re.sub(b"\xBB..\x59\x19\x08\xB7..\xBF", b"\xB1" + (b"\x00" * 9), data, flags=re.DOTALL)
-            data = re.sub(b"\xBB..\x59\x2D\xB7..\xBF", b"\x2B\xB0" + (b"\x00" * 7), data, flags=re.DOTALL)
+            data = re.sub(b"\xBB..\x59\x2D\xB7..\xBF", b"\xB1" + (b"\x00" * 8), data, flags=re.DOTALL)
         zout.writestr(item, data)
           ' "$COMPOSE_COMPILER_PLUGIN_ORIG" "$PWD/patched_compose.jar"
           export COMPOSE_COMPILER_PLUGIN="$PWD/patched_compose.jar"

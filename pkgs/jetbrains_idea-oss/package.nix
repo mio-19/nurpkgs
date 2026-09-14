@@ -21,10 +21,13 @@ let
   version = "2026.2.2";
   buildNumber = "262.10315.125";
 
-  # compose-compiler-plugin-for-ide 2.4.20-ij262-34 needs IR APIs from this
-  # Kotlin-for-IDE snapshot (e.g. IrDeclarationsKt.isSingleFieldValueClass).
   kotlinDistVersion = "2.4.20-ij262-52";
   kotlinIdeOldVersion = "2.3.20";
+
+  composeCompilerPluginEmbeddable = fetchurl {
+    url = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2/org/jetbrains/kotlin/kotlin-compose-compiler-plugin-embeddable/2.4.0/kotlin-compose-compiler-plugin-embeddable-2.4.0.jar";
+    hash = "sha256-lczVxACORUpcsm+JQFYT8q4z9Gv5UMi+TQG729z7zQg=";
+  };
 
   kotlinDist = stdenvNoCC.mkDerivation {
     pname = "kotlin-dist-for-ide";
@@ -147,7 +150,7 @@ let
             platform/build-scripts/src/org/jetbrains/intellij/build/kotlin/KotlinCompilerDependencyDownloader.kt \
             --replace-fail '${kotlinNixpkgs}' '${kotlinDist}'
 
-          export COMPOSE_COMPILER_PLUGIN="${kotlinDist}/lib/compose-compiler-plugin.jar"
+          export COMPOSE_COMPILER_PLUGIN="${composeCompilerPluginEmbeddable}"
           export KOTLIN_IDE_NEW=${escapeShellArg kotlinDistVersion}
           ${bumpKotlinIdeArtifacts}
           # source (not bash) so stdenv's substituteInPlace is in scope

@@ -160,6 +160,8 @@ let
           
           # Binary patch to redirect getInlineClassUnderlyingType calls
           find . -name "*.class" -type f -exec sed -i 's/org\/jetbrains\/kotlin\/ir\/util\/InlineClassesKt/androidx\/compose\/compiler\/plugins\/kotlin\/Fix/g' {} +
+          # Binary patch to redirect getInlineClassRepresentation calls
+          find . -name "*.class" -type f -exec sed -i 's/org\/jetbrains\/kotlin\/ir\/declarations\/IrDeclarationsKt/androidx\/compose\/compiler\/plugins\/kotlin\/FixIrDecla/g' {} +
           
           # Create Fix.java
           cat << 'EOF' > androidx/compose/compiler/plugins/kotlin/Fix.java
@@ -173,10 +175,26 @@ let
               }
           }
 EOF
+          # Create FixIrDecla.java
+          cat << 'EOF' > androidx/compose/compiler/plugins/kotlin/FixIrDecla.java
+          package androidx.compose.compiler.plugins.kotlin;
+          import org.jetbrains.kotlin.ir.declarations.IrClass;
+          import org.jetbrains.kotlin.ir.declarations.IrFile;
+          import org.jetbrains.kotlin.descriptors.InlineClassRepresentation;
+          import org.jetbrains.kotlin.ir.declarations.IrDeclarationsKt;
+          public class FixIrDecla {
+              public static InlineClassRepresentation getInlineClassRepresentation(IrClass c) {
+                  return IrDeclarationsKt.inlineClassRepresentation(c, false);
+              }
+              public static String getName(IrFile f) {
+                  return IrDeclarationsKt.getName(f);
+              }
+          }
+EOF
           
-          # Compile Fix.java
-          javac -cp ${kotlinDist}/lib/kotlin-compiler.jar androidx/compose/compiler/plugins/kotlin/Fix.java
-          rm androidx/compose/compiler/plugins/kotlin/Fix.java
+          # Compile Fix.java and FixIrDecla.java
+          javac -cp ${kotlinDist}/lib/kotlin-compiler.jar androidx/compose/compiler/plugins/kotlin/Fix.java androidx/compose/compiler/plugins/kotlin/FixIrDecla.java
+          rm androidx/compose/compiler/plugins/kotlin/Fix.java androidx/compose/compiler/plugins/kotlin/FixIrDecla.java
           
           # Repack JAR
           jar cMf ../compose-compiler-plugin.jar .

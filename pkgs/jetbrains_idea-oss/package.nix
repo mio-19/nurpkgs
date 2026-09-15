@@ -153,11 +153,10 @@ let
 
           # Ensure Maven doesn't try to download missing older versions of kotlin-jps-plugin-classpath
           find . \( -name "*.iml" -o -name "*.xml" \) -print0 | xargs -0 sed -i 's/kotlin-jps-plugin-classpath:2.2.0/kotlin-jps-plugin-classpath:2.4.20-ij262-52/g'
-          find . \( -name "*.iml" -o -name "*.xml" \) -print0 | xargs -0 sed -i 's/kotlin-jps-plugin-classpath\/2.2.0\/kotlin/kotlin-jps-plugin-classpath\/2.4.20-ij262-52\/kotlin/g'
+          find . \( -name "*.iml" -o -name "*.xml" \) -print0 | xargs -0 sed -i 's|kotlin-jps-plugin-classpath/2.2.0/kotlin-jps-plugin-classpath-2.2.0|kotlin-jps-plugin-classpath/2.4.20-ij262-52/kotlin-jps-plugin-classpath-2.4.20-ij262-52|g'
           find . \( -name "*.iml" -o -name "*.xml" \) -print0 | xargs -0 sed -i 's/kotlin-jps-plugin-classpath:2.3.20/kotlin-jps-plugin-classpath:2.4.20-ij262-52/g'
-          find . \( -name "*.iml" -o -name "*.xml" \) -print0 | xargs -0 sed -i 's/kotlin-jps-plugin-classpath\/2.3.20\/kotlin/kotlin-jps-plugin-classpath\/2.4.20-ij262-52\/kotlin/g'
-          find . \( -name "*.iml" -o -name "*.xml" \) -print0 | xargs -0 sed -i 's/61002bb21cc3c512bd7c9d532f3932e33e019e58d554bc4d3c208ebec5c11284/ec89148981cb31e4a33712216db09eabc48c82acf0c01933d52cb8b23d6fa6f9/g'
-          find . \( -name "*.iml" -o -name "*.xml" \) -print0 | xargs -0 sed -i 's/0d6103ec6a0eb9c36e856c04d3478099ab86437dd5f19a22a69d9e80b4cff2cb/ec89148981cb31e4a33712216db09eabc48c82acf0c01933d52cb8b23d6fa6f9/g'
+          find . \( -name "*.iml" -o -name "*.xml" \) -print0 | xargs -0 sed -i 's|kotlin-jps-plugin-classpath/2.3.20/kotlin-jps-plugin-classpath-2.3.20|kotlin-jps-plugin-classpath/2.4.20-ij262-52/kotlin-jps-plugin-classpath-2.4.20-ij262-52|g'
+          find . \( -name "*.iml" -o -name "*.xml" \) -print0 | xargs -0 sed -i '/<verification>/,/<\/verification>/d'
 
           # Patch compose-compiler-plugin 2.4.0 to fix ABI incompatibilities with Kotlin 2.4.20-ij262-52
           cp ${composeCompilerPlugin} compose-compiler-plugin.jar

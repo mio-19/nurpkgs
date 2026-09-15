@@ -161,6 +161,10 @@ let
           # Patch compose-compiler-plugin 2.4.0 to fix ABI incompatibilities with Kotlin 2.4.20-ij262-52
           cp ${composeCompilerPlugin} compose-compiler-plugin.jar
           chmod +w compose-compiler-plugin.jar
+          
+          # Fix compilation of buildScripts.bazel due to API changes in Kotlin 2.4 compiler CLI arguments
+          sed -i '/argumentWithoutValue/,+2d' platform/build-scripts/bazel/src/org/jetbrains/intellij/build/bazel/BazelBuildFileGenerator.kt
+          sed -i '/booleanArgumentWithValue/,+2d' platform/build-scripts/bazel/src/org/jetbrains/intellij/build/bazel/BazelBuildFileGenerator.kt
           mkdir compose-patch
           cd compose-patch
           jar xf ../compose-compiler-plugin.jar

@@ -35,6 +35,10 @@ stdenvNoCC.mkDerivation {
       wrapper = writeShellScript "bitwig-studio" ''
         set -euo pipefail
 
+        # Proprietary Bitwig engine crashes with hardened_malloc (double free/invalid free).
+        # We must unset LD_PRELOAD so it falls back to the glibc allocator.
+        unset LD_PRELOAD
+
         outDir=${bitwig-studio}
         TMPDIR="$(${coreutils}/bin/mktemp --directory)"
         cleanup() { ${coreutils}/bin/rm -rf "$TMPDIR"; }

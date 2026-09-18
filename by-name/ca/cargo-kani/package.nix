@@ -49,7 +49,7 @@ rustPlatform.buildRustPackage rec {
     hash = "sha256-OwjC0I06KxFxnQ4J/599v6ktZKqWgE3Kn/SY8hSk6DY=";
   };
 
-  cargoHash = "sha256-fmgE0xaoQovJk2aLSP3h4h+59xEUeLOMsFhHqUXyiFk=";
+  cargoHash = "sha256-ZXeYvQu/x3W1CCb/urUtMe4sNr9j6t17igwL8glOGlM=";
 
   env = {
     RUSTUP_HOME = "dummy";
@@ -98,6 +98,8 @@ rustPlatform.buildRustPackage rec {
     # Copy rust-src and remove lockfile
     cp -r $REAL_SYSROOT/lib/rustlib/src/rust $FAKE_SYSROOT/lib/rustlib/src/rust
     chmod -R +w $FAKE_SYSROOT/lib/rustlib/src/rust
+    
+    # Remove std's Cargo.lock and replace it with Kani's modified lockfile
     rm -f $FAKE_SYSROOT/lib/rustlib/src/rust/library/Cargo.lock
     cp Cargo.lock $FAKE_SYSROOT/lib/rustlib/src/rust/library/Cargo.lock
     

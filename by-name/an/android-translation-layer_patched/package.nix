@@ -340,6 +340,22 @@ static inline int snd_pcm_hw_params_set_access(snd_pcm_t *pcm, snd_pcm_hw_params
 static inline int snd_pcm_hw_params_set_format(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, int format) { return 0; }
 static inline int snd_pcm_hw_params_set_channels(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, unsigned int val) { return 0; }
 static inline int snd_pcm_hw_params_set_rate_near(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, unsigned int *val, int *dir) { return 0; }
+
+typedef void* snd_mixer_t;
+typedef void* snd_mixer_selem_id_t;
+typedef void* snd_mixer_elem_t;
+static inline int snd_mixer_open(snd_mixer_t **mixer, int mode) { return 0; }
+static inline int snd_mixer_attach(snd_mixer_t *mixer, const char *name) { return 0; }
+static inline int snd_mixer_selem_register(snd_mixer_t *mixer, void *options, void *classp) { return 0; }
+static inline int snd_mixer_load(snd_mixer_t *mixer) { return 0; }
+static inline int snd_mixer_selem_id_malloc(snd_mixer_selem_id_t **ptr) { return 0; }
+static inline void snd_mixer_selem_id_set_index(snd_mixer_selem_id_t *obj, unsigned int val) {}
+static inline void snd_mixer_selem_id_set_name(snd_mixer_selem_id_t *obj, const char *val) {}
+static inline snd_mixer_elem_t* snd_mixer_find_selem(snd_mixer_t *mixer, const snd_mixer_selem_id_t *id) { return 0; }
+static inline int snd_mixer_selem_get_playback_volume_range(snd_mixer_elem_t *elem, long *min, long *max) { return 0; }
+static inline int snd_mixer_selem_set_playback_volume_all(snd_mixer_elem_t *elem, long value) { return 0; }
+static inline int snd_mixer_close(snd_mixer_t *mixer) { return 0; }
+static inline void snd_mixer_selem_id_free(snd_mixer_selem_id_t *obj) {}
 #endif
 EOF
       cat << 'EOF' > $NIX_BUILD_TOP/darwin_headers/elf.h

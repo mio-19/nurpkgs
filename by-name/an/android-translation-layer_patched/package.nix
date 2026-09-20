@@ -107,6 +107,12 @@
       echo -e "#ifdef __APPLE__\n#include <jni.h>\nJNIEXPORT jint JNICALL Java_android_os_Vibrator_native_1constructor(JNIEnv *env, jobject this) { return -1; }\nJNIEXPORT void JNICALL Java_android_os_Vibrator_native_1vibrate(JNIEnv *env, jobject this, jint fd, jlong duration) {}\n#else\n$(cat src/api-impl-jni/android_os_Vibrator.c)\n#endif" > src/api-impl-jni/android_os_Vibrator.c
       
       echo -e "#ifndef __APPLE__\n$(cat src/main-executable/bionic_compat.c)\n#else\nvoid init__r_debug() {}\n#endif" > src/main-executable/bionic_compat.c
+
+      echo -e "#ifdef __APPLE__\n#include <jni.h>\nJNIEXPORT jlong JNICALL Java_android_app_NotificationManager_nativeInitBuilder(JNIEnv *env, jobject this) { return 0; }\nJNIEXPORT void JNICALL Java_android_app_NotificationManager_nativeAddAction(JNIEnv *env, jobject this, jlong builder_ptr, jstring name_jstr, jint type, jobject intent) {}\nJNIEXPORT void JNICALL Java_android_app_NotificationManager_nativeShowNotification(JNIEnv *env, jobject this, jlong builder_ptr, jint id, jstring title_jstr, jstring text_jstr, jstring icon_jstr, jboolean ongoing, jint type, jobject intent) {}\nJNIEXPORT void JNICALL Java_android_app_NotificationManager_nativeCancel(JNIEnv *env, jobject this, jint id) {}\nJNIEXPORT void JNICALL Java_android_app_NotificationManager_nativeShowMPRIS(JNIEnv *env, jobject this, jstring package_name_jstr, jstring identity_jstr) {}\nJNIEXPORT void JNICALL Java_android_app_NotificationManager_nativeCancelMPRIS(JNIEnv *env, jobject this) {}\n#else\n$(cat src/api-impl-jni/app/android_app_NotificationManager.c)\n#endif" > src/api-impl-jni/app/android_app_NotificationManager.c
+
+      echo -e "#ifdef __APPLE__\n#include <jni.h>\nJNIEXPORT jlong JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeInit(JNIEnv *env, jobject this) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeSetCompositingText(JNIEnv *env, jobject this, jlong ptr, jstring text, jint newCursorPosition) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeSetCompositingRegion(JNIEnv *env, jobject this, jlong ptr, jint start, jint end) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeFinishComposingText(JNIEnv *env, jobject this, jlong ptr) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeCommitText(JNIEnv *env, jobject this, jlong ptr, jstring text, jint newCursorPosition) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeDeleteSurroundingText(JNIEnv *env, jobject this, jlong ptr, jint beforeLength, jint afterLength) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeSetSelection(JNIEnv *env, jobject this, jlong ptr, jint start, jint end) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeSendKeyEvent(JNIEnv *env, jobject this, jlong ptr, jlong time, jlong key, jlong state) { return 0; }\n#else\n$(cat src/api-impl-jni/android_inputmethodservice_InputMethodService.c)\n#endif" > src/api-impl-jni/android_inputmethodservice_InputMethodService.c
+
+      echo -e "#ifdef __APPLE__\n#include <jni.h>\nJNIEXPORT void JNICALL Java_android_app_WallpaperManager_set_1bitmap(JNIEnv *env, jclass clazz, jlong texture_ptr) {}\n#else\n$(cat src/api-impl-jni/app/android_app_WallpaperManager.c)\n#endif" > src/api-impl-jni/app/android_app_WallpaperManager.c
     '';
     preConfigure = (old.preConfigure or "") + lib.optionalString stdenv.isDarwin ''
       mkdir -p $NIX_BUILD_TOP/darwin_headers
@@ -270,12 +276,15 @@ EOF
 typedef struct XdpPortal XdpPortal;
 #define XDP_OPEN_URI_FLAG_NONE 0
 #define XDP_LAUNCHER_APPLICATION 0
-#define XDP_PORTAL(...) NULL
+#define XDP_PORTAL(x) ((XdpPortal*)(x))
+#define XDP_WALLPAPER_FLAG_NONE 0
 static inline XdpPortal* xdp_portal_new(void) { return 0; }
 static inline void xdp_portal_open_uri(XdpPortal* portal, void* parent, const char* uri, int flags, void* cancellable, void* callback, void* user_data) {}
-static inline void* xdp_portal_dynamic_launcher_prepare_install_finish(...) { return 0; }
-static inline void xdp_portal_dynamic_launcher_install(...) {}
-static inline void xdp_portal_dynamic_launcher_prepare_install(...) {}
+static inline void* xdp_portal_dynamic_launcher_prepare_install_finish(XdpPortal* p1, void* p2, void* p3) { return 0; }
+static inline void xdp_portal_dynamic_launcher_install(XdpPortal* p1, void* p2, void* p3, void* p4, void* p5) {}
+static inline void xdp_portal_dynamic_launcher_prepare_install(XdpPortal* p1, void* p2, void* p3, void* p4, void* p5, void* p6, int p7, int p8, void* p9, void* p10, void* p11) {}
+static inline void xdp_portal_set_wallpaper_finish(XdpPortal* p1, void* p2, void* p3) {}
+static inline void xdp_portal_set_wallpaper(XdpPortal* p1, void* p2, void* p3, int p4, void* p5, void* p6, void* p7) {}
 #endif
 EOF
       cat << 'EOF' > $NIX_BUILD_TOP/darwin_headers/elf.h

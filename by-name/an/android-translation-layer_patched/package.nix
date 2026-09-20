@@ -113,6 +113,13 @@
       echo -e "#ifdef __APPLE__\n#include <jni.h>\nJNIEXPORT jlong JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeInit(JNIEnv *env, jobject this) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeSetCompositingText(JNIEnv *env, jobject this, jlong ptr, jstring text, jint newCursorPosition) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeSetCompositingRegion(JNIEnv *env, jobject this, jlong ptr, jint start, jint end) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeFinishComposingText(JNIEnv *env, jobject this, jlong ptr) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeCommitText(JNIEnv *env, jobject this, jlong ptr, jstring text, jint newCursorPosition) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeDeleteSurroundingText(JNIEnv *env, jobject this, jlong ptr, jint beforeLength, jint afterLength) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeSetSelection(JNIEnv *env, jobject this, jlong ptr, jint start, jint end) { return 0; }\nJNIEXPORT jboolean JNICALL Java_android_inputmethodservice_InputMethodService_00024ATLInputConnection_nativeSendKeyEvent(JNIEnv *env, jobject this, jlong ptr, jlong time, jlong key, jlong state) { return 0; }\n#else\n$(cat src/api-impl-jni/android_inputmethodservice_InputMethodService.c)\n#endif" > src/api-impl-jni/android_inputmethodservice_InputMethodService.c
 
       echo -e "#ifdef __APPLE__\n#include <jni.h>\nJNIEXPORT void JNICALL Java_android_app_WallpaperManager_set_1bitmap(JNIEnv *env, jclass clazz, jlong texture_ptr) {}\n#else\n$(cat src/api-impl-jni/app/android_app_WallpaperManager.c)\n#endif" > src/api-impl-jni/app/android_app_WallpaperManager.c
+
+      for f in src/api-impl-jni/audio/*.c; do
+        substituteInPlace "$f" --replace '#include <alsa/asoundlib.h>' '#include <alsa/asoundlib.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <stdio.h>'
+      done
     '';
     preConfigure = (old.preConfigure or "") + lib.optionalString stdenv.isDarwin ''
       mkdir -p $NIX_BUILD_TOP/darwin_headers
@@ -291,6 +298,9 @@ EOF
       cat << 'EOF' > $NIX_BUILD_TOP/darwin_headers/alsa/asoundlib.h
 #ifndef ASOUNDLIB_H
 #define ASOUNDLIB_H
+#include <stdlib.h>
+#include <errno.h>
+#include <stdio.h>
 typedef void* snd_pcm_t;
 typedef void* snd_pcm_hw_params_t;
 typedef void* snd_pcm_sw_params_t;

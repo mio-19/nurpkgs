@@ -408,7 +408,7 @@ EOF
       )
     '';
     postFixup = (old.postFixup or "") + lib.optionalString stdenv.isDarwin ''
-      install_name_tool -change @rpath/libart.dylib ${art-standalone_patched}/lib/libart.dylib $out/bin/.android-translation-layer-wrapped || true
-      install_name_tool -change @rpath/libart.dylib ${art-standalone_patched}/lib/libart.dylib $out/lib/java/dex/android_translation_layer/natives/libtranslation_layer_main.dylib || true
+      install_name_tool -add_rpath ${art-standalone_patched}/lib $out/bin/.android-translation-layer-wrapped || true
+      install_name_tool -add_rpath ${art-standalone_patched}/lib $out/lib/java/dex/android_translation_layer/natives/libtranslation_layer_main.dylib || true
     '';
   })

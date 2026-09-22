@@ -538,3 +538,18 @@ fn truncate_chars(s: &str, max: usize) -> String {
     
     truncated
 }
+
+#[cfg(test)]
+mod tests {
+    use super::truncate_chars;
+
+    #[test]
+    fn test_truncate_chars() {
+        assert_eq!(truncate_chars("abc", 2), "ab…");
+        assert_eq!(truncate_chars("👨‍👩‍👦", 1), "👨‍👩‍👦");
+        assert_eq!(truncate_chars("👨‍👩‍👦x", 1), "👨‍👩‍👦…");
+        assert_eq!(truncate_chars("👨‍👩‍👦x", 2), "👨‍👩‍👦x");
+        assert_eq!(truncate_chars("a👨‍👩‍👦", 1), "a…");
+        assert_eq!(truncate_chars("a👨‍👩‍👦", 2), "a👨‍👩‍👦");
+    }
+}

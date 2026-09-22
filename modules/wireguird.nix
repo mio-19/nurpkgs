@@ -21,7 +21,7 @@ let
 
   package = cfg.package.override { inherit wireguard-tools; };
 
-  wrapperCapabilities = "cap_net_raw,cap_net_admin+eip";
+  wrapperCapabilities = "cap_net_raw,cap_net_admin,cap_kill,cap_dac_override+eip";
 
   mkWrapper = name: {
     owner = "root";
@@ -76,13 +76,6 @@ in
     ];
 
     security.wrappers = {
-      wireguird = {
-        owner = "root";
-        group = cfg.group;
-        capabilities = wrapperCapabilities;
-        permissions = "u+rx,g+x";
-        source = "${lib.getExe package}";
-      };
       wg-quick = mkWrapper "wg-quick" // {
         source = wgQuickSource;
       };

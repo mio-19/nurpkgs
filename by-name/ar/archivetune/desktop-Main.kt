@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import moe.rukamori.archivetune.innertube.YouTube
 
 fun main() = application {
+    moe.rukamori.archivetune.innertube.NetworkGatekeeper.setConnectionBlocked(false)
     val windowState = rememberWindowState(width = 1200.dp, height = 800.dp)
 
     Window(

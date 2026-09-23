@@ -129,8 +129,6 @@ stdenv.mkDerivation (finalAttrs: {
     "-Dorg.gradle.native=false"
     "-Djava.net.preferIPv4Stack=true"
     "--no-daemon"
-    "--info"
-    "--stacktrace"
   ];
 
   gradleBuildTask = ":desktop:createReleaseDistributable";
@@ -150,7 +148,11 @@ stdenv.mkDerivation (finalAttrs: {
     gradle
     jdk
     makeWrapper
-  ] ++ lib.optionals stdenv.hostPlatform.isLinux [ autoPatchelfHook copyDesktopItems ];
+  ]
+  ++ lib.optionals stdenv.hostPlatform.isLinux [
+    autoPatchelfHook
+    copyDesktopItems
+  ];
 
   buildInputs = runtimeLibs;
 
@@ -177,7 +179,7 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preInstall
 
     mkdir -p $out/lib
-    
+
     if [ -d desktop/build/compose/binaries/main-release/app/ArchiveTune.app ]; then
       # macOS
       mkdir -p $out/Applications

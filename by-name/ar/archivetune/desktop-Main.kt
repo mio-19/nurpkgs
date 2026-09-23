@@ -71,7 +71,7 @@ fun ArchiveTuneApp() {
                             isLoading = true
                             searchResults = emptyList()
                             scope.launch(Dispatchers.IO) {
-                                val result = YouTube.search(searchQuery, null)
+                                val result = YouTube.search(searchQuery, YouTube.SearchFilter.FILTER_SONG)
                                 result.onSuccess { page ->
                                     searchResults = page.items.map { it.toString() }
                                     statusMessage = "Found ${searchResults.size} results"

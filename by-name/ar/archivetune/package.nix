@@ -100,7 +100,11 @@ stdenv.mkDerivation (finalAttrs: {
     # Fix the application block to use compose.desktop.application so createReleaseDistributable works
     sed -i 's/    application//' app/build.gradle.kts
     sed -i 's/application {/compose.desktop {\n    application {/' app/build.gradle.kts
-    sed -i 's/    mainClass.set("moe.rukamori.archivetune.DesktopMainKt")/        mainClass = "moe.rukamori.archivetune.DesktopMainKt"\n    }/' app/build.gradle.kts
+    sed -i 's/    mainClass.set("moe.rukamori.archivetune.DesktopMainKt")/        mainClass = "moe.rukamori.archivetune.DesktopMainKt"
+        buildTypes.release.proguard {
+            isEnabled.set(false)
+        }
+    }/' app/build.gradle.kts
 
 
     # Copy android stubs

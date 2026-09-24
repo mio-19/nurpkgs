@@ -9,9 +9,6 @@
 
 package moe.rukamori.archivetune.ui.screens.settings
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,8 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -123,7 +118,7 @@ fun SettingsScreen(
             LargeFlexibleTopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.settings),
+                        text = "settings",
                         fontWeight = FontWeight.Bold,
                     )
                 },
@@ -133,8 +128,8 @@ fun SettingsScreen(
                         onLongClick = navController::backToMain,
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.arrow_back),
-                            contentDescription = stringResource(R.string.back_button_desc),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                            contentDescription = "back_button_desc",
                         )
                     }
                 },

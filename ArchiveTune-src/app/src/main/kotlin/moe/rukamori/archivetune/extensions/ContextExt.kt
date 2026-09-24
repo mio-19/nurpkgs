@@ -7,9 +7,6 @@
 
 package moe.rukamori.archivetune.extensions
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import moe.rukamori.archivetune.constants.InnerTubeCookieKey
 import moe.rukamori.archivetune.constants.YtmSyncKey
 import moe.rukamori.archivetune.innertube.utils.hasYouTubeLoginCookie

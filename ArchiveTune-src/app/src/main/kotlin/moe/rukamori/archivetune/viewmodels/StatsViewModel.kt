@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -52,7 +51,7 @@ sealed interface StatsScreenState {
     data object Empty : StatsScreenState
 
     data class Error(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : StatsScreenState
 }
 

@@ -7,12 +7,6 @@
 
 package moe.rukamori.archivetune.localmedia
 
-import android.content.ContentUris
-import android.content.Context
-import android.media.MediaMetadataRetriever
-import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
 import androidx.core.content.FileProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException

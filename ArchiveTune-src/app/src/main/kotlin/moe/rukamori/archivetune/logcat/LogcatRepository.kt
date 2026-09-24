@@ -7,10 +7,6 @@
 
 package moe.rukamori.archivetune.logcat
 
-import android.content.Context
-import android.net.Uri
-import android.os.Process
-import android.util.Log
 import androidx.core.content.FileProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

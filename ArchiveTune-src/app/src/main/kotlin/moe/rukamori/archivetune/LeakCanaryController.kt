@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune
 
-import android.app.Application
-import android.content.Context
 
 object LeakCanaryController {
     private const val VARIANT_CLASS = "moe.rukamori.archivetune.LeakCanaryVariant"

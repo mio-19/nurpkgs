@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -37,7 +35,7 @@ sealed interface IconScreenState {
     data object Empty : IconScreenState
 
     data class Error(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : IconScreenState
 }
 
@@ -67,10 +65,10 @@ enum class AppIconSortOrder {
 data class AppIconUiModel(
     val id: String,
     val name: String?,
-    @StringRes val nameResId: Int?,
+    val nameResId: Int?,
     val author: String?,
     val githubAuthorUrl: String?,
-    @DrawableRes val previewDrawableResId: Int,
+    val previewDrawableResId: Int,
     val isSelected: Boolean,
     val isDefault: Boolean,
 )

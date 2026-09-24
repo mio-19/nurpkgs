@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.ui.svg
 
-import android.graphics.Picture
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

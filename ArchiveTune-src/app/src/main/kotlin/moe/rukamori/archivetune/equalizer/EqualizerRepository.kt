@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.equalizer
 
-import android.content.Context
-import android.net.Uri
 import androidx.datastore.preferences.core.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.widget
 
-import android.content.Context
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp

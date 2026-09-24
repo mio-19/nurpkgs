@@ -7,11 +7,6 @@
 
 package moe.rukamori.archivetune.ui.screens.library
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
-import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -85,9 +80,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -337,7 +330,7 @@ fun LocalSongScreen(
                                 expanded = false,
                                 onExpandedChange = {},
                                 placeholder = {
-                                    Text(text = stringResource(R.string.search_library))
+                                    Text(text = "search_library")
                                 },
                                 leadingIcon = {
                                     IconButton(
@@ -347,8 +340,8 @@ fun LocalSongScreen(
                                         },
                                     ) {
                                         Icon(
-                                            painter = painterResource(R.drawable.arrow_back),
-                                            contentDescription = stringResource(R.string.back_button_desc),
+                                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                                            contentDescription = "back_button_desc",
                                         )
                                     }
                                 },
@@ -357,8 +350,8 @@ fun LocalSongScreen(
                                         {
                                             IconButton(onClick = { query = "" }) {
                                                 Icon(
-                                                    painter = painterResource(R.drawable.close),
-                                                    contentDescription = stringResource(R.string.close),
+                                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                                                    contentDescription = "close",
                                                 )
                                             }
                                         }
@@ -379,7 +372,7 @@ fun LocalSongScreen(
                     LargeFlexibleTopAppBar(
                         title = {
                             Text(
-                                text = stringResource(R.string.local_history),
+                                text = "local_history",
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -388,7 +381,7 @@ fun LocalSongScreen(
                         navigationIcon = {
                             IconButton(onClick = navController::navigateUp) {
                                 Icon(
-                                    painter = painterResource(R.drawable.arrow_back),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                     contentDescription = null,
                                 )
                             }
@@ -396,14 +389,14 @@ fun LocalSongScreen(
                         actions = {
                             IconButton(onClick = { isSearchActive = true }) {
                                 Icon(
-                                    painter = painterResource(R.drawable.search),
-                                    contentDescription = stringResource(R.string.search),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                                    contentDescription = "search",
                                 )
                             }
                             IconButton(onClick = { showScanSheet = true }) {
                                 Icon(
-                                    painter = painterResource(R.drawable.settings),
-                                    contentDescription = stringResource(R.string.settings),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                                    contentDescription = "settings",
                                 )
                             }
                         },
@@ -500,7 +493,7 @@ fun LocalSongScreen(
                                 },
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.more_vert),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                     contentDescription = null,
                                 )
                             }
@@ -561,7 +554,7 @@ private fun LocalSongBadge(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
         ) {
             Icon(
-                painter = painterResource(iconRes),
+                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(18.dp),
@@ -616,8 +609,8 @@ private fun LocalSongControlsCard(
             enabled = shuffleEnabled,
         ) {
             Icon(
-                painter = painterResource(R.drawable.shuffle),
-                contentDescription = stringResource(R.string.shuffle),
+                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                contentDescription = "shuffle",
             )
         }
 
@@ -647,7 +640,7 @@ private fun LocalSongEmptyState(query: String) {
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 24.dp),
         ) {
             Icon(
-                painter = painterResource(if (query.isBlank()) R.drawable.music_note else R.drawable.search),
+                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent)) R.drawable.music_note else R.drawable.search),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(28.dp),
@@ -655,9 +648,9 @@ private fun LocalSongEmptyState(query: String) {
             Text(
                 text =
                     if (query.isBlank()) {
-                        stringResource(R.string.local_songs_empty_title)
+                        "local_songs_empty_title"
                     } else {
-                        stringResource(R.string.local_songs_no_matches_title)
+                        "local_songs_no_matches_title"
                     },
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
@@ -665,9 +658,9 @@ private fun LocalSongEmptyState(query: String) {
             Text(
                 text =
                     if (query.isBlank()) {
-                        stringResource(R.string.local_songs_empty_desc)
+                        "local_songs_empty_desc"
                     } else {
-                        stringResource(R.string.local_songs_no_matches_desc)
+                        "local_songs_no_matches_desc"
                     },
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -712,7 +705,7 @@ private fun LocalSongScanSheet(
         }
     val durationLabel =
         if (minimumDurationSeconds <= 0) {
-            stringResource(R.string.dark_theme_off)
+            "dark_theme_off"
         } else {
             pluralStringResource(R.plurals.seconds, minimumDurationSeconds, minimumDurationSeconds)
         }
@@ -745,15 +738,15 @@ private fun LocalSongScanSheet(
     val statusText =
         when {
             scanState.isScanning -> {
-                stringResource(R.string.scanning_device)
+                "scanning_device"
             }
 
             hasError -> {
-                stringResource(R.string.local_songs_scan_failed)
+                "local_songs_scan_failed"
             }
 
             !hasStoragePermission -> {
-                stringResource(R.string.local_songs_permission_body)
+                "local_songs_permission_body"
             }
 
             hasSummary -> {
@@ -765,15 +758,15 @@ private fun LocalSongScanSheet(
             }
 
             else -> {
-                stringResource(R.string.local_songs_ready_desc)
+                "local_songs_ready_desc"
             }
         }
 
     val primaryButtonText =
         if (hasStoragePermission) {
-            stringResource(R.string.scan_device)
+            "scan_device"
         } else {
-            stringResource(R.string.allow)
+            "allow"
         }
 
     val contentAlpha by animateFloatAsState(
@@ -815,7 +808,7 @@ private fun LocalSongScanSheet(
                         label = "heroIcon",
                     ) { icon ->
                         Icon(
-                            painter = painterResource(icon),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                             tint = heroTint,
                             modifier = Modifier.size(36.dp),
@@ -827,7 +820,7 @@ private fun LocalSongScanSheet(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = stringResource(R.string.local_songs_scan_title),
+                text = "local_songs_scan_title",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -836,7 +829,7 @@ private fun LocalSongScanSheet(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = stringResource(R.string.local_songs_scan_subtitle),
+                text = "local_songs_scan_subtitle",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -868,7 +861,7 @@ private fun LocalSongScanSheet(
                         )
                         Spacer(modifier = Modifier.width(14.dp))
                         Text(
-                            text = stringResource(R.string.scanning_device),
+                            text = "scanning_device",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -888,8 +881,8 @@ private fun LocalSongScanSheet(
                 Column(modifier = Modifier.padding(vertical = 6.dp)) {
                     ScanSheetInfoRow(
                         iconRes = R.drawable.storage,
-                        title = stringResource(R.string.permission_storage_title),
-                        description = stringResource(R.string.permission_storage_desc),
+                        title = "permission_storage_title",
+                        description = "permission_storage_desc",
                         trailing = {
                             Surface(
                                 shape = RoundedCornerShape(16.dp),
@@ -907,8 +900,7 @@ private fun LocalSongScanSheet(
                                 ) {
                                     Icon(
                                         painter =
-                                            painterResource(
-                                                if (hasStoragePermission) R.drawable.done else R.drawable.close,
+                                            androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent) R.drawable.done else R.drawable.close,
                                             ),
                                         contentDescription = null,
                                         tint =
@@ -922,9 +914,9 @@ private fun LocalSongScanSheet(
                                     Text(
                                         text =
                                             if (hasStoragePermission) {
-                                                stringResource(R.string.permission_status_allowed)
+                                                "permission_status_allowed"
                                             } else {
-                                                stringResource(R.string.not_allowed)
+                                                "not_allowed"
                                             },
                                         style = MaterialTheme.typography.labelMedium,
                                         fontWeight = FontWeight.SemiBold,
@@ -947,7 +939,7 @@ private fun LocalSongScanSheet(
 
                     ScanSheetInfoRow(
                         iconRes = R.drawable.info,
-                        title = stringResource(R.string.local_songs_latest_scan),
+                        title = "local_songs_latest_scan",
                         description = statusText,
                         trailing = null,
                     )
@@ -969,20 +961,20 @@ private fun LocalSongScanSheet(
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
                 ) {
                     Text(
-                        text = stringResource(R.string.local_songs_scan_filters_title),
+                        text = "local_songs_scan_filters_title",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = stringResource(R.string.local_songs_scan_filters_note),
+                        text = "local_songs_scan_filters_note",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
                     LocalSongScanSettingCard(
                         iconRes = R.drawable.timer,
-                        title = stringResource(R.string.local_songs_scan_duration_title),
-                        description = stringResource(R.string.local_songs_scan_duration_desc),
+                        title = "local_songs_scan_duration_title",
+                        description = "local_songs_scan_duration_desc",
                     ) {
                         Text(
                             text = durationLabel,
@@ -1002,9 +994,9 @@ private fun LocalSongScanSheet(
 
                     LocalSongScanSettingCard(
                         iconRes = R.drawable.snippet_folder,
-                        title = stringResource(R.string.local_songs_scan_included_folders_title),
-                        description = stringResource(R.string.local_songs_scan_included_folders_desc),
-                        actionLabel = stringResource(R.string.local_songs_scan_included_folders_add),
+                        title = "local_songs_scan_included_folders_title",
+                        description = "local_songs_scan_included_folders_desc",
+                        actionLabel = "local_songs_scan_included_folders_add",
                         onActionClick = {
                             if (!scanState.isScanning) {
                                 onAddIncludedFolder()
@@ -1013,7 +1005,7 @@ private fun LocalSongScanSheet(
                     ) {
                         if (sanitizedIncludedFolders.isEmpty()) {
                             Text(
-                                text = stringResource(R.string.local_songs_scan_included_folders_empty),
+                                text = "local_songs_scan_included_folders_empty",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -1045,9 +1037,9 @@ private fun LocalSongScanSheet(
 
                     LocalSongScanSettingCard(
                         iconRes = R.drawable.snippet_folder,
-                        title = stringResource(R.string.local_songs_scan_folders_title),
-                        description = stringResource(R.string.local_songs_scan_folders_desc),
-                        actionLabel = stringResource(R.string.local_songs_scan_folders_add),
+                        title = "local_songs_scan_folders_title",
+                        description = "local_songs_scan_folders_desc",
+                        actionLabel = "local_songs_scan_folders_add",
                         onActionClick = {
                             if (!scanState.isScanning) {
                                 onAddExcludedFolder()
@@ -1056,7 +1048,7 @@ private fun LocalSongScanSheet(
                     ) {
                         if (sanitizedExcludedFolders.isEmpty()) {
                             Text(
-                                text = stringResource(R.string.local_songs_scan_folders_empty),
+                                text = "local_songs_scan_folders_empty",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -1137,8 +1129,7 @@ private fun LocalSongScanSheet(
                         } else {
                             Icon(
                                 painter =
-                                    painterResource(
-                                        if (hasStoragePermission) R.drawable.sync else R.drawable.security,
+                                    androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent) R.drawable.sync else R.drawable.security,
                                     ),
                                 contentDescription = null,
                                 modifier = Modifier.size(20.dp),
@@ -1148,7 +1139,7 @@ private fun LocalSongScanSheet(
                         Text(
                             text =
                                 if (isScanning) {
-                                    stringResource(R.string.scanning_device)
+                                    "scanning_device"
                                 } else {
                                     primaryButtonText
                                 },
@@ -1178,7 +1169,7 @@ private fun LocalSongScanSheet(
                         modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.error),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.size(20.dp),
@@ -1226,7 +1217,7 @@ private fun LocalSongScanSettingCard(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            painter = painterResource(iconRes),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(22.dp),
@@ -1265,7 +1256,7 @@ private fun LocalSongScanSettingCard(
                                         .combinedClickable(onClick = onActionClick),
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.add),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
                                     modifier = Modifier.size(16.dp),
@@ -1303,7 +1294,7 @@ private fun LocalSongFolderChip(
             modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
         ) {
             Icon(
-                painter = painterResource(R.drawable.snippet_folder),
+                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.size(16.dp),
@@ -1326,7 +1317,7 @@ private fun LocalSongFolderChip(
                             .combinedClickable(enabled = enabled, onClick = onRemove),
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.close),
+                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.size(14.dp),
@@ -1359,7 +1350,7 @@ private fun ScanSheetInfoRow(
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
-                    painter = painterResource(iconRes),
+                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(22.dp),

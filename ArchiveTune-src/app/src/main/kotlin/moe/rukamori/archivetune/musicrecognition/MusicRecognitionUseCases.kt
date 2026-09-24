@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.musicrecognition
 
-import android.media.projection.MediaProjection
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged

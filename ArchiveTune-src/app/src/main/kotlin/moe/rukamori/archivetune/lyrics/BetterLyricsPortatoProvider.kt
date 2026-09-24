@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.lyrics
 
-import android.content.Context
 import moe.rukamori.archivetune.betterlyrics.BetterLyrics
 import moe.rukamori.archivetune.constants.EnableBetterLyricsPortatoKey
 import moe.rukamori.archivetune.utils.dataStore

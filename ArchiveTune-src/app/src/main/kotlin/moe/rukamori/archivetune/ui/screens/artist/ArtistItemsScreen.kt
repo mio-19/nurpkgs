@@ -32,7 +32,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -181,7 +180,7 @@ fun ArtistItemsScreen(
                             onLongClick = {},
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.more_vert),
+                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                 contentDescription = null,
                             )
                         }
@@ -349,7 +348,7 @@ fun ArtistItemsScreen(
                 onLongClick = navController::backToMain,
             ) {
                 Icon(
-                    painterResource(R.drawable.arrow_back),
+                    androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                     contentDescription = null,
                 )
             }
@@ -369,7 +368,7 @@ fun ArtistItemsScreen(
                     onLongClick = {},
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.play),
+                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                         contentDescription = null,
                     )
                 }
@@ -385,7 +384,7 @@ fun ArtistItemsScreen(
                     onLongClick = {},
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.shuffle),
+                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                         contentDescription = null,
                     )
                 }

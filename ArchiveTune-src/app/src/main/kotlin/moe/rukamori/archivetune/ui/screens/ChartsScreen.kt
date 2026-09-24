@@ -28,8 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -82,14 +80,14 @@ fun ChartsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.charts)) },
+                title = { Text("charts") },
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.navigateUp() },
                         onLongClick = { navController.backToMain() },
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.arrow_back),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                         )
                     }
@@ -196,8 +194,8 @@ fun ChartsScreen(
                             NavigationTitle(
                                 title =
                                     when (section.title) {
-                                        "Trending" -> stringResource(R.string.trending)
-                                        else -> section.title ?: stringResource(R.string.charts)
+                                        "Trending" -> "trending"
+                                        else -> section.title ?: "charts"
                                     },
                                 modifier = Modifier.animateItem(),
                             )
@@ -254,7 +252,7 @@ fun ChartsScreen(
                                                     },
                                                 ) {
                                                     Icon(
-                                                        painter = painterResource(R.drawable.more_vert),
+                                                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                                         contentDescription = null,
                                                     )
                                                 }
@@ -296,7 +294,7 @@ fun ChartsScreen(
                     chartsPage?.sections?.find { it.title == "Top music videos" }?.let { topVideosSection ->
                         item {
                             NavigationTitle(
-                                title = stringResource(R.string.top_music_videos),
+                                title = "top_music_videos",
                                 modifier = Modifier.animateItem(),
                             )
                         }

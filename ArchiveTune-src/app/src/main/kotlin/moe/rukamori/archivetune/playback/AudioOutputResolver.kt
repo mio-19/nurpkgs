@@ -7,10 +7,6 @@
 
 package moe.rukamori.archivetune.playback
 
-import android.media.AudioDeviceInfo
-import android.media.AudioManager
-import android.os.Build
-import androidx.annotation.RequiresApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import moe.rukamori.archivetune.models.ActiveOutputDevice

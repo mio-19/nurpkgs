@@ -7,12 +7,6 @@
 
 package moe.rukamori.archivetune.playback
 
-import android.content.ContentResolver
-import android.content.Context
-import android.net.Uri
-import android.os.Bundle
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -88,7 +82,7 @@ class MediaLibrarySessionCallback
         private data class AutoPlaylistSortOption(
             val sortType: PlaylistSongSortType,
             val descending: Boolean,
-            @StringRes val titleRes: Int,
+            val titleRes: Int,
         )
 
         private fun browsableExtras(
@@ -1797,7 +1791,7 @@ class MediaLibrarySessionCallback
         private fun String.pathSegments(): List<String> = split("/").filter { it.isNotBlank() }
 
         private fun drawableUri(
-            @DrawableRes id: Int,
+            id: Int,
         ) = Uri
             .Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)

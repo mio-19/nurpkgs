@@ -7,11 +7,6 @@
 
 package moe.rukamori.archivetune
 
-import android.app.ActivityManager
-import android.app.Application
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import coil3.ImageLoader

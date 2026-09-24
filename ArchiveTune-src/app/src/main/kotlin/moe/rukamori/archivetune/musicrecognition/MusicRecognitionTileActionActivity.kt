@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.musicrecognition
 
-import android.content.Intent
-import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint

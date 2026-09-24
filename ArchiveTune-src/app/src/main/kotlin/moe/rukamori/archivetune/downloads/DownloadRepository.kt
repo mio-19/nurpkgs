@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.downloads
 
-import android.content.Context
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadService
 import dagger.hilt.android.qualifiers.ApplicationContext

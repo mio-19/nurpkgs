@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.downloads
 
-import android.os.SystemClock
 import androidx.compose.runtime.Immutable
 import androidx.media3.exoplayer.offline.Download
 import kotlinx.coroutines.Dispatchers

@@ -49,7 +49,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -98,7 +97,7 @@ fun AodSlideToLockButton(
         contentAlignment = Alignment.CenterStart,
     ) {
         Text(
-            text = stringResource(R.string.aod_slide_to_lock),
+            text = "aod_slide_to_lock",
             style = MaterialTheme.typography.labelLarge,
             color = Color.White.copy(alpha = 0.65f),
             textAlign = TextAlign.Center,
@@ -227,7 +226,7 @@ fun AodTouchLockOverlay(
                         contentAlignment = Alignment.CenterStart,
                     ) {
                         Text(
-                            text = stringResource(R.string.aod_slide_to_unlock),
+                            text = "aod_slide_to_unlock",
                             style = MaterialTheme.typography.labelLarge,
                             color = Color.White.copy(alpha = 0.75f),
                             textAlign = TextAlign.Center,
@@ -285,7 +284,7 @@ fun AodTouchLockOverlay(
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = stringResource(R.string.aod_hold_to_unlock),
+                        text = "aod_hold_to_unlock",
                         style = MaterialTheme.typography.labelMedium,
                         color = Color.White.copy(alpha = 0.75f),
                     )

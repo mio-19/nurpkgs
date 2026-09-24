@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,7 +31,7 @@ sealed interface SearchDiscoveryScreenState {
     data object Empty : SearchDiscoveryScreenState
 
     data class Error(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : SearchDiscoveryScreenState
 }
 

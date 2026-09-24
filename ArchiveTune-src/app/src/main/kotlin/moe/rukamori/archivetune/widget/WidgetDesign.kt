@@ -7,12 +7,6 @@
 
 package moe.rukamori.archivetune.widget
 
-import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.LruCache
-import androidx.annotation.DrawableRes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -197,7 +191,7 @@ internal fun WidgetArtwork(
 internal fun WidgetControlButton(
     modifier: GlanceModifier,
     action: Action,
-    @DrawableRes icon: Int,
+    icon: Int,
     contentDescription: String,
     backgroundColor: ColorProvider,
     contentColor: ColorProvider,

@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.lyrics
 
-import android.content.Context
 import moe.rukamori.archivetune.constants.EnableSimpMusicLyricsKey
 import moe.rukamori.archivetune.simpmusic.SimpMusicLyrics
 import moe.rukamori.archivetune.utils.dataStore

@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.lyrics
 
-import android.content.Context
 
 interface LyricsProvider {
     val name: String

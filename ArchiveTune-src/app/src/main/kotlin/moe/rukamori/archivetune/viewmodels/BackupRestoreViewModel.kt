@@ -7,11 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -109,7 +104,7 @@ sealed interface ScheduledBackupScreenState {
     data object Empty : ScheduledBackupScreenState
 
     data class Error(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : ScheduledBackupScreenState
 }
 
@@ -138,7 +133,7 @@ sealed interface ExportPlaylistScreenState {
 
     @Immutable
     data class Error(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : ExportPlaylistScreenState
 }
 
@@ -157,7 +152,7 @@ sealed interface ExportPlaylistEvent {
 
     @Immutable
     data class ShowMessage(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : ExportPlaylistEvent
 }
 
@@ -514,7 +509,7 @@ class BackupRestoreViewModel
         }
 
         private fun updateScheduledBackup(
-            @StringRes successMessageRes: Int? = null,
+            successMessageRes: Int? = null,
             update: suspend () -> ScheduledBackupSettings,
         ) {
             scheduledBackupUpdateJob?.cancel()

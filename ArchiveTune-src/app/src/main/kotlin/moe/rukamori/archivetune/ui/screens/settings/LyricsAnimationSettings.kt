@@ -24,8 +24,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import moe.rukamori.archivetune.LocalPlayerAwareWindowInsets
 import moe.rukamori.archivetune.R
@@ -50,14 +48,14 @@ fun LyricsAnimationSettings(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(R.string.lyrics_animation_style)) },
+                title = { Text(text = "lyrics_animation_style") },
                 navigationIcon = {
                     IconButton(
                         onClick = navController::navigateUp,
                         onLongClick = navController::backToMain,
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.arrow_back),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                         )
                     }
@@ -83,7 +81,7 @@ fun LyricsAnimationSettings(navController: NavController) {
                     PreferenceEntry(
                         title = { Text("Line Bounce Effect") },
                         description = "Enable bounce animation for line-synced (LRC) lyrics",
-                        icon = { Icon(painterResource(R.drawable.animation), null) },
+                        icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                         trailingContent = {
                             Switch(
                                 checked = lrcBounceEnabled,
@@ -97,7 +95,7 @@ fun LyricsAnimationSettings(navController: NavController) {
                     PreferenceEntry(
                         title = { Text("Bounce Amplitude") },
                         description = "Adjust the bounce effect when a word is sung (${(bounceFactor * 100).toInt()}%)",
-                        icon = { Icon(painterResource(R.drawable.animation), null) },
+                        icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                         content = {
                             Slider(
                                 value = bounceFactor,
@@ -112,7 +110,7 @@ fun LyricsAnimationSettings(navController: NavController) {
                     PreferenceEntry(
                         title = { Text("Glow Intensity") },
                         description = "Adjust the glow brightness of the sung word (${(glowFactor * 100).toInt()}%)",
-                        icon = { Icon(painterResource(R.drawable.lyrics), null) },
+                        icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                         content = {
                             Slider(
                                 value = glowFactor,
@@ -127,7 +125,7 @@ fun LyricsAnimationSettings(navController: NavController) {
                     PreferenceEntry(
                         title = { Text("Fill Transition Smoothness") },
                         description = "Adjust the gradient edge width of the liquid fill effect (${fillTransitionWidth.toInt()} dp)",
-                        icon = { Icon(painterResource(R.drawable.lyrics), null) },
+                        icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                         content = {
                             Slider(
                                 value = fillTransitionWidth,

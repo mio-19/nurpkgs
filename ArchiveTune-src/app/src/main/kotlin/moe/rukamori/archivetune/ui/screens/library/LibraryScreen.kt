@@ -58,8 +58,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -316,12 +314,12 @@ fun LibraryScreen(navController: NavController) {
                         val page = libraryFilters.indexOf(filter)
                         val label =
                             when (filter) {
-                                LibraryFilter.LIBRARY -> stringResource(R.string.filter_library)
-                                LibraryFilter.PLAYLISTS -> stringResource(R.string.playlists)
-                                LibraryFilter.SPOTIFY -> stringResource(R.string.spotify_playlists)
-                                LibraryFilter.SONGS -> stringResource(R.string.songs)
-                                LibraryFilter.ARTISTS -> stringResource(R.string.artists)
-                                LibraryFilter.ALBUMS -> stringResource(R.string.albums)
+                                LibraryFilter.LIBRARY -> "filter_library"
+                                LibraryFilter.PLAYLISTS -> "playlists"
+                                LibraryFilter.SPOTIFY -> "spotify_playlists"
+                                LibraryFilter.SONGS -> "songs"
+                                LibraryFilter.ARTISTS -> "artists"
+                                LibraryFilter.ALBUMS -> "albums"
                             }
                         val iconRes =
                             when (filter) {
@@ -368,7 +366,7 @@ private fun PlaylistTagFilterRow(
     ) {
         item(key = "all_playlist_tags", contentType = "playlist_tag_filter_action") {
             PlaylistTagFilterChip(
-                label = stringResource(R.string.filter_all),
+                label = "filter_all",
                 selected = selectedTagIds.isEmpty(),
                 iconRes = R.drawable.filter_alt,
                 onClick = { onSelectedTagIdsChange(emptySet()) },
@@ -401,7 +399,7 @@ private fun PlaylistTagFilterRow(
 
         item(key = "manage_playlist_tags", contentType = "playlist_tag_filter_action") {
             PlaylistTagFilterChip(
-                label = stringResource(R.string.manage_tags),
+                label = "manage_tags",
                 selected = false,
                 iconRes = R.drawable.add,
                 onClick = onManageTagsClick,
@@ -479,7 +477,7 @@ private fun PlaylistTagFilterChip(
     ) {
         if (iconRes != null) {
             Icon(
-                painter = painterResource(id = iconRes),
+                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                 contentDescription = null,
                 tint = contentColor,
                 modifier = Modifier.size(18.dp),
@@ -566,7 +564,7 @@ fun ExpressiveTabChip(
         horizontalArrangement = Arrangement.Center,
     ) {
         Icon(
-            painter = painterResource(id = iconRes),
+            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
             contentDescription = label,
             tint = contentColor,
             modifier = Modifier.size(20.dp),

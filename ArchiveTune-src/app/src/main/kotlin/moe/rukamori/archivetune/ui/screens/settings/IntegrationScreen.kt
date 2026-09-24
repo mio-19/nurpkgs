@@ -23,8 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import moe.rukamori.archivetune.LocalPlayerAwareWindowInsets
 import moe.rukamori.archivetune.R
@@ -50,14 +48,14 @@ fun IntegrationScreen(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.integration)) },
+                title = { Text("integration") },
                 navigationIcon = {
                     IconButton(
                         onClick = navController::navigateUp,
                         onLongClick = navController::backToMain,
                     ) {
                         Icon(
-                            painterResource(R.drawable.arrow_back),
+                            androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                         )
                     }
@@ -74,11 +72,11 @@ fun IntegrationScreen(navController: NavController) {
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = SettingsDimensions.ScreenBottomPadding),
         ) {
-            PreferenceGroup(title = stringResource(R.string.general)) {
+            PreferenceGroup(title = "general") {
                 item {
                     PreferenceEntry(
-                        title = { Text(stringResource(R.string.discord_integration)) },
-                        icon = { Icon(painterResource(R.drawable.discord), null) },
+                        title = { Text("discord_integration") },
+                        icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                         onClick = {
                             navController.navigate("settings/discord")
                         },
@@ -86,11 +84,11 @@ fun IntegrationScreen(navController: NavController) {
                 }
             }
 
-            PreferenceGroup(title = stringResource(R.string.scrobbling)) {
+            PreferenceGroup(title = "scrobbling") {
                 item {
                     PreferenceEntry(
-                        title = { Text(stringResource(R.string.lastfm_integration)) },
-                        icon = { Icon(painterResource(R.drawable.token), null) },
+                        title = { Text("lastfm_integration") },
+                        icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                         onClick = {
                             navController.navigate("settings/lastfm")
                         },
@@ -99,9 +97,9 @@ fun IntegrationScreen(navController: NavController) {
 
                 item {
                     SwitchPreference(
-                        title = { Text(stringResource(R.string.listenbrainz_scrobbling)) },
-                        description = stringResource(R.string.listenbrainz_scrobbling_description),
-                        icon = { Icon(painterResource(R.drawable.token), null) },
+                        title = { Text("listenbrainz_scrobbling") },
+                        description = "listenbrainz_scrobbling_description",
+                        icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                         checked = listenBrainzEnabled,
                         onCheckedChange = onListenBrainzEnabledChange,
                     )
@@ -116,11 +114,11 @@ fun IntegrationScreen(navController: NavController) {
                                         R.string.set_listenbrainz_token,
                                     )
                                 } else {
-                                    stringResource(R.string.edit_listenbrainz_token)
+                                    "edit_listenbrainz_token"
                                 },
                             )
                         },
-                        icon = { Icon(painterResource(R.drawable.token), null) },
+                        icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                         onClick = { showListenBrainzTokenEditor.value = true },
                     )
                 }
@@ -144,7 +142,7 @@ fun IntegrationScreen(navController: NavController) {
                 it.isNotEmpty()
             },
             extraContent = {
-                InfoLabel(text = stringResource(R.string.listenbrainz_scrobbling_description))
+                InfoLabel(text = "listenbrainz_scrobbling_description")
             },
         )
     }

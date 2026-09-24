@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.cast
 
-import android.content.Context
 
 object CastPlaybackRepositoryLocator {
     @Volatile private var repository: CastPlaybackRepository? = null

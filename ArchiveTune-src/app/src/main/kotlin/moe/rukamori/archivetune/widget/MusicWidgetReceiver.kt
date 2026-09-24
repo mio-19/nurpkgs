@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.widget
 
-import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.cast
 
-import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

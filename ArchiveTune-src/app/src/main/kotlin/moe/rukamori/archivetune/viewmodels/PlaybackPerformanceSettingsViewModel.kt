@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -38,7 +37,7 @@ sealed interface PlaybackPerformanceSettingsUiState {
     data object Empty : PlaybackPerformanceSettingsUiState
 
     data class Error(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : PlaybackPerformanceSettingsUiState
 }
 

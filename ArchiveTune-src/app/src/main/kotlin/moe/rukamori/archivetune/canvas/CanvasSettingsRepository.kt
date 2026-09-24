@@ -7,10 +7,6 @@
 
 package moe.rukamori.archivetune.canvas
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
 import androidx.core.content.getSystemService
 import androidx.datastore.preferences.core.edit
 import dagger.hilt.android.qualifiers.ApplicationContext

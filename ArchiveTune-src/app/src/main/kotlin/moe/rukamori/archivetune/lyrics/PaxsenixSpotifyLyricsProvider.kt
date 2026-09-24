@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.lyrics
 
-import android.content.Context
 import moe.rukamori.archivetune.constants.EnablePaxsenixSpotifyLyricsKey
 import moe.rukamori.archivetune.paxsenix.PaxsenixLyrics
 import moe.rukamori.archivetune.utils.dataStore

@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.together
 
-import android.content.Context
-import android.os.Build
 import androidx.datastore.preferences.core.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi

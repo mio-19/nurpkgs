@@ -26,8 +26,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
@@ -119,7 +117,7 @@ fun OnlineSearchScreen(
                     contentType = "section_header",
                 ) {
                     SearchSectionHeader(
-                        title = stringResource(R.string.search_history),
+                        title = "search_history",
                         pureBlack = pureBlack,
                         modifier = Modifier.animateItem(),
                     )
@@ -160,7 +158,7 @@ fun OnlineSearchScreen(
                     contentType = "section_header",
                 ) {
                     SearchSectionHeader(
-                        title = stringResource(R.string.suggestions),
+                        title = "suggestions",
                         pureBlack = pureBlack,
                         modifier = Modifier.animateItem(),
                     )
@@ -198,7 +196,7 @@ fun OnlineSearchScreen(
                     contentType = "section_header",
                 ) {
                     SearchSectionHeader(
-                        title = stringResource(R.string.top_results),
+                        title = "top_results",
                         pureBlack = pureBlack,
                         modifier = Modifier.animateItem(),
                     )
@@ -274,7 +272,7 @@ fun OnlineSearchScreen(
                                 },
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.more_vert),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                     contentDescription = null,
                                 )
                             }
@@ -509,7 +507,7 @@ fun SuggestionItem(
                         ),
             ) {
                 Icon(
-                    painterResource(if (online) R.drawable.search else R.drawable.history),
+                    androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent) R.drawable.search else R.drawable.history),
                     contentDescription = null,
                     tint = iconTint,
                     modifier = Modifier.size(20.dp),
@@ -530,8 +528,8 @@ fun SuggestionItem(
             if (!online) {
                 IconButton(onClick = onDelete) {
                     Icon(
-                        painter = painterResource(R.drawable.close),
-                        contentDescription = stringResource(R.string.remove_from_history),
+                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                        contentDescription = "remove_from_history",
                         tint =
                             if (pureBlack) {
                                 Color.White.copy(alpha = 0.62f)
@@ -545,8 +543,8 @@ fun SuggestionItem(
 
             IconButton(onClick = onFillTextField) {
                 Icon(
-                    painter = painterResource(R.drawable.arrow_top_left),
-                    contentDescription = stringResource(R.string.search),
+                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                    contentDescription = "search",
                     tint =
                         if (pureBlack) {
                             Color.White.copy(alpha = 0.62f)

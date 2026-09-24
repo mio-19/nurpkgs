@@ -7,12 +7,6 @@
 
 package moe.rukamori.archivetune.aod
 
-import android.app.PendingIntent
-import android.content.Intent
-import android.graphics.drawable.Icon
-import android.os.Build
-import android.service.quicksettings.Tile
-import android.service.quicksettings.TileService
 import moe.rukamori.archivetune.MainActivity
 import moe.rukamori.archivetune.R
 

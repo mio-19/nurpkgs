@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.logcat
 
-import android.net.Uri
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

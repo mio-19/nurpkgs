@@ -7,11 +7,6 @@
 
 package moe.rukamori.archivetune.playback
 
-import android.app.Notification
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.graphics.drawable.Icon
 import androidx.media3.common.C
 import androidx.media3.common.util.NotificationUtil
 import androidx.media3.common.util.Util

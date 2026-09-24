@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import android.content.Context
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -53,7 +51,7 @@ sealed interface AiIntegrationSettingsScreenState {
     data object Empty : AiIntegrationSettingsScreenState
 
     data class Error(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : AiIntegrationSettingsScreenState
 }
 
@@ -380,7 +378,7 @@ class AiIntegrationSettingsViewModel
                     },
             )
 
-        private fun Throwable.shortMessage(@StringRes fallbackResId: Int): String {
+        private fun Throwable.shortMessage(fallbackResId: Int): String {
             val fallback = context.getString(fallbackResId)
             val raw = localizedMessage?.takeIf { it.isNotBlank() } ?: fallback
             val message =

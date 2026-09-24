@@ -43,8 +43,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -74,7 +72,7 @@ fun SongSourceReplacementDialog(
             .importSongCandidates()
             .collectAsStateWithLifecycle(initialValue = emptyList())
     val coroutineScope = rememberCoroutineScope()
-    val noResultsMessage = stringResource(R.string.import_no_search_results)
+    val noResultsMessage = "import_no_search_results"
 
     var query by remember(currentSong.id) { mutableStateOf(buildImportSongQuery(currentSong)) }
     var candidates by remember(currentSong.id) { mutableStateOf(emptyList<Song>()) }
@@ -134,14 +132,14 @@ fun SongSourceReplacementDialog(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text(stringResource(R.string.change_song_source)) },
+                        title = { Text("change_song_source") },
                         navigationIcon = {
                             IconButton(
                                 onClick = onDismiss,
                                 enabled = !isSaving,
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.close),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                     contentDescription = stringResource(android.R.string.cancel),
                                 )
                             }
@@ -180,7 +178,7 @@ fun SongSourceReplacementDialog(
                                     )
                                     Spacer(Modifier.width(8.dp))
                                 }
-                                Text(stringResource(R.string.replace_song))
+                                Text("replace_song")
                             }
                         }
                     }
@@ -215,7 +213,7 @@ fun SongSourceReplacementDialog(
                             selectedSong = null
                             searchMessage = null
                         },
-                        label = { Text(stringResource(R.string.import_search_query)) },
+                        label = { Text("import_search_query") },
                         singleLine = true,
                         enabled = searchingSource == null && !isSaving,
                         modifier =
@@ -234,7 +232,7 @@ fun SongSourceReplacementDialog(
                         ) {
                             SearchButtonContent(
                                 loading = searchingSource == ReplacementSource.LOCAL,
-                                text = stringResource(R.string.import_search_local),
+                                text = "import_search_local",
                             )
                         }
                         Button(
@@ -244,7 +242,7 @@ fun SongSourceReplacementDialog(
                         ) {
                             SearchButtonContent(
                                 loading = searchingSource == ReplacementSource.YOUTUBE,
-                                text = stringResource(R.string.import_search_youtube),
+                                text = "import_search_youtube",
                             )
                         }
                     }

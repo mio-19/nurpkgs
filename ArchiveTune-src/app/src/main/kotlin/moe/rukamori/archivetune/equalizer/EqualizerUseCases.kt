@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.equalizer
 
-import android.net.Uri
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import moe.rukamori.archivetune.playback.EqCapabilities

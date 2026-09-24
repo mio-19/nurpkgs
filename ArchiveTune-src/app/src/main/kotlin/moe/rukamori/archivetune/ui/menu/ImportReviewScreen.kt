@@ -55,8 +55,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -83,7 +81,7 @@ fun ImportReviewScreen(
     val reviewItems = remember(results) { results.map(::ImportReviewItemState).toMutableStateList() }
     val replacementSearcher = remember { ImportReplacementSearcher() }
     val coroutineScope = rememberCoroutineScope()
-    val noResultsMessage = stringResource(R.string.import_no_search_results)
+    val noResultsMessage = "import_no_search_results"
 
     var filter by remember { mutableStateOf(ImportReviewFilter.ALL) }
     var editingIndex by remember { mutableStateOf<Int?>(null) }
@@ -174,11 +172,11 @@ fun ImportReviewScreen(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text(stringResource(R.string.import_review_title)) },
+                        title = { Text("import_review_title") },
                         navigationIcon = {
                             IconButton(onClick = onCancel) {
                                 Icon(
-                                    painter = painterResource(R.drawable.close),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                     contentDescription = stringResource(android.R.string.cancel),
                                 )
                             }
@@ -355,7 +353,7 @@ private fun ImportReviewItem(
                 Spacer(Modifier.weight(1f))
                 if (!item.skipped) {
                     TextButton(onClick = onEdit) {
-                        Text(stringResource(R.string.import_edit_match))
+                        Text("import_edit_match")
                     }
                 }
                 TextButton(onClick = onToggleSkipped) {
@@ -401,7 +399,7 @@ private fun ImportReviewItem(
                 OutlinedTextField(
                     value = query,
                     onValueChange = onQueryChange,
-                    label = { Text(stringResource(R.string.import_search_query)) },
+                    label = { Text("import_search_query") },
                     singleLine = true,
                     enabled = searchingSource == null,
                     modifier = Modifier.fillMaxWidth(),
@@ -417,7 +415,7 @@ private fun ImportReviewItem(
                     ) {
                         SearchButtonContent(
                             loading = searchingSource == ImportReplacementSource.LOCAL,
-                            text = stringResource(R.string.import_search_local),
+                            text = "import_search_local",
                         )
                     }
                     Button(
@@ -427,7 +425,7 @@ private fun ImportReviewItem(
                     ) {
                         SearchButtonContent(
                             loading = searchingSource == ImportReplacementSource.YOUTUBE,
-                            text = stringResource(R.string.import_search_youtube),
+                            text = "import_search_youtube",
                         )
                     }
                 }
@@ -454,7 +452,7 @@ private fun ImportReviewItem(
                     onClick = onCancelEdit,
                     modifier = Modifier.align(Alignment.End),
                 ) {
-                    Text(stringResource(R.string.import_cancel_edit))
+                    Text("import_cancel_edit")
                 }
             }
         }
@@ -514,7 +512,7 @@ internal fun ImportCandidateItem(
                         )
                     } else {
                         Icon(
-                            painter = painterResource(R.drawable.music_note),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(24.dp),
@@ -541,7 +539,7 @@ internal fun ImportCandidateItem(
             }
             if (selected) {
                 Icon(
-                    painter = painterResource(R.drawable.check),
+                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                 )

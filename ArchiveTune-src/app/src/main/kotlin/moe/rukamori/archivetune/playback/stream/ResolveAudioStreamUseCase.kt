@@ -7,9 +7,6 @@
 
 package moe.rukamori.archivetune.playback.stream
 
-import android.os.Looper
-import android.os.SystemClock
-import androidx.annotation.WorkerThread
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart

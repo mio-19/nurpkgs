@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.ui.screens.search
 
-import android.util.Base64
 
 internal const val OnlineSearchResultRoute = "search/{encodedQuery}"
 internal const val OnlineSearchResultRoutePrefix = "search/"

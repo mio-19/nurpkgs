@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.playlist
 
-import android.net.Uri
 import moe.rukamori.archivetune.repository.PlaylistCoverRepository
 import javax.inject.Inject
 

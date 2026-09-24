@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.lyrics
 
-import android.content.Context
-import android.util.Log
 import moe.rukamori.archivetune.constants.EnableUnisonLyricsKey
 import moe.rukamori.archivetune.unison.Unison
 import moe.rukamori.archivetune.utils.GlobalLog

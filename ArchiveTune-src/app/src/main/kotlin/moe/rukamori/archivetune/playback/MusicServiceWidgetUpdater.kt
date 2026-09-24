@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.playback
 
-import android.graphics.BitmapFactory
-import android.net.Uri
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.mutablePreferencesOf

@@ -58,8 +58,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -187,19 +185,19 @@ fun LibrarySongsScreen(
             ) {
                 // Liked
                 SongSubFilterChip(
-                    label = stringResource(R.string.filter_liked),
+                    label = "filter_liked",
                     selected = filter == SongFilter.LIKED,
                     onClick = { filter = SongFilter.LIKED },
                 )
                 // Downloaded
                 SongSubFilterChip(
-                    label = stringResource(R.string.filter_downloaded),
+                    label = "filter_downloaded",
                     selected = filter == SongFilter.DOWNLOADED,
                     onClick = { filter = SongFilter.DOWNLOADED },
                 )
                 // All Songs
                 SongSubFilterChip(
-                    label = stringResource(R.string.all_songs),
+                    label = "all_songs",
                     selected = filter == SongFilter.LIBRARY,
                     onClick = { filter = SongFilter.LIBRARY },
                 )
@@ -217,20 +215,20 @@ fun LibrarySongsScreen(
                                     R.string.newest_first,
                                 )
                             } else {
-                                stringResource(R.string.oldest_first)
+                                "oldest_first"
                             }
                         }
 
                         SongSortType.NAME -> {
-                            if (sortDescending) stringResource(R.string.sort_z_to_a) else stringResource(R.string.sort_a_to_z)
+                            if (sortDescending) "sort_z_to_a" else "sort_a_to_z"
                         }
 
                         SongSortType.ARTIST -> {
-                            stringResource(R.string.sort_artist)
+                            "sort_artist"
                         }
 
                         SongSortType.PLAY_TIME -> {
-                            stringResource(R.string.most_played_sort)
+                            "most_played_sort"
                         }
                     }
 
@@ -251,7 +249,7 @@ fun LibrarySongsScreen(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Icon(
-                            painter = painterResource(id = R.drawable.expand_more),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(16.dp),
@@ -265,14 +263,14 @@ fun LibrarySongsScreen(
                         SongSortType.entries.forEach { type ->
                             val label =
                                 when (type) {
-                                    SongSortType.CREATE_DATE -> stringResource(R.string.recently_added)
+                                    SongSortType.CREATE_DATE -> "recently_added"
 
                                     // Issue 4: select NAME always sets ascending (A→Z) by default
-                                    SongSortType.NAME -> stringResource(R.string.sort_a_to_z)
+                                    SongSortType.NAME -> "sort_a_to_z"
 
-                                    SongSortType.ARTIST -> stringResource(R.string.sort_artist)
+                                    SongSortType.ARTIST -> "sort_artist"
 
-                                    SongSortType.PLAY_TIME -> stringResource(R.string.most_played_sort)
+                                    SongSortType.PLAY_TIME -> "most_played_sort"
                                 }
                             DropdownMenuItem(
                                 text = { Text(label) },
@@ -299,8 +297,7 @@ fun LibrarySongsScreen(
                 ) {
                     Icon(
                         painter =
-                            painterResource(
-                                id = if (sortDescending) R.drawable.arrow_downward else R.drawable.arrow_upward,
+                            androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent) R.drawable.arrow_downward else R.drawable.arrow_upward,
                             ),
                         contentDescription =
                             if (sortDescending) {
@@ -308,7 +305,7 @@ fun LibrarySongsScreen(
                                     R.string.sort_descending,
                                 )
                             } else {
-                                stringResource(R.string.sort_ascending)
+                                "sort_ascending"
                             },
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp),
@@ -350,7 +347,7 @@ fun LibrarySongsScreen(
                             ) {
                                 Column {
                                     Text(
-                                        text = stringResource(R.string.your_collection),
+                                        text = "your_collection",
                                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                                     )
@@ -359,9 +356,9 @@ fun LibrarySongsScreen(
                                         if (filteredSongs.size ==
                                             1
                                         ) {
-                                            "1 ${stringResource(R.string.song_singular)}"
+                                            "1 ${"song_singular"}"
                                         } else {
-                                            "${filteredSongs.size} ${stringResource(R.string.songs)}"
+                                            "${filteredSongs.size} ${"songs"}"
                                         }
                                     Text(
                                         text =
@@ -396,13 +393,13 @@ fun LibrarySongsScreen(
                                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
                                 ) {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.play),
+                                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                         contentDescription = null,
                                         modifier = Modifier.size(16.dp),
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = stringResource(R.string.play),
+                                        text = "play",
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                                     )
                                 }
@@ -538,8 +535,8 @@ fun LibrarySongsScreen(
                         ) {
                             if (isActive && isPlaying) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.graphic_eq),
-                                    contentDescription = stringResource(R.string.playing_desc),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                                    contentDescription = "playing_desc",
                                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                     modifier = Modifier.size(16.dp),
                                 )
@@ -584,7 +581,7 @@ fun LibrarySongsScreen(
                                 modifier = Modifier.size(24.dp),
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.more_vert),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                     contentDescription = null,
                                     modifier = Modifier.size(16.dp),
                                 )

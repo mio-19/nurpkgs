@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.widget
 
-import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import moe.rukamori.archivetune.R
 import moe.rukamori.archivetune.db.entities.Artist

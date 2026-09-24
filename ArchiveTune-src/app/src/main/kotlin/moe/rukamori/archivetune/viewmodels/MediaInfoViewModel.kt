@@ -1,7 +1,5 @@
 package moe.rukamori.archivetune.viewmodels
 
-import android.content.Context
-import android.text.format.Formatter
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

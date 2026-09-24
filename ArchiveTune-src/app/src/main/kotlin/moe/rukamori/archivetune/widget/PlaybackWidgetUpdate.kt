@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.widget
 
-import android.content.ComponentName
-import android.content.Context
 import moe.rukamori.archivetune.playback.MusicService
 
 internal suspend fun requestPlaybackWidgetUpdate(context: Context) {

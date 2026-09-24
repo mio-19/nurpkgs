@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.lyrics
 
-import android.content.Context
 import moe.rukamori.archivetune.innertube.YouTube
 import moe.rukamori.archivetune.innertube.models.WatchEndpoint
 

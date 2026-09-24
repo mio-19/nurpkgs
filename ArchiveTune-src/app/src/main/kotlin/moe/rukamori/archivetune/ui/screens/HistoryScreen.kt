@@ -87,9 +87,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -462,7 +460,7 @@ fun HistoryScreen(
                                 if (selectionCount > 0) {
                                     pluralStringResource(R.plurals.n_song, selectionCount, selectionCount)
                                 } else {
-                                    stringResource(R.string.history)
+                                    "history"
                                 },
                             fontWeight = FontWeight.Bold,
                         )
@@ -484,8 +482,7 @@ fun HistoryScreen(
                         ) {
                             Icon(
                                 painter =
-                                    painterResource(
-                                        if (selectionCount > 0) R.drawable.close else R.drawable.arrow_back,
+                                    androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent) R.drawable.close else R.drawable.arrow_back,
                                     ),
                                 contentDescription = null,
                             )
@@ -498,7 +495,7 @@ fun HistoryScreen(
                                 onLongClick = {},
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.search),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                     contentDescription = null,
                                 )
                             }
@@ -518,7 +515,7 @@ fun HistoryScreen(
                 visible = !showSearchBar && selectionCount == 0 && currentVisibleCount > 0,
                 lazyListState = activeListState,
                 icon = R.drawable.shuffle,
-                label = stringResource(R.string.shuffle),
+                label = "shuffle",
                 onClick = {
                     if (historySource == HistorySource.REMOTE) {
                         if (remoteVisibleSongs.isNotEmpty()) {
@@ -565,7 +562,7 @@ fun HistoryScreen(
                     },
                     modifier = Modifier.fillMaxSize(),
                     placeholder = {
-                        Text(text = stringResource(R.string.search))
+                        Text(text = "search")
                     },
                     leadingIcon = {
                         AppIconButton(
@@ -577,7 +574,7 @@ fun HistoryScreen(
                             },
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.arrow_back),
+                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                 contentDescription = null,
                             )
                         }
@@ -589,7 +586,7 @@ fun HistoryScreen(
                                 onLongClick = {},
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.close),
+                                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                     contentDescription = null,
                                 )
                             }
@@ -745,7 +742,7 @@ private fun LocalHistoryFeed(
                                     },
                                 ) {
                                     Icon(
-                                        painter = painterResource(R.drawable.more_vert),
+                                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                         contentDescription = null,
                                     )
                                 }
@@ -823,8 +820,8 @@ private fun RemoteHistoryFeed(
             RemoteHistoryUiState.Loading -> {
                 item("remote_history_loading") {
                     HistoryStateCard(
-                        title = stringResource(R.string.history_remote_loading),
-                        description = stringResource(R.string.history_remote_summary),
+                        title = "history_remote_loading",
+                        description = "history_remote_summary",
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                         loading = true,
                     )
@@ -834,8 +831,8 @@ private fun RemoteHistoryFeed(
             RemoteHistoryUiState.Empty -> {
                 item("remote_history_empty") {
                     HistoryStateCard(
-                        title = stringResource(R.string.history_remote_empty_title),
-                        description = stringResource(R.string.history_remote_empty_desc),
+                        title = "history_remote_empty_title",
+                        description = "history_remote_empty_desc",
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                         icon = R.drawable.history,
                     )
@@ -845,10 +842,10 @@ private fun RemoteHistoryFeed(
             RemoteHistoryUiState.Error -> {
                 item("remote_history_error") {
                     HistoryStateCard(
-                        title = stringResource(R.string.history_remote_error_title),
-                        description = stringResource(R.string.history_remote_error_desc),
+                        title = "history_remote_error_title",
+                        description = "history_remote_error_desc",
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        actionLabel = stringResource(R.string.retry),
+                        actionLabel = "retry",
                         onActionClick = onRetry,
                         icon = R.drawable.history,
                     )
@@ -859,8 +856,8 @@ private fun RemoteHistoryFeed(
                 if (filteredSections.isEmpty()) {
                     item("remote_history_search_empty") {
                         HistoryStateCard(
-                            title = stringResource(R.string.history_no_results_title),
-                            description = stringResource(R.string.history_no_results_desc),
+                            title = "history_no_results_title",
+                            description = "history_no_results_desc",
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                             icon = R.drawable.search,
                         )
@@ -897,7 +894,7 @@ private fun RemoteHistoryFeed(
                                             onClick = { onSongMenu(song) },
                                         ) {
                                             Icon(
-                                                painter = painterResource(R.drawable.more_vert),
+                                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                                 contentDescription = null,
                                             )
                                         }
@@ -953,7 +950,7 @@ private fun HistorySourceDock(
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                painter = painterResource(R.drawable.history),
+                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
                             )
@@ -1194,7 +1191,7 @@ private fun HistoryStateCard(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            painter = painterResource(icon),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                             modifier = Modifier.size(36.dp),
                         )
@@ -1263,8 +1260,8 @@ private fun BoxScope.HistorySelectionToolbar(
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.more_vert),
-                        contentDescription = stringResource(R.string.more_options),
+                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                        contentDescription = "more_options",
                     )
                 }
             },
@@ -1298,7 +1295,7 @@ private fun HistoryToolbarAction(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Icon(
-            painter = painterResource(icon),
+            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
             contentDescription = null,
         )
         Spacer(modifier = Modifier.width(8.dp))

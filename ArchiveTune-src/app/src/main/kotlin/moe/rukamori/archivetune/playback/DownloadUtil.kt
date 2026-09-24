@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.playback
 
-import android.content.Context
-import android.net.Uri
 import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.database.DatabaseProvider

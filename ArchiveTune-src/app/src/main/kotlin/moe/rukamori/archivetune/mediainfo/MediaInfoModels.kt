@@ -1,7 +1,5 @@
 package moe.rukamori.archivetune.mediainfo
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import com.google.common.collect.ImmutableList
 import moe.rukamori.archivetune.R

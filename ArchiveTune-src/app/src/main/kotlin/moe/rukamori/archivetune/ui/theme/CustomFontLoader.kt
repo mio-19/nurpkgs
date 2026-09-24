@@ -7,16 +7,12 @@
 
 package moe.rukamori.archivetune.ui.theme
 
-import android.content.Context
-import android.net.Uri
-import android.provider.OpenableColumns
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.Typeface
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import android.graphics.Typeface as AndroidTypeface
 
 object CustomFontLoader {
     val supportedMimeTypes =

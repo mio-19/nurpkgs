@@ -7,10 +7,6 @@
 
 package moe.rukamori.archivetune.onboarding
 
-import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.datastore.preferences.core.edit
 import com.google.common.collect.ImmutableList

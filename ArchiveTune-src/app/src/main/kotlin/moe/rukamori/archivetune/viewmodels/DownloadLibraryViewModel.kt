@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -67,7 +66,7 @@ sealed interface DownloadLibraryScreenState {
 
     data class Error(
         val selectedTab: DownloadLibraryTab,
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
         val query: String,
         val isSearchActive: Boolean,
         override val pendingRemoval: DownloadRemovalConfirmation? = null,
@@ -87,7 +86,7 @@ sealed interface DownloadRemovalConfirmation {
 
 sealed interface DownloadLibraryEvent {
     data class Message(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : DownloadLibraryEvent
 
     data class Navigate(

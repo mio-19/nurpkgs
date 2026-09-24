@@ -7,11 +7,6 @@
 
 package moe.rukamori.archivetune.ui.player
 
-import android.content.Context
-import android.media.MediaCodecList
-import android.media.MediaExtractor
-import android.media.MediaFormat
-import android.net.Uri
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

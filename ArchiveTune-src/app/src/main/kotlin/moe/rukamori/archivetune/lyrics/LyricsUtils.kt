@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.lyrics
 
-import android.icu.text.Transliterator
-import android.text.format.DateUtils
 import androidx.compose.runtime.Immutable
 import com.atilika.kuromoji.ipadic.Tokenizer
 import kotlinx.coroutines.Dispatchers

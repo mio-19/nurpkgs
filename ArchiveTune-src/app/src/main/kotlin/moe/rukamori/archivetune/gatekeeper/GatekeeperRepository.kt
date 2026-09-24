@@ -7,9 +7,6 @@
 
 package moe.rukamori.archivetune.gatekeeper
 
-import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp

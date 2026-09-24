@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -56,7 +55,7 @@ sealed interface PlaylistTagsScreenState {
 
     @Immutable
     data class Error(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : PlaylistTagsScreenState
 }
 
@@ -103,7 +102,7 @@ private data class PlaylistTagsControls(
     val selectedBulkTagIds: Set<String>,
     val selectedBulkPlaylistIds: Set<String>,
     val isBulkAssignVisible: Boolean,
-    @StringRes val operationErrorResId: Int?,
+    val operationErrorResId: Int?,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class)

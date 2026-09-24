@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.about
 
-import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.datastore.preferences.core.edit
 import dagger.hilt.android.qualifiers.ApplicationContext

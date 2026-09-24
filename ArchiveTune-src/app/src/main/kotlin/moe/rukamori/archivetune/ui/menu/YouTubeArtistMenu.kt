@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.ui.menu
 
-import android.content.Intent
-import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,8 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -111,13 +107,13 @@ fun YouTubeArtistMenu(
                                     NewAction(
                                         icon = {
                                             Icon(
-                                                painter = painterResource(R.drawable.radio),
+                                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                                 contentDescription = null,
                                                 modifier = Modifier.size(28.dp),
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                             )
                                         },
-                                        text = stringResource(R.string.start_radio),
+                                        text = "start_radio",
                                         onClick = {
                                             playerConnection.playQueue(YouTubeQueue(watchEndpoint))
                                             onDismiss()
@@ -131,13 +127,13 @@ fun YouTubeArtistMenu(
                                     NewAction(
                                         icon = {
                                             Icon(
-                                                painter = painterResource(R.drawable.shuffle),
+                                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                                 contentDescription = null,
                                                 modifier = Modifier.size(28.dp),
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                             )
                                         },
-                                        text = stringResource(R.string.shuffle),
+                                        text = "shuffle",
                                         onClick = {
                                             playerConnection.playQueue(YouTubeQueue(watchEndpoint))
                                             onDismiss()
@@ -150,13 +146,13 @@ fun YouTubeArtistMenu(
                                 NewAction(
                                     icon = {
                                         Icon(
-                                            painter = painterResource(R.drawable.share),
+                                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                             contentDescription = null,
                                             modifier = Modifier.size(28.dp),
                                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
                                     },
-                                    text = stringResource(R.string.share),
+                                    text = "share",
                                     onClick = {
                                         val intent =
                                             Intent().apply {
@@ -189,17 +185,16 @@ fun YouTubeArtistMenu(
                                     if (libraryArtist?.artist?.bookmarkedAt !=
                                         null
                                     ) {
-                                        stringResource(R.string.subscribed)
+                                        "subscribed"
                                     } else {
-                                        stringResource(R.string.subscribe)
+                                        "subscribe"
                                     },
                             )
                         },
                         leadingContent = {
                             Icon(
                                 painter =
-                                    painterResource(
-                                        if (libraryArtist?.artist?.bookmarkedAt != null) {
+                                    androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent) {
                                             R.drawable.subscribed
                                         } else {
                                             R.drawable.subscribe
@@ -249,7 +244,7 @@ fun YouTubeArtistMenu(
                         },
                         leadingContent = {
                             Icon(
-                                painter = painterResource(if (isInSpeedDial) R.drawable.bookmark_filled else R.drawable.bookmark),
+                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent) R.drawable.bookmark_filled else R.drawable.bookmark),
                                 contentDescription = null,
                             )
                         },

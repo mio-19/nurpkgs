@@ -7,9 +7,6 @@
 
 package moe.rukamori.archivetune.ui.screens.settings
 
-import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ProcessLifecycleOwner

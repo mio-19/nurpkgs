@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.lyrics
 
-import android.content.Context
-import android.util.Log
 import moe.rukamori.archivetune.constants.EnableYouLyPlusLyricsKey
 import moe.rukamori.archivetune.utils.GlobalLog
 import moe.rukamori.archivetune.utils.dataStore

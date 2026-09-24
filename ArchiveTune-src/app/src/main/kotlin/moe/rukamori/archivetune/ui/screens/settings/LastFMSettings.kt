@@ -9,7 +9,6 @@
 
 package moe.rukamori.archivetune.ui.screens.settings
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,8 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.Dp
@@ -83,14 +80,14 @@ fun LastFMSettings(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.lastfm_integration)) },
+                title = { Text("lastfm_integration") },
                 navigationIcon = {
                     IconButton(
                         onClick = navController::navigateUp,
                         onLongClick = navController::backToMain,
                     ) {
                         Icon(
-                            painterResource(R.drawable.arrow_back),
+                            androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                         )
                     }
@@ -230,7 +227,7 @@ private fun LastFmSettingsLoading() {
     ) {
         CircularWavyProgressIndicator(modifier = Modifier.size(28.dp))
         Text(
-            text = stringResource(R.string.loading),
+            text = "loading",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(start = 12.dp),
         )
@@ -239,7 +236,7 @@ private fun LastFmSettingsLoading() {
 
 @Composable
 private fun LastFmSettingsError(
-    @StringRes messageResId: Int,
+    messageResId: Int,
 ) {
     Text(
         text = stringResource(messageResId),
@@ -264,49 +261,49 @@ private fun LastFmSettingsSuccess(
         if (model.endpointValid) {
             model.resolvedEndpoint
         } else {
-            stringResource(R.string.lastfm_endpoint_invalid)
+            "lastfm_endpoint_invalid"
         }
 
-    PreferenceGroup(title = stringResource(R.string.lastfm_service)) {
+    PreferenceGroup(title = "lastfm_service") {
         item {
             PreferenceEntry(
-                title = { Text(stringResource(R.string.lastfm_service_provider)) },
+                title = { Text("lastfm_service_provider") },
                 description = "$providerName\n$endpointDescription",
-                icon = { Icon(painterResource(R.drawable.token), null) },
+                icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                 onClick = onOpenServiceEditor,
             )
         }
 
         item {
             PreferenceEntry(
-                title = { Text(stringResource(R.string.lastfm_api_credentials)) },
+                title = { Text("lastfm_api_credentials") },
                 description =
                     if (model.apiKeyOverride.isBlank() && model.secretOverride.isBlank()) {
-                        stringResource(R.string.lastfm_api_credentials_default)
+                        "lastfm_api_credentials_default"
                     } else {
-                        stringResource(R.string.lastfm_api_credentials_custom)
+                        "lastfm_api_credentials_custom"
                     },
-                icon = { Icon(painterResource(R.drawable.token), null) },
+                icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                 onClick = onOpenServiceEditor,
             )
         }
     }
 
-    PreferenceGroup(title = stringResource(R.string.account)) {
+    PreferenceGroup(title = "account") {
         item {
             PreferenceEntry(
                 title = {
                     Text(
-                        text = if (model.isLoggedIn) model.username else stringResource(R.string.not_logged_in),
+                        text = if (model.isLoggedIn) model.username else "not_logged_in",
                         modifier = Modifier.alpha(if (model.isLoggedIn) 1f else 0.5f),
                     )
                 },
                 description = null,
-                icon = { Icon(painterResource(R.drawable.token), null) },
+                icon = { Icon(androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), null) },
                 trailingContent = {
                     if (model.isLoggedIn) {
                         OutlinedButton(onClick = onLogout, shapes = ButtonDefaults.shapes()) {
-                            Text(stringResource(R.string.action_logout))
+                            Text("action_logout")
                         }
                     } else {
                         OutlinedButton(
@@ -314,7 +311,7 @@ private fun LastFmSettingsSuccess(
                             enabled = model.canLogin,
                             shapes = ButtonDefaults.shapes(),
                         ) {
-                            Text(stringResource(R.string.action_login))
+                            Text("action_login")
                         }
                     }
                 },
@@ -322,10 +319,10 @@ private fun LastFmSettingsSuccess(
         }
     }
 
-    PreferenceGroup(title = stringResource(R.string.options)) {
+    PreferenceGroup(title = "options") {
         item {
             SwitchPreference(
-                title = { Text(stringResource(R.string.enable_scrobbling)) },
+                title = { Text("enable_scrobbling") },
                 checked = model.scrobblingEnabled,
                 onCheckedChange = onScrobblingChange,
                 isEnabled = model.canEnableScrobbling,
@@ -334,7 +331,7 @@ private fun LastFmSettingsSuccess(
 
         item {
             SwitchPreference(
-                title = { Text(stringResource(R.string.lastfm_now_playing)) },
+                title = { Text("lastfm_now_playing") },
                 checked = model.nowPlayingEnabled,
                 onCheckedChange = onNowPlayingChange,
                 isEnabled = model.canEnableScrobbling && model.scrobblingEnabled,
@@ -342,10 +339,10 @@ private fun LastFmSettingsSuccess(
         }
     }
 
-    PreferenceGroup(title = stringResource(R.string.scrobbling_configuration)) {
+    PreferenceGroup(title = "scrobbling_configuration") {
         item {
             PreferenceEntry(
-                title = { Text(stringResource(R.string.scrobble_min_track_duration)) },
+                title = { Text("scrobble_min_track_duration") },
                 description = stringResource(R.string.duration_seconds_short, model.minTrackDurationSeconds),
                 onClick = { onOpenTimingEditor(LastFmTimingSetting.MIN_TRACK_DURATION) },
             )
@@ -353,7 +350,7 @@ private fun LastFmSettingsSuccess(
 
         item {
             PreferenceEntry(
-                title = { Text(stringResource(R.string.scrobble_delay_percent)) },
+                title = { Text("scrobble_delay_percent") },
                 description =
                     stringResource(
                         R.string.percent_format,
@@ -365,7 +362,7 @@ private fun LastFmSettingsSuccess(
 
         item {
             PreferenceEntry(
-                title = { Text(stringResource(R.string.scrobble_delay_minutes)) },
+                title = { Text("scrobble_delay_minutes") },
                 description = stringResource(R.string.duration_seconds_short, model.scrobbleDelaySeconds),
                 onClick = { onOpenTimingEditor(LastFmTimingSetting.DELAY_SECONDS) },
             )
@@ -388,13 +385,13 @@ private fun LastFmLoginDialog(
         onDismissRequest = {
             if (!dialog.isLoggingIn) onDismiss()
         },
-        title = { Text(stringResource(R.string.login)) },
+        title = { Text("login") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = dialog.username,
                     onValueChange = onUsernameChange,
-                    label = { Text(stringResource(R.string.username)) },
+                    label = { Text("username") },
                     singleLine = true,
                     enabled = !dialog.isLoggingIn,
                     modifier = Modifier.fillMaxWidth(),
@@ -402,7 +399,7 @@ private fun LastFmLoginDialog(
                 OutlinedTextField(
                     value = dialog.password,
                     onValueChange = onPasswordChange,
-                    label = { Text(stringResource(R.string.password)) },
+                    label = { Text("password") },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -430,7 +427,7 @@ private fun LastFmLoginDialog(
                     ) {
                         CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
                         Text(
-                            text = stringResource(R.string.logging_in),
+                            text = "logging_in",
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = 8.dp),
                         )
@@ -448,7 +445,7 @@ private fun LastFmLoginDialog(
                         dialog.password.isNotBlank(),
                 shapes = ButtonDefaults.shapes(),
             ) {
-                Text(stringResource(R.string.login))
+                Text("login")
             }
         },
         dismissButton = {
@@ -457,7 +454,7 @@ private fun LastFmLoginDialog(
                 enabled = !dialog.isLoggingIn,
                 shapes = ButtonDefaults.shapes(),
             ) {
-                Text(stringResource(R.string.cancel))
+                Text("cancel")
             }
         },
     )
@@ -479,7 +476,7 @@ private fun LastFmServiceEditorDialog(
         onDismissRequest = {
             if (!editor.isSaving) onDismiss()
         },
-        title = { Text(stringResource(R.string.lastfm_service)) },
+        title = { Text("lastfm_service") },
         text = {
             Column(
                 modifier =
@@ -489,7 +486,7 @@ private fun LastFmServiceEditorDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    text = stringResource(R.string.lastfm_service_provider),
+                    text = "lastfm_service_provider",
                     style = MaterialTheme.typography.labelLarge,
                 )
                 Row(
@@ -514,7 +511,7 @@ private fun LastFmServiceEditorDialog(
                     OutlinedTextField(
                         value = editor.customEndpoint,
                         onValueChange = onCustomEndpointChange,
-                        label = { Text(stringResource(R.string.lastfm_custom_endpoint)) },
+                        label = { Text("lastfm_custom_endpoint") },
                         singleLine = true,
                         isError = editor.errorMessageResId == R.string.lastfm_endpoint_invalid,
                         enabled = !editor.isSaving,
@@ -526,7 +523,7 @@ private fun LastFmServiceEditorDialog(
                     OutlinedTextField(
                         value = editor.apiKeyOverride,
                         onValueChange = onApiKeyOverrideChange,
-                        label = { Text(stringResource(R.string.lastfm_api_key_override)) },
+                        label = { Text("lastfm_api_key_override") },
                         singleLine = true,
                         enabled = !editor.isSaving,
                         modifier = Modifier.fillMaxWidth(),
@@ -534,14 +531,14 @@ private fun LastFmServiceEditorDialog(
                     OutlinedTextField(
                         value = editor.secretOverride,
                         onValueChange = onSecretOverrideChange,
-                        label = { Text(stringResource(R.string.lastfm_secret_override)) },
+                        label = { Text("lastfm_secret_override") },
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         enabled = !editor.isSaving,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    InfoLabel(text = stringResource(R.string.lastfm_api_credentials_hint))
+                    InfoLabel(text = "lastfm_api_credentials_hint")
                 }
 
                 editor.errorMessageResId?.let { messageResId ->
@@ -655,7 +652,6 @@ private fun LastFmTimingEditorDialog(
     )
 }
 
-@StringRes
 private fun LastFmProvider.titleResId(): Int =
     when (this) {
         LastFmProvider.LASTFM -> R.string.lastfm_provider_lastfm
@@ -663,7 +659,6 @@ private fun LastFmProvider.titleResId(): Int =
         LastFmProvider.CUSTOM -> R.string.lastfm_provider_custom
     }
 
-@StringRes
 private fun LastFmTimingSetting.titleResId(): Int =
     when (this) {
         LastFmTimingSetting.MIN_TRACK_DURATION -> R.string.scrobble_min_track_duration

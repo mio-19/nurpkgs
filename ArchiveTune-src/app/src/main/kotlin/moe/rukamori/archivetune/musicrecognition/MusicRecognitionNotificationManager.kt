@@ -7,17 +7,8 @@
 
 package moe.rukamori.archivetune.musicrecognition
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import android.util.Base64
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.json.Json
 import moe.rukamori.archivetune.MainActivity
@@ -173,7 +164,7 @@ class MusicRecognitionNotificationManager
         private fun baseBuilder(
             title: String,
             text: String,
-            @StringRes status: Int,
+            status: Int,
             alert: Boolean,
         ): NotificationCompat.Builder =
             NotificationCompat

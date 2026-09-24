@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.ui.screens.musicrecognition
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,8 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
@@ -114,7 +110,7 @@ fun MusicRecognitionDetailsScreen(
             LargeFlexibleTopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.music_recognition),
+                        text = "music_recognition",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -122,8 +118,8 @@ fun MusicRecognitionDetailsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            painter = painterResource(R.drawable.arrow_back),
-                            contentDescription = stringResource(R.string.back_button_desc),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                            contentDescription = "back_button_desc",
                         )
                     }
                 },

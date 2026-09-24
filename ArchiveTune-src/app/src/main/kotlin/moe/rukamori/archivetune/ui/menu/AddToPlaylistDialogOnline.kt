@@ -37,8 +37,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -273,10 +271,10 @@ fun AddToPlaylistDialogOnline(
         ) {
             item {
                 ListItem(
-                    title = stringResource(R.string.create_playlist),
+                    title = "create_playlist",
                     thumbnailContent = {
                         Image(
-                            painter = painterResource(id = R.drawable.playlist_add),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                             contentDescription = null,
                             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
                             modifier = Modifier.size(ListThumbnailSize),
@@ -305,10 +303,10 @@ fun AddToPlaylistDialogOnline(
                         Modifier.clickable {
                             prepareSongsForReview(targetPlaylist = null, addToLiked = true)
                         },
-                    title = stringResource(R.string.liked_songs),
+                    title = "liked_songs",
                     thumbnailContent = {
                         Image(
-                            painter = painterResource(id = R.drawable.favorite), // The XML image
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent), // The XML image
                             contentDescription = null,
                             modifier = Modifier.size(40.dp), // Adjust size as needed
                             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground), // Optional tinting
@@ -320,7 +318,7 @@ fun AddToPlaylistDialogOnline(
 
             item {
                 Text(
-                    text = stringResource(R.string.playlist_add_local_to_synced_note),
+                    text = "playlist_add_local_to_synced_note",
                     fontSize = TextUnit(12F, TextUnitType.Sp),
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )

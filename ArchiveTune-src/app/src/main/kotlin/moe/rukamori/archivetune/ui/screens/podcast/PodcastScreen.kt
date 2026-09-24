@@ -46,8 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -83,7 +81,7 @@ fun PodcastScreen(
     val state by viewModel.screenState.collectAsStateWithLifecycle()
     val playerConnection = LocalPlayerConnection.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val unknownErrorMessage = stringResource(R.string.error_unknown)
+    val unknownErrorMessage = "error_unknown"
     val onRetry = remember(viewModel) { { viewModel.onAction(PodcastAction.Retry) } }
     val onLoadMore = remember(viewModel) { { viewModel.onAction(PodcastAction.LoadMore) } }
     val onPlayAll = remember(viewModel) { { viewModel.onAction(PodcastAction.PlayAll) } }
@@ -144,8 +142,8 @@ private fun PodcastScreenContent(
 
             PodcastScreenState.Empty -> {
                 MediaDetailStatePanel(
-                    title = stringResource(R.string.episodes),
-                    description = stringResource(R.string.podcast_has_no_episodes),
+                    title = "episodes",
+                    description = "podcast_has_no_episodes",
                     iconRes = R.drawable.mic,
                     modifier = Modifier.align(Alignment.Center),
                 )
@@ -153,10 +151,10 @@ private fun PodcastScreenContent(
 
             is PodcastScreenState.Error -> {
                 MediaDetailStatePanel(
-                    title = stringResource(R.string.podcast),
+                    title = "podcast",
                     description = stringResource(state.messageResId),
                     iconRes = R.drawable.error,
-                    actionLabel = stringResource(R.string.retry),
+                    actionLabel = "retry",
                     onAction = onRetry,
                     modifier = Modifier.align(Alignment.Center),
                 )
@@ -221,7 +219,7 @@ private fun PodcastSuccessContent(
                 fallbackIcon = R.drawable.mic,
                 systemBarsTopPadding = systemBarsTopPadding,
                 subtitle = subtitle,
-                metadata = stringResource(R.string.episodes),
+                metadata = "episodes",
                 description = null,
                 isAdded = false,
                 addContentDescription = R.string.add_to_library,
@@ -338,7 +336,7 @@ private fun PodcastEpisodeRow(
         },
         trailingContent = {
             Icon(
-                painter = painterResource(R.drawable.play),
+                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
             )
@@ -371,8 +369,8 @@ private fun PodcastTopAppBar(
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
-                    painter = painterResource(R.drawable.arrow_back),
-                    contentDescription = stringResource(R.string.back_button_desc),
+                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                    contentDescription = "back_button_desc",
                 )
             }
         },

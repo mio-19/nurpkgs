@@ -7,12 +7,6 @@
 
 package moe.rukamori.archivetune.ui.theme
 
-import android.app.WallpaperManager
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.os.Build
-import android.util.Base64
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.snap

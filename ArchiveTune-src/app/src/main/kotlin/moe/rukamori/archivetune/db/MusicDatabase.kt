@@ -7,10 +7,6 @@
 
 package moe.rukamori.archivetune.db
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import androidx.core.content.contentValuesOf
 import androidx.room.AutoMigration
 import androidx.room.Database
@@ -862,8 +858,7 @@ class Migration11To12 : AutoMigrationSpec {
 class Migration12To13 : AutoMigrationSpec
 
 class Migration13To14 : AutoMigrationSpec {
-    @SuppressLint("Range")
-    override fun onPostMigrate(db: SupportSQLiteDatabase) {
+        override fun onPostMigrate(db: SupportSQLiteDatabase) {
         val now = Converters().dateToTimestamp(LocalDateTime.now())
         db.execSQL("UPDATE playlist SET createdAt = '$now'")
         db.execSQL("UPDATE playlist SET lastUpdateTime = '$now'")

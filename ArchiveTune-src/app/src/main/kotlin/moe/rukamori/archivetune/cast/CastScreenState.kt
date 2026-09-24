@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.cast
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 
 sealed interface CastScreenState {
@@ -20,7 +19,7 @@ sealed interface CastScreenState {
     data object Empty : CastScreenState
 
     data class Error(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : CastScreenState
 }
 

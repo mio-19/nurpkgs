@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -42,14 +41,14 @@ sealed interface SponsorBlockSettingsScreenState {
     data object Empty : SponsorBlockSettingsScreenState
 
     data class Error(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : SponsorBlockSettingsScreenState
 }
 
 @Immutable
 data class SponsorBlockCategoryUiModel(
     val category: SponsorBlockCategory,
-    @StringRes val labelRes: Int,
+    val labelRes: Int,
 )
 
 @Immutable

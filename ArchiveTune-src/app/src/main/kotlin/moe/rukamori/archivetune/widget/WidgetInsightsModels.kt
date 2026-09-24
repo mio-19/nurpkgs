@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.widget
 
-import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.datastore.preferences.core.Preferences
 import moe.rukamori.archivetune.R

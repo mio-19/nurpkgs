@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.discord
 
-import android.content.Context
-import android.net.Uri
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow

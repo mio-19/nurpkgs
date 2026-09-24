@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import android.content.Context
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
@@ -69,7 +67,7 @@ sealed interface LyricsSearchScreenState {
 
     @Immutable
     data class Error(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : LyricsSearchScreenState
 }
 

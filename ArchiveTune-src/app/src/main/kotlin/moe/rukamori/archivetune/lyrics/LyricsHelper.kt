@@ -7,10 +7,6 @@
 
 package moe.rukamori.archivetune.lyrics
 
-import android.content.Context
-import android.os.SystemClock
-import android.util.Log
-import android.util.LruCache
 import androidx.datastore.preferences.core.Preferences
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException

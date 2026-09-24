@@ -9,10 +9,6 @@
 
 package moe.rukamori.archivetune.ui.screens.settings
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
@@ -68,8 +64,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -241,8 +235,8 @@ private fun LogcatScreenContent(
                     onClick = onResumeAutoScroll,
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.arrow_downward),
-                        contentDescription = stringResource(R.string.jump_to_latest_log),
+                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                        contentDescription = "jump_to_latest_log",
                     )
                 }
             }
@@ -333,14 +327,14 @@ private fun LogcatTopBar(
     MediumFlexibleTopAppBar(
         title = {
             Text(
-                text = stringResource(R.string.debug_logs),
+                text = "debug_logs",
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         },
         subtitle = {
             Text(
-                text = stringResource(R.string.filter_all_logs),
+                text = "filter_all_logs",
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -351,7 +345,7 @@ private fun LogcatTopBar(
                 onLongClick = onNavigateBackLongClick,
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.arrow_back),
+                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                     contentDescription = null,
                 )
             }
@@ -363,8 +357,7 @@ private fun LogcatTopBar(
             ) {
                 Icon(
                     painter =
-                        painterResource(
-                            if (model?.isPaused == true) R.drawable.play else R.drawable.pause,
+                        androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent) R.drawable.play else R.drawable.pause,
                         ),
                     contentDescription =
                         stringResource(
@@ -378,8 +371,8 @@ private fun LogcatTopBar(
                     enabled = model != null,
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.more_vert),
-                        contentDescription = stringResource(R.string.options_label),
+                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                        contentDescription = "options_label",
                     )
                 }
                 DropdownMenu(
@@ -387,18 +380,18 @@ private fun LogcatTopBar(
                     onDismissRequest = { onSetMenuExpanded(false) },
                 ) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.share)) },
+                        text = { Text("share") },
                         onClick = onShare,
                         enabled = model?.entries?.isNotEmpty() == true,
                         leadingIcon = {
                             Icon(
-                                painter = painterResource(R.drawable.share),
+                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                 contentDescription = null,
                             )
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.export)) },
+                        text = { Text("export") },
                         onClick = onExport,
                         enabled =
                             model?.let { currentModel ->
@@ -406,18 +399,18 @@ private fun LogcatTopBar(
                             } == true,
                         leadingIcon = {
                             Icon(
-                                painter = painterResource(R.drawable.download),
+                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                 contentDescription = null,
                             )
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.clear)) },
+                        text = { Text("clear") },
                         onClick = onClear,
                         enabled = model?.hasLogs == true,
                         leadingIcon = {
                             Icon(
-                                painter = painterResource(R.drawable.clear_all),
+                                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                                 contentDescription = null,
                             )
                         },
@@ -452,10 +445,10 @@ private fun LogcatLogContent(
             onValueChange = onQueryChange,
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            label = { Text(stringResource(R.string.search)) },
+            label = { Text("search") },
             leadingIcon = {
                 Icon(
-                    painter = painterResource(R.drawable.search),
+                    painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                     contentDescription = null,
                 )
             },
@@ -463,8 +456,8 @@ private fun LogcatLogContent(
                 if (model.query.isNotEmpty()) {
                     IconButton(onClick = { onQueryChange("") }) {
                         Icon(
-                            painter = painterResource(R.drawable.close),
-                            contentDescription = stringResource(R.string.clear),
+                            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
+                            contentDescription = "clear",
                         )
                     }
                 }
@@ -542,7 +535,7 @@ private fun LogcatEntryItem(
     SegmentedListItem(
         onClick = onClick,
         onLongClick = onLongClick,
-        onLongClickLabel = stringResource(R.string.copy_log_entry),
+        onLongClickLabel = "copy_log_entry",
         shapes = ListItemDefaults.segmentedShapes(index = index, count = count),
         colors =
             ListItemDefaults.segmentedColors(
@@ -610,18 +603,18 @@ private fun LogcatEmptyState(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
     ) {
         Icon(
-            painter = painterResource(R.drawable.manage_search),
+            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
             contentDescription = null,
             modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = stringResource(R.string.no_logs),
+            text = "no_logs",
             style = MaterialTheme.typography.titleMedium,
         )
         Text(
-            text = stringResource(R.string.logs_empty_message),
+            text = "logs_empty_message",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -645,7 +638,7 @@ private fun LogcatErrorState(
             color = MaterialTheme.colorScheme.error,
         )
         Button(onClick = onRetry) {
-            Text(stringResource(R.string.retry))
+            Text("retry")
         }
     }
 }

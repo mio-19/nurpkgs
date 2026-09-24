@@ -7,11 +7,6 @@
 
 package moe.rukamori.archivetune.appicon
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.annotation.DrawableRes
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -27,7 +22,7 @@ data class AppIcon(
     val name: String?,
     val author: String?,
     val githubAuthorUrl: String?,
-    @DrawableRes val previewDrawableResId: Int,
+    val previewDrawableResId: Int,
     val aliasClassName: String,
     val isDefault: Boolean,
 )

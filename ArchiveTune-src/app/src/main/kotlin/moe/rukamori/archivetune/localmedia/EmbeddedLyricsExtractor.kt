@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.localmedia
 
-import android.content.ContentResolver
-import android.net.Uri
 import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 import java.io.EOFException

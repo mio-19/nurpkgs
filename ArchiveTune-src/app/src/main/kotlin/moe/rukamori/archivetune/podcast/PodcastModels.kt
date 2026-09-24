@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.podcast
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import com.google.common.collect.ImmutableList
 import moe.rukamori.archivetune.models.MediaMetadata
@@ -24,7 +23,7 @@ sealed interface PodcastScreenState {
 
     @Immutable
     data class Error(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : PodcastScreenState
 }
 
@@ -78,6 +77,6 @@ sealed interface PodcastEvent {
     ) : PodcastEvent
 
     data class ShowMessage(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : PodcastEvent
 }

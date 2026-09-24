@@ -7,16 +7,14 @@
 
 package moe.rukamori.archivetune.ui.screens
 
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import moe.rukamori.archivetune.R
 
 @Immutable
 sealed class Screens(
-    @StringRes val titleId: Int,
-    @DrawableRes val iconIdInactive: Int,
-    @DrawableRes val iconIdActive: Int,
+    val titleId: Int,
+    val iconIdInactive: Int,
+    val iconIdActive: Int,
     val route: String,
 ) {
     object Home : Screens(

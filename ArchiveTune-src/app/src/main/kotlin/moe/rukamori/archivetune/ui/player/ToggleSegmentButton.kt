@@ -34,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -65,7 +64,7 @@ fun ToggleSegmentButton(
         onClick = onClick
     ) {
         Icon(
-            painter = painterResource(iconId),
+            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
             contentDescription = contentDesc,
             tint = if (active) activeContentColor else inactiveContentColor,
             modifier = Modifier.size(24.dp)

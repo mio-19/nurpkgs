@@ -7,14 +7,6 @@
 
 package moe.rukamori.archivetune.canvas
 
-import android.annotation.SuppressLint
-import android.content.Context
-import android.webkit.CookieManager
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -101,8 +93,7 @@ class SpotifyCanvasSessionRepository @Inject constructor(
         }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private suspend fun harvest(credential: String): SpotifyInternalToken = withContext(Dispatchers.Main.immediate) {
+        private suspend fun harvest(credential: String): SpotifyInternalToken = withContext(Dispatchers.Main.immediate) {
         if (!WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT) ||
             !WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER) ||
             !WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)

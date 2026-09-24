@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.backup
 
-import android.net.Uri
 
 enum class ScheduledBackupFrequency {
     DAILY,

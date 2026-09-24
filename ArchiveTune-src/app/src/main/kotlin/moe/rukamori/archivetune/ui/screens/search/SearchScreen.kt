@@ -59,8 +59,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -205,7 +203,7 @@ fun SearchScreen(
                         contentType = "search_empty",
                     ) {
                         SearchStateMessage(
-                            message = stringResource(R.string.no_results_found),
+                            message = "no_results_found",
                             modifier = Modifier.animateItem(),
                         )
                     }
@@ -220,7 +218,7 @@ fun SearchScreen(
                             message = stringResource(currentState.messageResId),
                             action = {
                                 Button(onClick = viewModel::retry) {
-                                    Text(stringResource(R.string.retry_button))
+                                    Text("retry_button")
                                 }
                             },
                             modifier = Modifier.animateItem(),
@@ -236,7 +234,7 @@ fun SearchScreen(
                                 contentType = "section_title",
                             ) {
                                 NavigationTitle(
-                                    title = stringResource(R.string.mood_and_genres),
+                                    title = "mood_and_genres",
                                     modifier = Modifier.animateItem(),
                                 )
                             }
@@ -311,20 +309,20 @@ private fun SearchEntryField(
                 },
                 placeholder = {
                     Text(
-                        text = stringResource(R.string.search_yt_music),
+                        text = "search_yt_music",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 },
                 leadingIcon = {
                     Icon(
-                        painter = painterResource(R.drawable.search),
+                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                         contentDescription = null,
                     )
                 },
                 trailingIcon = {
                     Icon(
-                        painter = painterResource(R.drawable.language),
+                        painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                         contentDescription = null,
                     )
                 },
@@ -359,8 +357,7 @@ private fun SearchDiscoveryTabs(
                 icon = {
                     Icon(
                         painter =
-                            painterResource(
-                                when (tab) {
+                            androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent) {
                                     SearchDiscoveryTab.EXPLORE -> R.drawable.explore_outlined
                                     SearchDiscoveryTab.SUGGESTIONS -> R.drawable.auto_awesome
                                 },
@@ -491,7 +488,7 @@ private fun SuggestedSongsSection(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
 
     SectionContainer(
-        title = stringResource(R.string.stats_unique_songs),
+        title = "stats_unique_songs",
         modifier = modifier,
     ) {
         val visibleSongs = remember(songs) { songs.take(6) }
@@ -584,7 +581,7 @@ private fun TrendingAlbumsSection(
     val coroutineScope = rememberCoroutineScope()
 
     NavigationTitle(
-        title = stringResource(R.string.top_albums),
+        title = "top_albums",
         modifier = modifier,
     )
     LazyRow(
@@ -635,7 +632,7 @@ private fun SuggestedArtistsSection(
     val haptic = LocalHapticFeedback.current
 
     NavigationTitle(
-        title = stringResource(R.string.stats_unique_artists),
+        title = "stats_unique_artists",
         modifier = modifier,
     )
     LazyRow(
@@ -700,7 +697,7 @@ private fun YouTubeSongMenuButton(
         },
     ) {
         Icon(
-            painter = painterResource(R.drawable.more_vert),
+            painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
             contentDescription = null,
         )
     }
@@ -755,7 +752,7 @@ private fun SearchStateMessage(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Icon(
-                painter = painterResource(R.drawable.search_off),
+                painter = androidx.compose.ui.graphics.painter.ColorPainter(androidx.compose.ui.graphics.Color.Transparent),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.outline,
             )

@@ -10,7 +10,6 @@ package moe.rukamori.archivetune.ui.theme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
-import android.graphics.Color as AndroidColor
 
 object PlayerBackgroundColorUtils {
     private const val DEFAULT_MIN_BRIGHTNESS = 0.15f

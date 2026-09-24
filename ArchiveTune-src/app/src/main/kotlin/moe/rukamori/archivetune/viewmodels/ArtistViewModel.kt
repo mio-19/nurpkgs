@@ -7,8 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import android.content.Context
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,7 +64,7 @@ sealed interface ArtistBlockState {
 
     @Immutable
     data class Error(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : ArtistBlockState
 }
 
@@ -91,7 +89,7 @@ sealed interface ArtistEvent {
 
     @Immutable
     data class ShowMessage(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : ArtistEvent
 }
 

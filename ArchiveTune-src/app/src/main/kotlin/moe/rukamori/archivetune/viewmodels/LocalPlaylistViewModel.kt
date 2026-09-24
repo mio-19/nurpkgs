@@ -7,9 +7,6 @@
 
 package moe.rukamori.archivetune.viewmodels
 
-import android.content.Context
-import android.net.Uri
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -692,12 +689,12 @@ sealed interface PlaylistCoverState {
     data object Empty : PlaylistCoverState
 
     data class Error(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : PlaylistCoverState
 }
 
 sealed interface PlaylistCoverEvent {
     data class ShowMessage(
-        @StringRes val messageRes: Int,
+        val messageRes: Int,
     ) : PlaylistCoverEvent
 }

@@ -7,11 +7,6 @@
 
 package moe.rukamori.archivetune.playback
 
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.os.Bundle
-import androidx.annotation.DrawableRes
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
@@ -23,7 +18,7 @@ import moe.rukamori.archivetune.R
 @UnstableApi
 class ArchiveTuneMediaNotificationProvider(
     private val context: Context,
-    @DrawableRes smallIconResId: Int,
+    smallIconResId: Int,
 ) : MediaNotification.Provider {
     private val delegate =
         DefaultMediaNotificationProvider(

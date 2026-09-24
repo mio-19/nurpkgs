@@ -7,7 +7,6 @@
 
 package moe.rukamori.archivetune.home
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import com.google.common.collect.ImmutableList
 import moe.rukamori.archivetune.constants.QuickPicks
@@ -31,7 +30,7 @@ sealed interface HomeScreenState {
 
     @Immutable
     data class Error(
-        @StringRes val messageResId: Int,
+        val messageResId: Int,
     ) : HomeScreenState
 }
 

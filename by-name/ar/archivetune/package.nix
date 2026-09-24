@@ -94,9 +94,12 @@ stdenv.mkDerivation (finalAttrs: {
 
     # Copy android stubs
     cp -r  ${./android-stubs} android-stubs
+    chmod -R +w .
+    ls -la android-stubs
 
     # We also have migration-patches if the user wants to apply them manually
-    cp -r  ${./migration-patches} patches/
+    cp -r ${./migration-patches} patches/
+    chmod -R +w .
   '';
 
   env.JAVA_HOME = jdk;

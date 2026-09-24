@@ -85,7 +85,7 @@ stdenv.mkDerivation (finalAttrs: {
     mkdir -p app/src/main/kotlin/moe/rukamori/archivetune/ui/screens
 
     # Copy our desktop UI components
-    cp -r ${./src}/* ./
+    cp -r  ${./src}/* ./
 
     # Apply build script patches
     patch -p1 < ${./root-build.patch}
@@ -93,10 +93,10 @@ stdenv.mkDerivation (finalAttrs: {
     patch -p1 < ${./app-build.patch}
 
     # Copy android stubs
-    cp -r ${./android-stubs} android-stubs
+    cp -r  ${./android-stubs} android-stubs
 
     # We also have migration-patches if the user wants to apply them manually
-    cp -r ${./migration-patches} patches/
+    cp -r  ${./migration-patches} patches/
   '';
 
   env.JAVA_HOME = jdk;

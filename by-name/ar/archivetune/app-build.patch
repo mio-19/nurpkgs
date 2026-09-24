@@ -14,15 +14,21 @@
 +    kotlin("jvm")
 +    id("org.jetbrains.compose") version "1.7.0"
 +    id("org.jetbrains.kotlin.plugin.compose")
-+    application
++    id("org.jetbrains.compose") version "1.7.0"
++    id("org.jetbrains.kotlin.plugin.compose")
  }
  
 -val localProperties = Properties()
 -val localPropertiesFile = rootProject.file("local.properties")
 -if (localPropertiesFile.exists()) {
 -    localProperties.load(localPropertiesFile.inputStream())
-+application {
-+    mainClass.set("moe.rukamori.archivetune.DesktopMainKt")
++compose.desktop {
++    application {
++        mainClass = "moe.rukamori.archivetune.DesktopMainKt"
++        buildTypes.release.proguard {
++            isEnabled.set(false)
++        }
++    }
  }
  
 -fun String.asBuildConfigString(): String =

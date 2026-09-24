@@ -80,6 +80,11 @@ stdenv.mkDerivation (finalAttrs: {
 
   postPatch = ''
 
+    # Wire the pinned :core submodule source into place.
+    rm -rf core
+    cp -r ${coreSrc} core
+    chmod -R +w core
+
     # Rename android main to old_android_main to preserve it as reference
     mv app/src/main app/src/old_android_main
     mkdir -p app/src/main/kotlin/moe/rukamori/archivetune/ui/screens

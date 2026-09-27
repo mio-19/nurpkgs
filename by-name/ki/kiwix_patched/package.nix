@@ -27,4 +27,9 @@ in
           --replace-warn "QMAKE_LFLAGS += -Wl,-rpath-link,\'\$\$PREFIX/lib/x86_64-linux-gnu\'" "" \
           --replace-warn "-Wl,-rpath-link,\'\$\$PREFIX/lib/x86_64-linux-gnu\'" ""
       '';
+    postInstall =
+      (old.postInstall or "")
+      + pkgs.lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
+        ln -s $out/bin/kiwix-desktop.app/Contents/MacOS/kiwix-desktop $out/bin/kiwix-desktop
+      '';
   })

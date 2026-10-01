@@ -43,9 +43,8 @@
               if lib.isDerivation raw then
                 pkg
               else if lib.isList raw then
-                pkg
-                // {
-                  passthru = pkg.passthru // {
+                pkg.overrideAttrs (old: {
+                  passthru = (old.passthru or { }) // {
                     updateScript = pkgs.writeShellApplication {
                       name = "update-${name}";
                       text = ''
@@ -54,11 +53,10 @@
                       '';
                     };
                   };
-                }
+                })
               else if lib.isString raw || lib.isPath raw then
-                pkg
-                // {
-                  passthru = pkg.passthru // {
+                pkg.overrideAttrs (old: {
+                  passthru = (old.passthru or { }) // {
                     updateScript = pkgs.writeShellApplication {
                       name = "update-${name}";
                       text = ''
@@ -67,7 +65,7 @@
                       '';
                     };
                   };
-                }
+                })
               else
                 pkg;
         in

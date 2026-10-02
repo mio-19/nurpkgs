@@ -41,7 +41,7 @@ let
 
   clice-llvm = fetchzip {
     url = "https://github.com/clice-io/xclang/releases/download/${llvmVersion}/${llvmArtifact.name}.tar.xz";
-    hash = "sha256-VN8LYijd7gDfJTrThvlQFOlLlQoNtHUg72xiZv1s9J8=";
+    hash = llvmArtifact.hash;
   };
 
   # Vendored FetchContent deps (cmake/package.cmake + kotatsu nested deps).

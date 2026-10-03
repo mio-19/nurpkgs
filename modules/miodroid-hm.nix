@@ -7,7 +7,7 @@
 
 let
   cfg = config.programs.miodroid;
-  wipWarning = "programs.miodroid is work in progress: the Home Manager service is experimental and currently requires additional rootless LXC setup.";
+  wipWarning = "programs.miodroid is work in progress: rootless container support is not functional yet, and the Home Manager service will fail until the package and host support are completed.";
 in
 {
   options.programs.miodroid = {

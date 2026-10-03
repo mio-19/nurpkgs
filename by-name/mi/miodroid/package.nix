@@ -54,7 +54,10 @@ python3Packages.buildPythonApplication rec {
     ./patches/0004-android16-vendor-detection.patch
     ./patches/0005-multi-instance-support.patch
   ];
-  patchFlags = [ "-p1" "--fuzz=10" ];
+  patchFlags = [
+    "-p1"
+    "--fuzz=10"
+  ];
 
   postPatch = ''
     # ── Patches 0001-0003: global rebrand waydroid → miodroid ──────────────
@@ -65,14 +68,36 @@ python3Packages.buildPythonApplication rec {
     # Rebrand patch 0005 after applying it, without touching Android props.
     substituteInPlace tools/helpers/instance.py \
       --replace-fail 'from tools.helpers.arguments import arguments' \
-        'import os\nfrom tools.helpers.arguments import arguments'
+        ""
+    sed -i '1i import os' tools/helpers/instance.py
+    sed -i '/import tools.helpers.dbus/d' tools/helpers/__init__.py
+    sed -i '/helpers.dbus.setup_policy(args)/d' tools/actions/initializer.py
     substituteInPlace tools/helpers/instance.py \
       --replace-fail 'INSTANCE_NAME = arguments("").instance' \
-        'INSTANCE_NAME = arguments(os.environ.get("MIODROID_INSTANCE", "")).instance'
+        'INSTANCE_NAME = os.environ.get("MIODROID_INSTANCE", "")'
     sed -i 's/id\.waydro/id.miodro/g' \
       tools/helpers/instance.py tools/helpers/ipc.py \
       tools/actions/session_manager.py
     sed -i 's/waydroid/miodroid/g' tools/helpers/instance.py
+    sed -i 's|/waydroid{instance_suffix}|/miodroid{instance_suffix}|' \
+      tools/config/__init__.py
+
+    # Permit the Home Manager user service to use an unprivileged LXC setup.
+    substituteInPlace tools/__init__.py \
+      --replace-fail \
+        'args.work = config.defaults["work"]' \
+        'args.work = os.environ.get("MIODROID_WORK", config.defaults["work"])'
+    substituteInPlace tools/__init__.py \
+      --replace-fail \
+        'args.config = args.work + "/waydroid.cfg"' \
+        'config.defaults.update({"work": args.work, **{key: args.work + config.defaults[key][len(config.defaults["work"]):] for key in ("images_path", "rootfs", "overlay", "overlay_rw", "overlay_work", "data", "lxc", "host_perms")}}) if os.environ.get("MIODROID_ROOTLESS") else None; args.config = args.work + "/miodroid.cfg"'
+    substituteInPlace tools/__init__.py \
+      --replace-fail \
+        'if os.geteuid() != 0:' \
+        'if os.geteuid() != 0 and not os.environ.get("MIODROID_ROOTLESS"):'
+    substituteInPlace tools/actions/container_manager.py tools/helpers/ipc.py \
+      --replace-fail 'dbus.SystemBus()' \
+        'dbus.SessionBus() if os.environ.get("MIODROID_ROOTLESS") else dbus.SystemBus()'
 
     # cfg["waydroid"] section key in Python  →  cfg["miodroid"]
     find . -name "*.py" -exec sed -i \

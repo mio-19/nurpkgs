@@ -24,6 +24,12 @@ in
       default = null;
       description = "Optional named Miodroid instance.";
     };
+    hostHelperService = lib.mkOption {
+      type = lib.types.str;
+      default = "miodroid-rootless-helper-${config.home.username}.service";
+      defaultText = lib.literalExpression ''"miodroid-rootless-helper-\${config.home.username}.service"'';
+      description = "NixOS system service that prepares host devices for rootless Miodroid.";
+    };
   };
 
   config = lib.mkIf cfg.enable (
@@ -33,7 +39,10 @@ in
       systemd.user.services.miodroid-container = {
         Unit = {
           Description = "Experimental Rootless Miodroid Container";
-          After = [ "graphical-session.target" ];
+          After = [
+            "graphical-session.target"
+            cfg.hostHelperService
+          ];
           PartOf = [ "graphical-session.target" ];
         };
         Service = {

@@ -39,10 +39,7 @@ in
       systemd.user.services.miodroid-container = {
         Unit = {
           Description = "Experimental Rootless Miodroid Container";
-          After = [
-            "graphical-session.target"
-            cfg.hostHelperService
-          ];
+          After = [ "graphical-session.target" ];
           PartOf = [ "graphical-session.target" ];
         };
         Service = {

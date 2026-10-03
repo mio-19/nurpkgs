@@ -71,6 +71,11 @@ in
         assertion = !rootlessCfg.enable || rootlessCfg.users != [ ];
         message = "virtualisation.miodroid-rootless.users must not be empty when rootless support is enabled";
       }
+      {
+        assertion =
+          !rootlessCfg.enable || lib.all (user: builtins.hasAttr user config.users.users) rootlessCfg.users;
+        message = "Every user in virtualisation.miodroid-rootless.users must be declared in users.users";
+      }
     ];
 
     system.requiredKernelConfig = [
@@ -119,6 +124,10 @@ in
       miodroid-rootless-helper = lib.mkIf rootlessCfg.enable {
         description = "Miodroid rootless host preparation";
         wantedBy = [ "multi-user.target" ];
+        after = [
+          "systemd-modules-load.service"
+          "systemd-udev-settle.service"
+        ];
         serviceConfig = {
           Type = "oneshot";
           ExecStart = rootlessHelper;

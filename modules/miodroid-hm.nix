@@ -7,7 +7,7 @@
 
 let
   cfg = config.programs.miodroid;
-  wipWarning = "programs.miodroid is work in progress: rootless container support is not functional yet, and the Home Manager service will fail until the package and host support are completed.";
+  wipWarning = "programs.miodroid is experimental: enable virtualisation.miodroid.rootlessUser in NixOS to provision unprivileged LXC and host binder devices; FUSE mounts and the remaining device setup are still evolving.";
 in
 {
   options.programs.miodroid = {

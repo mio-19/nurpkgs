@@ -49,6 +49,16 @@ in
     ];
 
     boot.kernelParams = [ "psi=1" ];
+    boot.kernelModules = lib.mkIf (cfg.rootlessUser != null) [ "binder_linux" ];
+    boot.extraModprobeConfig = lib.mkIf (cfg.rootlessUser != null) ''
+      options binder_linux devices=binder,vndbinder,hwbinder
+    '';
+
+    services.udev.extraRules = lib.mkIf (cfg.rootlessUser != null) ''
+      KERNEL=="binder", MODE="0666"
+      KERNEL=="vndbinder", MODE="0666"
+      KERNEL=="hwbinder", MODE="0666"
+    '';
 
     environment.etc."gbinder.d/miodroid.conf".source = miodroidGbinderConf;
     environment.systemPackages = [ cfg.package ];

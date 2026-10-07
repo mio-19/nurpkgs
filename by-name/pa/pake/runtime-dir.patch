@@ -1,0 +1,172 @@
+diff --git a/bin/builders/BaseBuilder.ts b/bin/builders/BaseBuilder.ts
+--- a/bin/builders/BaseBuilder.ts
++++ b/bin/builders/BaseBuilder.ts
+@@ -176,6 +176,7 @@
+       await fsExtra.unlink(modules);
+     }
+ 
++    const skipInstall = process.env.PAKE_SKIP_INSTALL === '1';
+     const spinner = getSpinner('Installing package...');
+     const packageManager = await detectPackageManager();
+     const timeout = getInstallTimeout();
+@@ -196,20 +197,26 @@
+       );
+     }
+ 
+-    try {
+-      await shellExec(getInstallCommand(packageManager, useCnMirror), timeout, {
+-        ...buildEnv,
+-        CI: 'true',
+-      });
+-      spinner.succeed(chalk.green('Package installed!'));
+-    } catch (error) {
+-      spinner.fail(chalk.red('Installation failed'));
+-      if (!useCnMirror) {
+-        logger.info(
+-          `✺ If downloads are slow in China, retry with ${CN_MIRROR_ENV}=1 to use CN mirrors.`,
+-        );
++    if (skipInstall) {
++      spinner.succeed(
++        chalk.green('Skipping dependency install (PAKE_SKIP_INSTALL=1)'),
++      );
++    } else {
++      try {
++        await shellExec(getInstallCommand(packageManager, useCnMirror), timeout, {
++          ...buildEnv,
++          CI: 'true',
++        });
++        spinner.succeed(chalk.green('Package installed!'));
++      } catch (error) {
++        spinner.fail(chalk.red('Installation failed'));
++        if (!useCnMirror) {
++          logger.info(
++            `✺ If downloads are slow in China, retry with ${CN_MIRROR_ENV}=1 to use CN mirrors.`,
++          );
++        }
++        throw error;
+       }
+-      throw error;
+     }
+ 
+     if (!tauriTargetPathExists) {
+diff --git a/bin/builders/LinuxBuilder.ts b/bin/builders/LinuxBuilder.ts
+--- a/bin/builders/LinuxBuilder.ts
++++ b/bin/builders/LinuxBuilder.ts
+@@ -12,6 +12,7 @@
+   needsTemporaryDebForZst,
+ } from '@/utils/targets';
+ import logger from '@/options/logger';
++import { npmDirectory } from '@/utils/dir';
+ import { detectPackageManager } from './env';
+ 
+ export default class LinuxBuilder extends BaseBuilder {
+@@ -282,6 +283,9 @@
+   // Override buildAndCopy to ensure currentBuildType is synced if called directly, though the loop above handles it most of the time.
+   async buildAndCopy(url: string, target: string, logSuccess = true) {
+     this.currentBuildType = target;
++    if (target === 'appimage') {
++      await this.ensureAppImageTools();
++    }
+     if (!this.compiled) {
+       await super.buildAndCopy(url, target, logSuccess);
+       return;
+@@ -388,4 +392,20 @@
+     }
+     return super.getArchSpecificPath();
+   }
++
++  private async ensureAppImageTools(): Promise<void> {
++    const toolsDir = process.env.PAKE_APPIMAGE_TOOLS_DIR;
++    if (!toolsDir) {
++      return;
++    }
++
++    const cargoTarget =
++      process.env.CARGO_TARGET_DIR || path.join(npmDirectory, 'src-tauri', 'target');
++    const targetDir = path.join(cargoTarget, '.tauri');
++    await fsExtra.ensureDir(targetDir);
++    await fsExtra.copy(toolsDir, targetDir, {
++      overwrite: false,
++      errorOnExist: false,
++    });
++  }
+ }
+diff --git a/bin/helpers/tauriConfig.ts b/bin/helpers/tauriConfig.ts
+--- a/bin/helpers/tauriConfig.ts
++++ b/bin/helpers/tauriConfig.ts
+@@ -30,7 +30,10 @@
+ 
+ let tauriConfig = {
+   ...CommonConf,
+-  bundle: platformConfig.bundle,
++  bundle: {
++    ...platformConfig.bundle,
++    useLocalToolsDir: process.platform === 'linux',
++  },
+   app: {
+     ...CommonConf.app,
+     trayIcon: {
+diff --git a/bin/utils/build-workspace.ts b/bin/utils/build-workspace.ts
+--- a/bin/utils/build-workspace.ts
++++ b/bin/utils/build-workspace.ts
+@@ -41,9 +41,32 @@
+   getBuildCancellationSignal()?.throwIfAborted();
+ }
+ 
++
++async function makeWritable(dirPath: string): Promise<void> {
++  await fs.chmod(dirPath, 0o755);
++  for (const entry of await fs.readdir(dirPath, { withFileTypes: true })) {
++    // Do not follow the node_modules symlink into the Nix store.
++    if (entry.isSymbolicLink()) continue;
++    const entryPath = path.join(dirPath, entry.name);
++    if (entry.isDirectory()) {
++      await makeWritable(entryPath);
++    } else {
++      const mode = (await fs.stat(entryPath)).mode;
++      const isExecutable = (mode & 0o111) !== 0;
++      await fs.chmod(entryPath, isExecutable ? 0o755 : 0o644);
++    }
++  }
++}
++
+ /** Copy only build inputs; cached or previously generated user content is not a template. */
+ export async function createBuildWorkspace(sourceDirectory: string) {
+-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'pake-build-'));
++  const runtimeDir = process.env.PAKE_RUNTIME_DIR;
++  const directory = runtimeDir
++    ? path.resolve(runtimeDir)
++    : await fs.mkdtemp(path.join(os.tmpdir(), 'pake-build-'));
++  if (runtimeDir) {
++    await fs.ensureDir(directory);
++  }
+   try {
+     for (const file of [
+       'package.json',
+@@ -77,6 +100,8 @@
+         process.platform === 'win32' ? 'junction' : 'dir',
+       );
+     }
++    // Copies from a Nix store path keep read-only modes; make the workspace writable.
++    await makeWritable(directory);
+     return directory;
+   } catch (error) {
+     await fs.remove(directory);
+@@ -155,10 +180,13 @@
+ 
+ export async function enterBuildWorkspace() {
+   const previousTarget = process.env.CARGO_TARGET_DIR;
+-  const targetDirectory = path.resolve(
+-    packageDirectory,
+-    previousTarget || 'src-tauri/target',
+-  );
++  // Nix installs are read-only; keep the Cargo target dir writable by default.
++  const targetDirectory = previousTarget
++    ? path.resolve(previousTarget)
++    : path.resolve(
++        process.env.PAKE_RUNTIME_DIR || os.tmpdir(),
++        'pake-cargo-target',
++      );
+   const directory = await createBuildWorkspace(packageDirectory);
+   let release: (() => Promise<void>) | undefined;
+   setBuildDirectory(directory);

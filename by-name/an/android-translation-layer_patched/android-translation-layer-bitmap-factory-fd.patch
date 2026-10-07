@@ -1,0 +1,41 @@
+--- a/src/api-impl/android/graphics/BitmapFactory.java
++++ b/src/api-impl/android/graphics/BitmapFactory.java
+@@ -633,25 +633,28 @@
+ 
+ 		Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeFileDescriptor");
+ 		try {
+-			//if (nativeIsSeekable(fd)) {
+-			//	bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
+-			//} else {
+-			FileInputStream fis = new FileInputStream(fd);
+ 			try {
++				long offset = android.system.Os.lseek(fd, 0, android.system.OsConstants.SEEK_CUR);
++				FileInputStream fis = new FileInputStream(fd);
+ 				bm = decodeStreamInternal(fis, outPadding, opts);
+-			} finally {
+-				try {
+-					fis.close();
+-				} catch (Throwable t) { /* ignore */
+-				}
++				android.system.Os.lseek(fd, offset, android.system.OsConstants.SEEK_SET);
++			} catch (Exception e) {
++				bm = null;
+ 			}
+-			//}
+ 
+ 			if (bm == null && opts != null && opts.inBitmap != null) {
+ 				throw new IllegalArgumentException("Problem decoding into existing bitmap");
+ 			}
+ 
+ 			setDensityFromOptions(bm, opts);
++			if (bm != null && opts != null) {
++				opts.outWidth = bm.getWidth();
++				opts.outHeight = bm.getHeight();
++				opts.outMimeType = "image/png";
++				if (opts.inJustDecodeBounds) {
++					bm = null;
++				}
++			}
+ 		} finally {
+ 			Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
+ 		}

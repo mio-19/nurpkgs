@@ -1,0 +1,90 @@
+package hanga:engine;
+
+/// Sandbox ABI. Game nouns are not function names. One value type (JSON / Godot Variant)
+/// plus named `invoke` (Godot `Object.call`).
+interface host {
+    /// Object entry: `at` indexes `value.cells`.
+    record field {
+        key: string,
+        at: u32,
+    }
+
+    /// One JSON node. `items` / `dict` store child indexes, not nested `value`
+    /// (WIT types cannot recurse).
+    variant cell {
+        empty,
+        flag(bool),
+        int(s64),
+        float(f64),
+        text(string),
+        items(list<u32>),
+        dict(list<field>),
+        /// Bus error, not game data. `busy` `self` `noproc` (OTP `{error, Reason}`).
+        fail(string),
+    }
+
+    /// JSON-shaped tree: `empty` is null. Arrays and objects nest via indexes.
+    record value {
+        cells: list<cell>,
+        root: u32,
+    }
+
+    /// `trace` / `debug` / `info` / `warn` / `error`.
+    log: func(level: string, message: string);
+    /// Milliseconds since the host process started.
+    now-ms: func() -> s64;
+    /// This component's collection name.
+    id: func() -> string;
+    /// Other loaded mods (not including this one). Empty when this is the only component.
+    peers: func() -> list<string>;
+    /// Luanti `core.get_modpath`: true if that pack is in this game (including self).
+    has-mod: func(name: string) -> bool;
+    /// OTP `gen_server:call` / Luanti `othermod.api()`. Waits for a reply.
+    /// Empty peer: later packs then lead, first real reply (Luanti `override_item`).
+    /// `empty` = not overridden. `fail` = bus error (`busy`, `self`, `noproc`).
+    /// A busy target is *not* queued: that would be a cast with a fake “not mine”.
+    invoke: func(peer: string, method: string, args: value) -> value;
+    /// OTP `gen_server:cast` / Godot `call_deferred`. No reply. Queues a mailbox
+    /// if the target is in a call. Empty peer: every pack except the caller.
+    /// Same pack: enqueue on self (OTP `!` to self).
+    send: func(peer: string, method: string, args: value);
+    /// OTP `gen_event` / Luanti `register_on_*`. Skip the caller.
+    /// `flag(true)` / `int(1)` vetoes. A busy listener vetoes (fail closed).
+    emit: func(method: string, args: value) -> bool;
+    /// Lead worldgen + player overlay at this cell. Dict: `name` (text), `edit` (flag).
+    voxel: func(x: s32, y: s32, z: s32) -> value;
+    /// Luanti `core.set_node`. `air` or empty name unsets. Applied next tick to the mesh.
+    voxel-set: func(x: s32, y: s32, z: s32, name: string);
+    /// Local player snapshot, or `empty` in menu. Dict: `x` `y` `z` `yaw` (float).
+    /// `state` if this pack advertised `evaluate-action` or `tick`; `wallet` if
+    /// it advertised `wallet-after`.
+    player: func() -> value;
+    /// Luanti `core.after` / OTP `send_after`: cast `method` on this pack after `ms`.
+    after: func(ms: s32, method: string, args: value);
+}
+
+/// Required guest surface. Everything else is `invoke` (optional virtuals).
+/// Empty reply = not overridden. `has` / `methods` advertise method names.
+interface guest {
+    use host.{value};
+
+    /// ABI major. Host loads only `6`.
+    abi: func() -> s32;
+
+    /// Godot `_ready` / Luanti file load: once after every pack in the collection exists.
+    ready: func();
+
+    /// Voxel names in meshing-index order. Index 0 is always air.
+    voxel-catalog: func() -> list<string>;
+
+    /// Worldgen hot path (typed, not `invoke`).
+    query-voxel: func(x: s32, y: s32, z: s32) -> s32;
+
+    /// Named methods. Reserved: `has` (flag), `methods` (`items` of names, dict keys, or CSV text).
+    invoke: func(caller: string, method: string, args: value) -> value;
+}
+
+world plugin {
+    import host;
+    export guest;
+}

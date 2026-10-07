@@ -1,0 +1,34 @@
+From: Developer
+Date: Thu, 06 Aug 2026
+Subject: [PATCH] intercept GMS bindService
+
+Return a dummy binder object when apps attempt to bind to Google Play Services.
+
+--- a/src/api-impl/android/app/ContextImpl.java	2026-10-04 20:19:59.383206606 +1100
++++ b/src/api-impl/android/app/ContextImpl.java	2026-10-04 20:19:59.383206606 +1100
+@@ -33,6 +33,25 @@
+ 			serviceConnection.onServiceConnected(intent.getComponent(), requestMessenger.getBinder());
+ 			return true;
+ 		}
++		String pkg = intent.getPackage();
++		String action = intent.getAction();
++		if ((pkg != null && pkg.equals("com.google.android.gms")) || 
++		    (action != null && action.startsWith("com.google.android.gms."))) {
++			android.util.Slog.i(TAG, "MicroG PoC: Intercepted bindService for GMS: " + intent);
++			
++			final android.content.ComponentName name = intent.getComponent();
++			final android.os.IBinder binder = new android.os.Binder();
++			
++			// Simulate async service connection
++			new android.os.Handler(android.os.Looper.getMainLooper()).post(new Runnable() {
++				@Override
++				public void run() {
++					serviceConnection.onServiceConnected(name, binder);
++				}
++			});
++			return true;
++		}
++
+ 		ATLLoadedApp targetApp = this.atl_get_intent_target(intent);
+ 		if (targetApp == null) {
+ 			return false;

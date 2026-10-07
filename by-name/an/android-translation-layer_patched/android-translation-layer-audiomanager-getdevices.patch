@@ -1,0 +1,32 @@
+From: Developer
+Date: Wed, 12 Aug 2026
+Subject: [PATCH] stub AudioDeviceInfo for ExoPlayer / NewPipe
+
+--- a/src/api-impl/android/media/AudioDeviceInfo.java
++++ b/src/api-impl/android/media/AudioDeviceInfo.java
+@@ -1,4 +1,25 @@
+ package android.media;
+ 
+ public class AudioDeviceInfo {
++	public static final int TYPE_UNKNOWN = 0;
++	public static final int TYPE_BUILTIN_SPEAKER = 2;
++	public static final int TYPE_BLUETOOTH_SCO = 7;
++	public static final int TYPE_BLUETOOTH_A2DP = 8;
++	public static final int TYPE_BLE_HEADSET = 26;
++	public static final int TYPE_BLE_SPEAKER = 27;
++	public static final int TYPE_BLE_BROADCAST = 30;
++
++	private final int type;
++
++	public AudioDeviceInfo() {
++		this(TYPE_BUILTIN_SPEAKER);
++	}
++
++	public AudioDeviceInfo(int type) {
++		this.type = type;
++	}
++
++	public int getType() {
++		return type;
++	}
+ }

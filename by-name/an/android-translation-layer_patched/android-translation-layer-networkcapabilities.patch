@@ -1,0 +1,58 @@
+From: Developer
+Date: Wed, 12 Aug 2026
+Subject: [PATCH] report a connected network so Coil can fetch images
+
+Coil 3 on API 23+ uses getNetworkCapabilities(). ATL returned null,
+so Coil treated the device as offline and never loaded YouTube avatars.
+
+--- a/src/api-impl/android/net/NetworkInfo.java	2026-10-04 20:18:35.329610983 +1100
++++ a/src/api-impl/android/net/NetworkInfo.java	2026-10-04 20:18:35.329610983 +1100
+@@ -31,7 +31,7 @@
+ 	}
+ 
+ 	public boolean isConnectedOrConnecting() {
+-		return false;
++		return state == State.CONNECTED || state == State.CONNECTING;
+ 	}
+ 
+ 	public boolean isFailover() {
+@@ -55,7 +55,7 @@
+ 	}
+ 
+ 	public boolean isAvailable() {
+-		return false;
++		return state == State.CONNECTED || state == State.CONNECTING;
+ 	}
+ 
+ 	public DetailedState getDetailedState() {
+--- a/src/api-impl/android/net/ConnectivityManager.java	2026-10-04 20:18:26.487653522 +1100
++++ a/src/api-impl/android/net/ConnectivityManager.java	2026-10-04 20:18:26.487653522 +1100
+@@ -9,6 +9,8 @@
+ 	public class NetworkCallback {
+ 		public void onAvailable(Network network) {}
+ 		public void onLost(Network network) {}
++		public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {}
++		public void onUnavailable() {}
+ 	}
+ 
+ 	public NetworkInfo getNetworkInfo(int networkType) {
+@@ -55,9 +57,17 @@
+ 		return capabilities;
+ 	}
+ 
+-	public void registerDefaultNetworkCallback(NetworkCallback cb, Handler hdl) {}
++	public void registerDefaultNetworkCallback(NetworkCallback cb, Handler hdl) {
++		registerDefaultNetworkCallback(cb);
++	}
+ 
+-	public void registerDefaultNetworkCallback(NetworkCallback cb) {}
++	public void registerDefaultNetworkCallback(NetworkCallback cb) {
++		if (cb == null)
++			return;
++		Network network = getActiveNetwork();
++		cb.onAvailable(network);
++		cb.onCapabilitiesChanged(network, getNetworkCapabilities(network));
++	}
+ 
+ 	public ProxyInfo getDefaultProxy() { return null; }
+ 

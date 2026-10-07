@@ -1,0 +1,28 @@
+From: Developer
+Date: Thu, 13 Aug 2026
+Subject: [PATCH] return null when gdk_pixbuf_new_from_stream fails
+
+--- a/src/api-impl-jni/graphics/android_graphics_BitmapFactory.c
++++ b/src/api-impl-jni/graphics/android_graphics_BitmapFactory.c
+@@ -72,8 +72,20 @@
+ 	GInputStream *stream = java_input_stream_new(env, is, storage);
+ 
+-	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_stream(stream, NULL, NULL);
++	GError *error = NULL;
++	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_stream(stream, NULL, &error);
+ 	g_object_unref(stream);
++
++	if (!pixbuf) {
++		if (error) {
++			WARN("gdk_pixbuf_new_from_stream failed: %s", error->message);
++			g_error_free(error);
++		} else {
++			WARN("gdk_pixbuf_new_from_stream failed");
++		}
++		return 0;
++	}
++
+ 	GdkTexture *texture = gdk_texture_new_for_pixbuf(pixbuf);
+ 	g_object_unref(pixbuf);
+ 	return _INTPTR(texture);
+ }

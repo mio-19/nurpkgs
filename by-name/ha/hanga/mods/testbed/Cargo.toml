@@ -1,0 +1,14 @@
+[package]
+name = "testbed"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+# rlib so host `cargo test` links. wasm (mods.nix) patches this to cdylib.
+crate-type = ["rlib"]
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)'] }
+
+[dependencies]
+wit-bindgen = "0.60.0"

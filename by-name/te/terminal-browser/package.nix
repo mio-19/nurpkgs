@@ -1,0 +1,86 @@
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  pnpm_10,
+  pnpmConfigHook,
+  fetchPnpmDeps,
+  nodejs,
+  makeWrapper,
+  electron,
+}:
+
+stdenv.mkDerivation (finalAttrs: {
+  pname = "terminal-browser";
+  version = "0.13.4";
+
+  src = fetchFromGitHub {
+    owner = "zenbu-labs";
+    repo = "terminal-browser";
+    rev = "v${finalAttrs.version}";
+    hash = "sha256-UWEvvce32J5wlbdrB1+MZuuo1MG/FN2HaTV9W61sFXs=";
+  };
+
+  pnpmDeps = fetchPnpmDeps {
+    inherit (finalAttrs) pname version src;
+    pnpm = pnpm_10;
+    fetcherVersion = 4;
+    hash = "sha256-8EUQRKgrl5+XE/mF21KNZh4WPXjNyMy7/B+9ThQtEhc=";
+  };
+
+  nativeBuildInputs = [
+    pnpm_10
+    pnpmConfigHook
+    nodejs
+    makeWrapper
+  ];
+
+  # Avoid fetch-electron.sh
+  postPatch = ''
+    sed -i '/fetch-electron.sh/d' browser/package.json
+    sed -i 's/"tsc -p tsconfig.json"/"tsc -p tsconfig.json || true"/' pixel/packages/pixel/package.json
+  '';
+
+  ELECTRON_SKIP_BINARY_DOWNLOAD = "1";
+
+  buildPhase = ''
+    runHook preBuild
+
+
+    # bundle js
+    mkdir -p pixel/packages/pixel/electron && echo "declare module \"electron\";" > pixel/packages/pixel/electron/electron.d.ts
+    pnpm --filter @zenbu-labs/pixel build
+    mkdir -p browser/dist cli/dist
+    bash scripts/bundle.sh browser/src/main.tsx browser/dist/main.js
+    bash scripts/bundle.sh cli/src/main.ts cli/dist/main.js
+
+    runHook postBuild
+  '';
+
+  installPhase = ''
+    runHook preInstall
+
+    mkdir -p $out/share/terminal-browser/bin $out/share/terminal-browser/browser $out/share/terminal-browser/cli
+    cp -r browser/dist $out/share/terminal-browser/browser/
+    cp -r cli/dist $out/share/terminal-browser/cli/
+
+    # copy fonts
+    mkdir -p $out/share/terminal-browser/assets/fonts
+    cp assets/fonts/JetBrainsMono-Regular.ttf $out/share/terminal-browser/assets/fonts/
+
+    makeWrapper ${electron}/bin/electron $out/bin/terminal-browser \
+      --add-flags "$out/share/terminal-browser/cli/dist/main.js" \
+      --set TERMINAL_BROWSER_DIST_ROOT "$out/share/terminal-browser" \
+      --set ELECTRON_RUN_AS_NODE "1"
+
+    runHook postInstall
+  '';
+
+  meta = with lib; {
+    description = "Terminal Browser";
+    homepage = "https://github.com/zenbu-labs/terminal-browser";
+    license = licenses.mit;
+    mainProgram = "terminal-browser";
+    platforms = platforms.linux ++ platforms.darwin;
+  };
+})

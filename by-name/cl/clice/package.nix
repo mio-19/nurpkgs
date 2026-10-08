@@ -1,56 +1,94 @@
 {
   lib,
   stdenv,
-  fetchzip,
+  fetchFromGitHub,
+  fetchurl,
   autoPatchelfHook,
-  zlib,
-  ncurses,
-  libxml2,
+  python3,
 }:
 
 let
+  bazel_9 = stdenv.mkDerivation rec {
+    pname = "bazel";
+    version = "9.2.0";
+
+    src = fetchurl {
+      url = "https://github.com/bazelbuild/bazel/releases/download/${version}/bazel-${version}-linux-x86_64";
+      hash = "sha256-dmipXbElDxLEBAclHk4gO07Ivzm8SV0vSFstjJkEhpQ=";
+    };
+
+    dontUnpack = true;
+
+    nativeBuildInputs = [ autoPatchelfHook ];
+    buildInputs = [ stdenv.cc.cc.lib ];
+
+    installPhase = ''
+      mkdir -p $out/bin
+      cp $src $out/bin/bazel
+      chmod +x $out/bin/bazel
+    '';
+  };
+
   version = "0.1.2026100708";
 
-  platformAttrs =
-    if stdenv.hostPlatform.system == "x86_64-linux" then {
-      suffix = "x86_64-unknown-linux-gnu";
-      hash = "sha256-/ZXiq3QcEXkKd8Y0Ff+aD9r33I3aNNT8vv1RNps4HDI=";
-    } else if stdenv.hostPlatform.system == "aarch64-linux" then {
-      suffix = "aarch64-unknown-linux-gnu";
-      hash = "sha256-a+Kpr+bOfT1fu9A1VCnW8J2UCgQDWIRlwxLdAytfomI=";
-    } else throw "Unsupported system: ${stdenv.hostPlatform.system}";
+  src = fetchFromGitHub {
+    owner = "clice-io";
+    repo = "clice";
+    tag = "v${version}";
+    hash = "sha256-8bjL/sB4WHrum1H8IDdL+P4msCzTBn92Ts2OuGhvV78=";
+  };
+
+  deps = stdenv.mkDerivation {
+    name = "clice-deps";
+    inherit src;
+    
+    nativeBuildInputs = [ bazel_9 python3 ];
+
+    buildPhase = ''
+      export HOME=$TMPDIR
+      export BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+      # Just fetch all external repositories
+      bazel fetch //...
+    '';
+
+    installPhase = ''
+      # The bazel cache is usually in $HOME/.cache/bazel
+      cp -r $HOME/.cache/bazel $out
+    '';
+
+    outputHashMode = "recursive";
+    outputHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+  };
+
 in
 stdenv.mkDerivation {
   pname = "clice";
-  inherit version;
+  inherit version src;
 
-  src = fetchzip {
-    url = "https://github.com/clice-io/clice/releases/download/v${version}/clice-${version}.${platformAttrs.suffix}.tar.gz";
-    hash = platformAttrs.hash;
-  };
+  nativeBuildInputs = [ bazel_9 python3 ];
 
-  nativeBuildInputs = [ autoPatchelfHook ];
-
-  buildInputs = [
-    zlib
-    ncurses
-    libxml2
-  ];
+  buildPhase = ''
+    export HOME=$TMPDIR
+    export BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
+    
+    # Copy the pre-fetched cache
+    mkdir -p $HOME/.cache
+    cp -r ${deps} $HOME/.cache/bazel
+    chmod -R +w $HOME/.cache/bazel
+    
+    bazel build -c opt --config=RelWithDebInfo //...
+  '';
 
   installPhase = ''
-    runHook preInstall
     mkdir -p $out/bin
-    cp -r * $out/
-    runHook postInstall
+    cp bazel-bin/bin/clice $out/bin/clice
   '';
 
   meta = with lib; {
     description = "Next-generation C++ language server built on LLVM/Clang";
     homepage = "https://github.com/clice-io/clice";
-    changelog = "https://docs.clice.io/clice/";
     license = licenses.asl20;
     maintainers = [ ];
     mainProgram = "clice";
-    platforms = [ "x86_64-linux" "aarch64-linux" ];
   };
 }

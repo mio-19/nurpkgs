@@ -1,15 +1,16 @@
-{ lib
-, rustPlatform
-, fetchFromGitHub
-, pkg-config
-, wrapGAppsHook4
-, openssl
-, gtk4
-, glib
-, webkitgtk_6_0
-, libadwaita
-, stdenv
-, darwin
+{
+  lib,
+  rustPlatform,
+  fetchFromGitHub,
+  pkg-config,
+  wrapGAppsHook4,
+  openssl,
+  gtk4,
+  glib,
+  webkitgtk_6_0,
+  libadwaita,
+  stdenv,
+  darwin,
 }:
 
 rustPlatform.buildRustPackage rec {
@@ -36,7 +37,8 @@ rustPlatform.buildRustPackage rec {
     glib
     webkitgtk_6_0
     libadwaita
-  ] ++ lib.optionals stdenv.isDarwin [
+  ]
+  ++ lib.optionals stdenv.isDarwin [
     darwin.apple_sdk.frameworks.Security
     darwin.apple_sdk.frameworks.SystemConfiguration
   ];

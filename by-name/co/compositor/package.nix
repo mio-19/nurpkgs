@@ -13,13 +13,13 @@ let
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "compositor";
-  version = "1.4.8";
+  version = "1.4.5";
 
   src = fetchFromGitHub {
     owner = "robbietilton";
     repo = "Compositor";
     rev = "v${finalAttrs.version}";
-    hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    hash = "sha256-VwGIy0eam0UfBCj+d58mzHYYaXLD07sb41eLLrOX2c4=";
   };
 
   passthru.spmDeps = stdenvNoCC.mkDerivation {
@@ -27,7 +27,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     inherit (finalAttrs) version src;
 
     outputHashMode = "recursive";
-    outputHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    outputHash = "sha256-9eSSVS8/4caRbXZzMopicFPeFodsCAPliAA4h7vxXgY=";
 
     nativeBuildInputs = [ writableTmpDirAsHomeHook ];
 

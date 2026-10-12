@@ -66,6 +66,7 @@ let
     ./darwin-arm64-relative-refs-mterp-other.patch
     ./darwin-arm64-relative-refs-alloc.patch
     ./darwin-arm64-relative-refs-heap.patch
+    ./darwin-arm64-heap-window-begin.patch
     ./darwin-arm64-relative-refs-image-base.patch
     ./darwin-arm64-relative-refs-unstarted.patch
     ./darwin-arm64-thread-pool-stack.patch

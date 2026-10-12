@@ -48,7 +48,10 @@ let
     ./darwin-fault-handler-arm64.patch
     ./darwin-build-system.patch
     ./darwin-system.patch
+    ./darwin-arm64-nativehelper-asyncclose.patch
+    ./darwin-arm64-openjdk-jvm-timeout.patch
     ./darwin-libcore-host.patch
+    ./darwin-arm64-libcore-strerror.patch
     ./darwin-art-runtime.patch
     ./darwin-arm64-core-libs-dylib.patch
     ./darwin-arm64-asm.patch

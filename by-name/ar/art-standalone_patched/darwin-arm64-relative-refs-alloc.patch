@@ -9,7 +9,7 @@
 +// window whose base is chosen at RUNTIME so it lands in actually-free memory
 +// (macOS reserves/occupies much of the address space, so no fixed 4 GiB base is
 +// safe).  Must match runtime_globals.h g_reference_base.
-+extern "C" uintptr_t g_reference_base = 0;
++extern "C" uintptr_t g_reference_base = 0x300000000ULL;  // must match runtime_globals.h kReferenceBase
 +extern "C" uintptr_t art_get_reference_base() { return g_reference_base; }
 +
 +void ReserveReferenceWindow() {

@@ -63,6 +63,7 @@ let
     ./darwin-arm64-relative-refs-heap.patch
     ./darwin-arm64-relative-refs-image-base.patch
     ./darwin-arm64-relative-refs-unstarted.patch
+    ./darwin-arm64-thread-pool-stack.patch
     # 16 KiB page-size: the heap does mprotect/madvise at page granularity, which macOS rejects at
     # ART's 4 KiB kPageSize.  See DARWIN-ARM64.md.
     ./darwin-arm64-page-size-mprotect.patch

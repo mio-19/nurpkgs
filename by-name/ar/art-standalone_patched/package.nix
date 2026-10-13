@@ -50,6 +50,7 @@ let
     ./darwin-system.patch
     ./darwin-arm64-nativehelper-asyncclose.patch
     ./darwin-arm64-openjdk-jvm-timeout.patch
+    ./darwin-arm64-oat-skip-dlopen.patch
     ./darwin-libcore-host.patch
     ./darwin-arm64-libcore-strerror.patch
     ./darwin-art-runtime.patch

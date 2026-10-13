@@ -3,7 +3,7 @@
 @@ -40,7 +40,7 @@
      (*env)->ReleaseStringUTFChars(env, jstr, chars);
  }
- 
+
 -#if defined(LINUX) && (defined(_GNU_SOURCE) || \
 +#if defined(LINUX) && !defined(__APPLE__) && (defined(_GNU_SOURCE) || \
           (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE < 200112L \

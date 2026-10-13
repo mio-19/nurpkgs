@@ -23,7 +23,7 @@
 +#endif
      }
    }
- 
+
 @@ -442,7 +451,11 @@
      CHECK(non_moving_space_mem_map.IsValid()) << error_str;
      DCHECK(!heap_reservation.IsValid());

@@ -14,4 +14,4 @@ Ensure Context.getPackageCodePath() returns the correct base APK path instead of
 +		pkg.applicationInfo.publicSourceDir = mainApk;
  		return new ATLLoadedApp(resources, classLoader, pkg);
  	}
- 
+

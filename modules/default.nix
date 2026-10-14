@@ -28,8 +28,4 @@ rec {
   miodroid = ./miodroid.nix;
   local-ai = ../by-name/lo/local-ai/module.nix;
   toshy = ../by-name/to/toshy/nixos-module.nix;
-
-  # Backwards-compatibility aliases for Home Manager modules (moved to homeModules)
-  toshy-hm = ../by-name/to/toshy/hm-module.nix;
-  miodroid-rootless = ../home-modules/miodroid.nix;
 }

@@ -1,6 +1,6 @@
 # nurpkgs
 
-Too tired to write the build scripts. LLMs are used and build scripts are generally sloppy here
+Too tired to write the build scripts. Free (free as in free beer) LLMs are used and build scripts are generally sloppy here
 
 see all packages: <https://nur.nix-community.org/repos/mio/> How to use (NUR guide) <https://nur.nix-community.org/documentation/> You will want to use `nur.repos.mio.*`
 

@@ -6,7 +6,7 @@ See cachix pins for betterbird linux builds by shelvacu https://app.cachix.org/c
 
 Too tired to write the build scripts. Free (free as in free beer) LLMs are used and build scripts are generally sloppy here, except for: betterbird
 
-Some packages are fully broken or mostly broken. Some packages are deprecated without a clear marking. I am not putting efforts to maintain this package collections to a quality that is ready to support other users beyond my personal usage.
+Some packages are fully broken or mostly broken. Some packages are deprecated without a clear marking. I am not putting efforts to maintain this package collections to a quality that is ready to support other users beyond my personal usage, except for: betterbird
 
 + linux: x86_64-v3, aarch64
 + darwin: aarch64

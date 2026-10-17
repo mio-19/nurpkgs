@@ -44,12 +44,14 @@ let
   # makeBinaryWrapper creates an ELF wrapper rather than a shell script.
   wgQuickSource =
     if dnsBackendEnabled then
-      pkgs.runCommand "wg-quick-wireguird" {
-        nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
-      } ''
-        makeBinaryWrapper ${wireguard-tools}/bin/wg-quick $out \
-          --prefix PATH : ${lib.getBin config.networking.resolvconf.package}/bin
-      ''
+      pkgs.runCommand "wg-quick-wireguird"
+        {
+          nativeBuildInputs = [ pkgs.makeBinaryWrapper ];
+        }
+        ''
+          makeBinaryWrapper ${wireguard-tools}/bin/wg-quick $out \
+            --prefix PATH : ${lib.getBin config.networking.resolvconf.package}/bin
+        ''
     else
       "${wireguard-tools}/bin/wg-quick";
 

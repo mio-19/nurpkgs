@@ -4,7 +4,7 @@ see all packages: <https://nur.nix-community.org/repos/mio/> How to use (NUR gui
 
 See cachix pins for betterbird linux builds by shelvacu https://app.cachix.org/cache/mio#pins
 
-Too tired to write the build scripts. Free (free as in free beer) LLMs are used and build scripts are generally sloppy here
+Too tired to write the build scripts. Free (free as in free beer) LLMs are used and build scripts are generally sloppy here, except for: betterbird
 
 Some packages are fully broken or mostly broken. Some packages are deprecated without a clear marking. I am not putting efforts to maintain this package collections to a quality that is ready to support other users beyond my personal usage.
 

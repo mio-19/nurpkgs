@@ -78,6 +78,7 @@ jobs:
 
       # ─── Omnimux ─────────────────────────────────────────────────────────────
       - name: Build & Package Omnimux
+        continue-on-error: true
         run: |
           python3 scripts/prepare-omnimux-vendor.py
           cd by-name/om/omnimux/src
@@ -91,6 +92,7 @@ jobs:
 
       # ─── Hanga ───────────────────────────────────────────────────────────────
       - name: Build & Package Hanga
+        continue-on-error: true
         run: |
           python3 scripts/build-hanga-mods.py by-name/ha/hanga/dist
           cd by-name/ha/hanga
@@ -102,6 +104,7 @@ jobs:
 
       # ─── Uplink ──────────────────────────────────────────────────────────────
       - name: Build & Package Uplink
+        continue-on-error: true
         run: |
           cd by-name/up/uplink
           cargo build --release -p uplink_cli
@@ -115,6 +118,7 @@ jobs:
 
       # ─── NRS Client ──────────────────────────────────────────────────────────
       - name: Build & Package NRS Client
+        continue-on-error: true
         run: |
           cd by-name/nr/nrs-client/src
           flutter pub get
@@ -125,10 +129,12 @@ jobs:
           tar -czvf "$GITHUB_WORKSPACE/staging/nrs-client-linux-${{ matrix.arch }}.tar.gz" -C dist-nrs .
 
       - name: Upload Linux Artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: linux-${{ matrix.arch }}-artifacts
           path: staging/*
+          if-no-files-found: ignore
           retention-days: 1
 
   build-macos:
@@ -175,6 +181,7 @@ jobs:
 
       # ─── Omnimux ─────────────────────────────────────────────────────────────
       - name: Build & Package Omnimux
+        continue-on-error: true
         run: |
           python3 scripts/prepare-omnimux-vendor.py
           cd by-name/om/omnimux/src
@@ -188,6 +195,7 @@ jobs:
 
       # ─── Hanga ───────────────────────────────────────────────────────────────
       - name: Build & Package Hanga
+        continue-on-error: true
         run: |
           python3 scripts/build-hanga-mods.py by-name/ha/hanga/dist
           cd by-name/ha/hanga
@@ -199,6 +207,7 @@ jobs:
 
       # ─── Uplink ──────────────────────────────────────────────────────────────
       - name: Build & Package Uplink
+        continue-on-error: true
         run: |
           cd by-name/up/uplink
           cargo build --release -p uplink_cli
@@ -213,6 +222,7 @@ jobs:
 
       # ─── NRS Client ──────────────────────────────────────────────────────────
       - name: Build & Package NRS Client
+        continue-on-error: true
         run: |
           cd by-name/nr/nrs-client/src
           flutter pub get
@@ -224,10 +234,12 @@ jobs:
           zip -r "$GITHUB_WORKSPACE/staging/nrs-client-macos-${{ matrix.arch }}.zip" .
 
       - name: Upload macOS Artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: macos-${{ matrix.arch }}-artifacts
           path: staging/*
+          if-no-files-found: ignore
           retention-days: 1
 
   build-windows:
@@ -265,6 +277,7 @@ jobs:
 
       # ─── Omnimux ─────────────────────────────────────────────────────────────
       - name: Build & Package Omnimux
+        continue-on-error: true
         run: |
           python scripts/prepare-omnimux-vendor.py
           cd by-name/om/omnimux/src
@@ -287,6 +300,7 @@ jobs:
 
       # ─── Hanga ───────────────────────────────────────────────────────────────
       - name: Build & Package Hanga
+        continue-on-error: true
         run: |
           python scripts/build-hanga-mods.py by-name/ha/hanga/dist
           cd by-name/ha/hanga
@@ -324,6 +338,7 @@ jobs:
 
       # ─── Uplink ──────────────────────────────────────────────────────────────
       - name: Build & Package Uplink
+        continue-on-error: true
         run: |
           cd by-name/up/uplink
           # Build CLI for x86_64 and aarch64
@@ -347,6 +362,7 @@ jobs:
 
       # ─── NRS Client ──────────────────────────────────────────────────────────
       - name: Build & Package NRS Client
+        continue-on-error: true
         run: |
           cd by-name/nr/nrs-client/src
           if (!(Test-Path "windows")) {
@@ -360,40 +376,53 @@ jobs:
           Compress-Archive -Path dist-nrs/* -DestinationPath "$env:GITHUB_WORKSPACE\staging\nrs-client-windows-x86_64.zip"
 
       - name: Upload Windows Artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: windows-artifacts
           path: staging/*
+          if-no-files-found: ignore
           retention-days: 1
 
   publish-release:
     name: Publish Release to GitHub
     runs-on: ubuntu-latest
     needs: [build-linux, build-macos, build-windows]
+    if: always() && !cancelled()
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           path: release-artifacts/
           merge-multiple: true
 
-      - name: Generate Checksums
+      - name: Generate Checksums & Verify Artifacts
+        id: check_artifacts
         run: |
-          cd release-artifacts
-          sha256sum * > SHA256SUMS.txt
-          echo "### Release Checksums" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat SHA256SUMS.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ -d release-artifacts ] && [ -n "$(ls -A release-artifacts 2>/dev/null)" ]; then
+            cd release-artifacts
+            sha256sum * > SHA256SUMS.txt
+            echo "### Release Checksums" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat SHA256SUMS.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "has_artifacts=true" >> $GITHUB_OUTPUT
+          else
+            echo "No artifacts found to publish."
+            echo "has_artifacts=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Set Release Date
+        if: steps.check_artifacts.outputs.has_artifacts == 'true'
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
       - name: Publish Nightly Release
+        if: steps.check_artifacts.outputs.has_artifacts == 'true'
         uses: softprops/action-gh-release@c95fe1489396fe8a9ec87453c663f53724e23043 # v2.2.1
         with:
           tag_name: nightly

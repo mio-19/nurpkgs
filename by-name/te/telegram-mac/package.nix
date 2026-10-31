@@ -137,9 +137,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       --replace-fail 'git clone -b OpenSSL_1_1_1-stable https://github.com/openssl/openssl build/''${NAME}' \
         'cp -R "${finalAttrs.opensslSrc}" "build/''${NAME}" && chmod -R u+w "build/''${NAME}"'
 
-    substituteInPlace core-xprojects/libopus/libopus/build.sh \
-      --replace-fail 'cp -a ${SOURCE_DIR}/include/ ${OUT_DIR}/libopus/include/opus' \
-        'cp -a ${SOURCE_DIR}/include/ ${OUT_DIR}/libopus/include/opus'
+    # Upstream's libopus build deposits headers under include/opus/include/,
+    # and both the framework validation and the webrtc build script in this tree
+    # already normalize against that layout, so leave the cp line untouched.
 
     # These scripts expect BSD cp semantics (copy directory contents).
     substituteInPlace core-xprojects/webrtc/webrtc/build.sh \

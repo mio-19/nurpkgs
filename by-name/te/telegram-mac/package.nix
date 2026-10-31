@@ -138,8 +138,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
         'cp -R "${finalAttrs.opensslSrc}" "build/''${NAME}" && chmod -R u+w "build/''${NAME}"'
 
     substituteInPlace core-xprojects/libopus/libopus/build.sh \
-      --replace-fail 'cp -a ''${SOURCE_DIR}/include/ ''${OUT_DIR}/libopus/include/opus' \
-        'mkdir -p ''${OUT_DIR}/libopus/include/opus && cp -a ''${SOURCE_DIR}/include/* ''${OUT_DIR}/libopus/include/opus/'
+      --replace-fail 'cp -a ${SOURCE_DIR}/include/ ${OUT_DIR}/libopus/include/opus' \
+        'cp -a ${SOURCE_DIR}/include/ ${OUT_DIR}/libopus/include/opus'
 
     # These scripts expect BSD cp semantics (copy directory contents).
     substituteInPlace core-xprojects/webrtc/webrtc/build.sh \

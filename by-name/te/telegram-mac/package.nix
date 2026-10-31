@@ -137,12 +137,9 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       --replace-fail 'git clone -b OpenSSL_1_1_1-stable https://github.com/openssl/openssl build/''${NAME}' \
         'cp -R "${finalAttrs.opensslSrc}" "build/''${NAME}" && chmod -R u+w "build/''${NAME}"'
 
-    # The real libopus cp line only installs headers; no .h files land under
-    # include/opus/ until the .a lipo step runs later. Touch a sentinel header
-    # so webrtc's opus includes resolve before the final framework is assembled.
     substituteInPlace core-xprojects/libopus/libopus/build.sh \
-      --replace-fail 'lipo -create ''${LIBLIST} -output ''${OUT_DIR}/libopus/lib/libopus.a' \
-        'mkdir -p ''${OUT_DIR}/libopus/include/opus && touch ''${OUT_DIR}/libopus/include/opus/opus.h && lipo -create ''${LIBLIST} -output ''${OUT_DIR}/libopus/lib/libopus.a'
+      --replace-fail 'cp -a ${SOURCE_DIR}/include/ ${OUT_DIR}/libopus/include/opus' \
+        'mkdir -p ${OUT_DIR}/libopus/include/opus && cp -a ${SOURCE_DIR}/include/* ${OUT_DIR}/libopus/include/opus/'
 
     # These scripts expect BSD cp semantics (copy directory contents).
     substituteInPlace core-xprojects/webrtc/webrtc/build.sh \

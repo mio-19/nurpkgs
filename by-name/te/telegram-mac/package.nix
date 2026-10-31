@@ -141,8 +141,8 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     # include/opus/ until the .a lipo step runs later. Touch a sentinel header
     # so webrtc's opus includes resolve before the final framework is assembled.
     substituteInPlace core-xprojects/libopus/libopus/build.sh \
-      --replace-fail 'lipo -create ${LIBLIST} -output ${OUT_DIR}/libopus/lib/libopus.a' \
-        'mkdir -p ${OUT_DIR}/libopus/include/opus && touch ${OUT_DIR}/libopus/include/opus/opus.h && lipo -create ${LIBLIST} -output ${OUT_DIR}/libopus/lib/libopus.a'
+      --replace-fail 'lipo -create ''${LIBLIST} -output ''${OUT_DIR}/libopus/lib/libopus.a' \
+        'mkdir -p ''${OUT_DIR}/libopus/include/opus && touch ''${OUT_DIR}/libopus/include/opus/opus.h && lipo -create ''${LIBLIST} -output ''${OUT_DIR}/libopus/lib/libopus.a'
 
     # These scripts expect BSD cp semantics (copy directory contents).
     substituteInPlace core-xprojects/webrtc/webrtc/build.sh \
